@@ -1,0 +1,135 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>0 Problem</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-10-13"><meta name="DC.source" content="heat.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>0 Problem</h1><!--introduction--><p>See nonasymptotic mixing of the MALA</p><p><img src="heat_eq18114.png" alt="$$ \pi (x) = Z^{-1} exp(-\beta U(x)) \quad | \quad Z=\int exp(-\beta U(x))$$"></p><p><img src="heat_eq60728.png" alt="$$ U = (-\frac{x^2}{2})^2 $$"></p><p><img src="heat_eq79610.png" alt="$$ dY_\tau = -\nabla U(Y_\tau) d\tau + \sqrt{2\beta^{-1}}dW_\tau $$"></p><p>Feynman Kac</p><p><img src="heat_eq08552.png" alt="$$ dY_\tau = \mu d\tau + \sigma dW_\tau $$"></p><p><img src="heat_eq60998.png" alt="$$ g(\tau,x) = E(h(Y_T)|Y_0 = x) $$"></p><p><img src="heat_eq46509.png" alt="$$ g_\tau(\tau,x) = - \mu g_x - \frac{1}{2} \sigma^2 g_xx \quad | \quad  g(T,x) = h(x) $$"></p><p>Reverse time :</p><p><img src="heat_eq20304.png" alt="$$ t = T - \tau \quad dt = -d\tau $$"></p><p><img src="heat_eq60708.png" alt="$$ g_t = \mu g_x + \frac{1}{2} \sigma^2 g_xx \quad | \quad g(0,x) = h(x) $$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">1 Parameters</a></li><li><a href="#2">1.0 Problem</a></li><li><a href="#3">1.1 Time Stepping</a></li><li><a href="#4">1.2 Particle Distribution</a></li><li><a href="#5">2 Implementation</a></li><li><a href="#6">2.1 Initialization</a></li></ul></div><h2>1 Parameters<a name="1"></a></h2><h2>1.0 Problem<a name="2"></a></h2><pre class="codeinput">beta = 1;
+</pre><h2>1.1 Time Stepping<a name="3"></a></h2><pre class="codeinput"><span class="comment">% lagrangian velocity D()/Dt = d()/dt + u*\nabla()</span>
+u = 20;
+<span class="comment">% smallest inter particle spacing</span>
+dx = 0.01;
+<span class="comment">% CFL</span>
+dt = dx/u;
+</pre><h2>1.2 Particle Distribution<a name="4"></a></h2><pre class="codeinput">D0 = 0.2;
+</pre><h2>2 Implementation<a name="5"></a></h2><h2>2.1 Initialization<a name="6"></a></h2><pre class="codeinput">X = rand(100,1);
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% 0 Problem
+%
+% See nonasymptotic mixing of the MALA
+% 
+% $$ \pi (x) = Z^{-1} exp(-\beta U(x)) \quad | \quad Z=\int exp(-\beta U(x))$$
+%
+% $$ U = (-\frac{x^2}{2})^2 $$
+%
+% $$ dY_\tau = -\nabla U(Y_\tau) d\tau + \sqrt{2\beta^{-1}}dW_\tau $$
+%
+% Feynman Kac
+%
+% $$ dY_\tau = \mu d\tau + \sigma dW_\tau $$
+%
+% $$ g(\tau,x) = E(h(Y_T)|Y_0 = x) $$
+%
+% $$ g_\tau(\tau,x) = - \mu g_x - \frac{1}{2} \sigma^2 g_xx \quad | \quad  g(T,x) = h(x) $$
+%
+% Reverse time :
+%
+% $$ t = T - \tau \quad dt = -d\tau $$
+%
+% $$ g_t = \mu g_x + \frac{1}{2} \sigma^2 g_xx \quad | \quad g(0,x) = h(x) $$
+
+
+%% 1 Parameters
+
+%% 1.0 Problem
+
+beta = 1;
+
+%% 1.1 Time Stepping
+
+% lagrangian velocity D()/Dt = d()/dt + u*\nabla()
+u = 20;
+% smallest inter particle spacing
+dx = 0.01;
+% CFL
+dt = dx/u;
+
+%% 1.2 Particle Distribution
+
+D0 = 0.2;
+
+
+%% 2 Implementation
+
+%% 2.1 Initialization
+
+X = rand(100,1);
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
