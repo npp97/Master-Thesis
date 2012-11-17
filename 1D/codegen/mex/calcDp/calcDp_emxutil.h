@@ -3,7 +3,7 @@
  *
  * Code generation for function 'calcDp_emxutil'
  *
- * C source code generated on: Wed Nov 14 18:19:51 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
@@ -31,7 +31,6 @@
 /* Variable Definitions */
 
 /* Function Declarations */
-extern void b_emxInit_int32_T(emxArray_int32_T **pEmxArray, int32_T numDimensions, const emlrtRTEInfo *srcLocation, boolean_T doPush);
 extern void b_emxInit_real_T(emxArray_real_T **pEmxArray, int32_T numDimensions, const emlrtRTEInfo *srcLocation, boolean_T doPush);
 extern void emxEnsureCapacity(emxArray__common *emxArray, int32_T oldNumel, int32_T elementSize, const emlrtRTEInfo *srcLocation);
 extern void emxFree_boolean_T(emxArray_boolean_T **pEmxArray);

@@ -51,7 +51,7 @@ dt = dx/du;
 
 %% 1.4 Kernel 
 
-eps = 3;
+rcp = 3;
 
 
 
@@ -59,7 +59,7 @@ eps = 3;
 
 %upper bound on the inter particle spacing
 vs = 5;
-D0 = 0.2;
+D0 = 2;
 Nstar = 10;
 rstar = 5;
 dc = 2.5;
@@ -77,21 +77,23 @@ quiver(XX,YY,reshape(GG(:,1),size(XX)),reshape(GG(:,2),size(XX)))
 
 %% 2.1 Initialization
 
-N = 50;
+N = 100;
 d = 2;
 
-eps = ones(N,1);
+rcp = ones(N,1);
 
 % initialise positions
 Xp = randn(N,d)+2;
 D = distm_mex(Xp,Xp);
 
 % initialise CD-PSE
-f = 1/2*llh(0,1/2*Xp);
-wp = rbf(D,eps)\f;
+f = exp(-sum((Xp-1).^2,2));
+wp = rbf(D,rcp)\f;
 
 % initialise radii
-Dp = calcDp_mex(Xp,Xp,rstar,D0);
+DOP = DiffOp(Xp,Xp,rcp);
+DF = DOP*f;
+Dp = calcDp(Xp,Xp,rstar,D0,DF);
 rcp = rstar*Dp;
 
 % Time Stepping
@@ -102,7 +104,6 @@ n=1;
 
 while (t<tf)
     % choose dt according to CFL
-    dt = 1e-3;
     
     % advect particles
     disp('advecting')
@@ -110,15 +111,20 @@ while (t<tf)
 %         [ik,xt]=ode45(@gradllh,[t,t+dt],Xp(m,:)');
 %         Xp(m,:) = xt(end,:)';
 %     end
-Xp = Xp - 1/10*gradllh(0,Xp);
+    Xp_adv = Xp - dt*gradllh(0,Xp);
     subplot(2,2,1)
     plot(Xp(:,1),Xp(:,2),'o')
     drawnow
+    [OP,D1,D2,E] = Lop(Xp_adv,Xp,rcp,1,1);
     
-    D = distm_mex(Xp,Xp);
-    f = llh(0,Xp);
-    c = rbf(D,eps)\f;
+    EV = eig(OP);
+    % scale dt according to eigenvalues to assure stability
+    dt = 1/max(abs(eig(OP)));
     
+    L = dt*OP + E;
+
+    f=L*f;
+    Xp=Xp_adv;
     % reorganize particles ?
     n=n-1;
     if (n==0)
@@ -126,31 +132,26 @@ Xp = Xp - 1/10*gradllh(0,Xp);
         n=10;
         % construct CD-PSE operators
         
-        DOP = DiffOp(Xp,Xp,eps);
+        DOP = DiffOp(Xp,Xp,rcp);
         
         % evaluate field derivaties 
         
+        DF = DOP*f;
+        
         % compute Dpn
-        Dp = calcDp_mex(Xp,Xp,rstar,D0);
+        Dp = calcDp(Xp,Xp,rstar,D0,DF);
         rcp = rstar*Dp;
 
 
         % save points
         X_old = Xp;
         Dp_old = Dp;
+        rcp_old = rcp;
     
         % create x_new
         while(true)            
             subplot(2,2,1)
             hold off
-
-            % remove zeros
-                        
-            ix = Dp~=0;
-
-            Dp = Dp(ix);
-            Xp = Xp(ix,:);
-            rcp = rcp(ix);
             
             size(Xp,1)
             
@@ -175,8 +176,6 @@ Xp = Xp - 1/10*gradllh(0,Xp);
                     Dp=Dp([1:ind-1 ind+1:end]);
                     Xp=Xp([1:ind-1 ind+1:end],:);
                     rcp = rstar*Dp;
-                    %happens when we start with a single point
-
                 end
  
             end
@@ -197,7 +196,7 @@ Xp = Xp - 1/10*gradllh(0,Xp);
                    % normalize & make sure we do not insert points inside the cutoff radii ... 
                    xnew = Dp(l)*xnew/norm(xnew)+Xp(l,:);
                    Xp = [Xp; xnew];
-                   Dp(end+1) = calcDp_mex(Xp(end,:),Xp,rstar,D0);
+                   Dp(end+1) = IntOp(xnew,X_old,rcp_old)*f;
                    rcp(end+1) = rstar*Dp(end);
                   plot(xnew(1),xnew(2),'go')
                    %%%drawnow
@@ -212,7 +211,7 @@ Xp = Xp - 1/10*gradllh(0,Xp);
             % construct neighbor lists within x_new and between x_new and x_old
             
             % compute Dp of x_new by interpolation from Dp of x_old
-            Dp = calcDp_mex(Xp,Xp,rstar,D0);
+            Dp = IntOp(Xp,X_old,rcp)*f;
             rcp = rstar*Dp;
             % compute total energy and gradient
             Dpq = bsxfun(@min,Dp,Dp');
@@ -230,9 +229,9 @@ Xp = Xp - 1/10*gradllh(0,Xp);
             end
             % line search for gradient descent step size and move particels by one step
             
-            [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,rstar,D0),-1,opts);
+            [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,f,D0),-1,opts);
             Xp = Xp + gamma*wp;
-            Dp = calcDp_mex(Xp,Xp,rstar,D0);
+            Dp = IntOp(Xp,X_old,rcp)*f;
             rcp = rstar*Dp;
             plot(Xp(:,1),Xp(:,2),'yo')
             %drawnow
@@ -261,14 +260,10 @@ Xp = Xp - 1/10*gradllh(0,Xp);
             drawnow
 
         end
-    
-        % compute interpolation kernels and right hand side of 2.3b
         
-        % interpolate intensities fp from x_old to x_new
+        f=IntOp(Xp,X_old,rcp)*f;
+        
     end
-    
-    % construct DC PSE operators fro the right hand side of EQ2.3b and evaluate using x_p old as source and x_p new as
-    % collocation + update intensities fp
     
     % Advance time
     t = t + dt;

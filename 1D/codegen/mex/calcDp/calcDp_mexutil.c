@@ -3,7 +3,7 @@
  *
  * Code generation for function 'calcDp_mexutil'
  *
- * C source code generated on: Wed Nov 14 18:19:50 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
@@ -23,21 +23,21 @@
 /* Function Declarations */
 
 /* Function Definitions */
-const mxArray *b_message(const mxArray *b, emlrtMCInfo *location)
-{
-  const mxArray *pArray;
-  const mxArray *m9;
-  pArray = b;
-  return emlrtCallMATLABR2012b(emlrtRootTLSGlobal, 1, &m9, 1, &pArray, "message",
-    TRUE, location);
-}
-
 void error(const mxArray *b, emlrtMCInfo *location)
 {
   const mxArray *pArray;
   pArray = b;
   emlrtCallMATLABR2012b(emlrtRootTLSGlobal, 0, NULL, 1, &pArray, "error", TRUE,
                         location);
+}
+
+const mxArray *message(const mxArray *b, emlrtMCInfo *location)
+{
+  const mxArray *pArray;
+  const mxArray *m6;
+  pArray = b;
+  return emlrtCallMATLABR2012b(emlrtRootTLSGlobal, 1, &m6, 1, &pArray, "message",
+    TRUE, location);
 }
 
 /* End of code generation (calcDp_mexutil.c) */

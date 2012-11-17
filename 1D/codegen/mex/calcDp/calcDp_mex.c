@@ -3,7 +3,7 @@
  *
  * Code generation for function 'calcDp'
  *
- * C source code generated on: Wed Nov 14 18:19:51 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
@@ -27,13 +27,13 @@ emlrtCTX emlrtRootTLSGlobal = NULL;
 static void calcDp_mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   mxArray *outputs[1];
-  mxArray *inputs[4];
+  mxArray *inputs[5];
   int n = 0;
   int nOutputs = (nlhs < 1 ? 1 : nlhs);
   int nInputs = nrhs;
   /* Check for proper number of arguments. */
-  if(nrhs != 4) {
-    mexErrMsgIdAndTxt("emlcoder:emlmex:WrongNumberOfInputs","4 inputs required for entry-point 'calcDp'.");
+  if(nrhs != 5) {
+    mexErrMsgIdAndTxt("emlcoder:emlmex:WrongNumberOfInputs","5 inputs required for entry-point 'calcDp'.");
   } else if(nlhs > 1) {
     mexErrMsgIdAndTxt("emlcoder:emlmex:TooManyOutputArguments","Too many output arguments for entry-point 'calcDp'.");
   }
@@ -79,9 +79,9 @@ mxArray *emlrtMexFcnProperties(void)
     mxArray *xResult = mxCreateStructMatrix(1,1,2,mexProperties);
     mxArray *xEntryPoints = mxCreateStructMatrix(1,1,4,epProperties);
     mxArray *xInputs = NULL;
-    xInputs = mxCreateLogicalMatrix(1, 4);
+    xInputs = mxCreateLogicalMatrix(1, 5);
     mxSetFieldByNumber(xEntryPoints, 0, 0, mxCreateString("calcDp"));
-    mxSetFieldByNumber(xEntryPoints, 0, 1, mxCreateDoubleScalar(4));
+    mxSetFieldByNumber(xEntryPoints, 0, 1, mxCreateDoubleScalar(5));
     mxSetFieldByNumber(xEntryPoints, 0, 2, mxCreateDoubleScalar(1));
     mxSetFieldByNumber(xEntryPoints, 0, 3, xInputs);
     mxSetFieldByNumber(xResult, 0, 0, mxCreateString("8.0.0.783 (R2012b)"));

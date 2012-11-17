@@ -3,7 +3,7 @@
  *
  * Code generation for function 'calcDp_api'
  *
- * C source code generated on: Wed Nov 14 18:19:51 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
@@ -20,7 +20,7 @@
 /* Variable Declarations */
 
 /* Variable Definitions */
-static emlrtRTEInfo o_emlrtRTEI = { 1, 1, "calcDp_api", "" };
+static emlrtRTEInfo k_emlrtRTEI = { 1, 1, "calcDp_api", "" };
 
 /* Function Declarations */
 static void b_emlrt_marshallIn(const mxArray *u, const emlrtMsgIdentifier
@@ -67,16 +67,16 @@ static real_T d_emlrt_marshallIn(const mxArray *u, const emlrtMsgIdentifier
 static void e_emlrt_marshallIn(const mxArray *src, const emlrtMsgIdentifier
   *msgId, emxArray_real_T *ret)
 {
-  int32_T iv15[2];
+  int32_T iv13[2];
   boolean_T bv0[2];
   int32_T i;
   for (i = 0; i < 2; i++) {
-    iv15[i] = -1;
+    iv13[i] = -1;
     bv0[i] = TRUE;
   }
 
   emlrtCheckVsBuiltInR2012b(emlrtRootTLSGlobal, msgId, src, "double", FALSE, 2U,
-    iv15, bv0, ret->size);
+    iv13, bv0, ret->size);
   ret->size[0] = ret->size[0];
   ret->size[1] = ret->size[1];
   ret->allocatedSize = ret->size[0] * ret->size[1];
@@ -98,14 +98,14 @@ static void emlrt_marshallIn(const mxArray *X, const char_T *identifier,
 static const mxArray *emlrt_marshallOut(emxArray_real_T *u)
 {
   const mxArray *y;
-  static const int32_T iv14[1] = { 0 };
+  static const int32_T iv12[1] = { 0 };
 
-  const mxArray *m7;
+  const mxArray *m5;
   y = NULL;
-  m7 = mxCreateNumericArray(1, (int32_T *)&iv14, mxDOUBLE_CLASS, mxREAL);
-  mxSetData((mxArray *)m7, (void *)u->data);
-  mxSetDimensions((mxArray *)m7, u->size, 1);
-  emlrtAssign(&y, m7);
+  m5 = mxCreateNumericArray(1, (int32_T *)&iv12, mxDOUBLE_CLASS, mxREAL);
+  mxSetData((mxArray *)m5, (void *)u->data);
+  mxSetDimensions((mxArray *)m5, u->size, 1);
+  emlrtAssign(&y, m5);
   return y;
 }
 
@@ -119,31 +119,36 @@ static real_T f_emlrt_marshallIn(const mxArray *src, const emlrtMsgIdentifier
   return ret;
 }
 
-void calcDp_api(const mxArray * const prhs[4], const mxArray *plhs[1])
+void calcDp_api(const mxArray * const prhs[5], const mxArray *plhs[1])
 {
   emxArray_real_T *X;
   emxArray_real_T *Xp;
+  emxArray_real_T *DF;
   emxArray_real_T *Dp;
   real_T rstar;
   real_T Dzero;
   emlrtHeapReferenceStackEnterFcnR2012b(emlrtRootTLSGlobal);
-  emxInit_real_T(&X, 2, &o_emlrtRTEI, TRUE);
-  emxInit_real_T(&Xp, 2, &o_emlrtRTEI, TRUE);
-  b_emxInit_real_T(&Dp, 1, &o_emlrtRTEI, TRUE);
+  emxInit_real_T(&X, 2, &k_emlrtRTEI, TRUE);
+  emxInit_real_T(&Xp, 2, &k_emlrtRTEI, TRUE);
+  emxInit_real_T(&DF, 2, &k_emlrtRTEI, TRUE);
+  b_emxInit_real_T(&Dp, 1, &k_emlrtRTEI, TRUE);
 
   /* Marshall function inputs */
   emlrt_marshallIn(emlrtAlias(prhs[0]), "X", X);
   emlrt_marshallIn(emlrtAlias(prhs[1]), "Xp", Xp);
   rstar = c_emlrt_marshallIn(emlrtAliasP(prhs[2]), "rstar");
   Dzero = c_emlrt_marshallIn(emlrtAliasP(prhs[3]), "Dzero");
+  emlrt_marshallIn(emlrtAlias(prhs[4]), "DF", DF);
 
   /* Invoke the target function */
-  calcDp(X, Xp, rstar, Dzero, Dp);
+  calcDp(X, Xp, rstar, Dzero, DF, Dp);
 
   /* Marshall function outputs */
   plhs[0] = emlrt_marshallOut(Dp);
   Dp->canFreeData = FALSE;
   emxFree_real_T(&Dp);
+  DF->canFreeData = FALSE;
+  emxFree_real_T(&DF);
   Xp->canFreeData = FALSE;
   emxFree_real_T(&Xp);
   X->canFreeData = FALSE;

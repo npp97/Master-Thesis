@@ -3,7 +3,7 @@
  *
  * Code generation for function 'calcDp'
  *
- * C source code generated on: Wed Nov 14 18:19:50 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
@@ -31,7 +31,7 @@
 /* Variable Definitions */
 
 /* Function Declarations */
-extern void calcDp(const emxArray_real_T *X, const emxArray_real_T *Xp, real_T rstar, real_T Dzero, emxArray_real_T *Dp);
+extern void calcDp(const emxArray_real_T *X, const emxArray_real_T *Xp, real_T rstar, real_T Dzero, const emxArray_real_T *DF, emxArray_real_T *Dp);
 extern void check_forloop_overflow_error(boolean_T overflow);
 #endif
 /* End of code generation (calcDp.h) */

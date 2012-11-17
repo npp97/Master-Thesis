@@ -3,7 +3,7 @@
  *
  * Code generation for function 'calcDp_data'
  *
- * C source code generated on: Wed Nov 14 18:19:50 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
@@ -28,17 +28,14 @@
 
 /* Variable Declarations */
 extern const volatile char_T *emlrtBreakCheckR2012bFlagVar;
-extern emlrtRSInfo g_emlrtRSI;
-extern emlrtRSInfo p_emlrtRSI;
-extern emlrtRSInfo r_emlrtRSI;
+extern emlrtRSInfo i_emlrtRSI;
+extern emlrtRSInfo j_emlrtRSI;
 extern emlrtRSInfo s_emlrtRSI;
-extern emlrtRSInfo t_emlrtRSI;
 extern emlrtRSInfo u_emlrtRSI;
 extern emlrtRSInfo v_emlrtRSI;
-extern emlrtRSInfo ib_emlrtRSI;
-extern emlrtRSInfo mb_emlrtRSI;
-extern emlrtRTEInfo c_emlrtRTEI;
-extern emlrtRTEInfo d_emlrtRTEI;
+extern emlrtRSInfo w_emlrtRSI;
+extern emlrtRSInfo x_emlrtRSI;
+extern emlrtRSInfo y_emlrtRSI;
 
 /* Variable Definitions */
 

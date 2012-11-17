@@ -1,14 +1,14 @@
 /*
- * power.h
+ * monitor_function.h
  *
- * Code generation for function 'power'
+ * Code generation for function 'monitor_function'
  *
- * C source code generated on: Wed Nov 14 18:19:51 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
-#ifndef __POWER_H__
-#define __POWER_H__
+#ifndef __MONITOR_FUNCTION_H__
+#define __MONITOR_FUNCTION_H__
 /* Include files */
 #include <math.h>
 #include <stdlib.h>
@@ -31,7 +31,6 @@
 /* Variable Definitions */
 
 /* Function Declarations */
-extern void b_power(const emxArray_real_T *a, emxArray_real_T *y);
-extern void power(const emxArray_real_T *a, emxArray_real_T *y);
+extern void monitor_function(const emxArray_real_T *DF, real_T Dzero, emxArray_real_T *Ddash);
 #endif
-/* End of code generation (power.h) */
+/* End of code generation (monitor_function.h) */

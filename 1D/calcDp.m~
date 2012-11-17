@@ -4,7 +4,7 @@ function Dp = calcDp(X,Xp,rstar,Dzero,DF)
     assert( isa(rstar,'double'))
     assert( isa(Dzero,'double'))
     Dp = Dzero*ones(size(X,1),1);
-    MF=monitor_function(DF,Dzero);
+    MF=monitor_
     for j=1:size(X,1)
         Dp_old = -inf;
         k=0;
@@ -12,10 +12,10 @@ function Dp = calcDp(X,Xp,rstar,Dzero,DF)
             Dp_old = Dp(j);
             ind = (distm(X(j,:),Xp)<=rstar*Dp(j,:));
             if(sum(ind)>0)
-                Dp(j) = min(MF(ind));
+                Dp(j) = min(monitor_function(DF(ind),Dzero));
                 k=k+1;
             else
-                Dp(j) = MF(j);
+                Dp(j) = monitor_function(DF(j),Dzero);
                 break;
             end
         end

@@ -10,11 +10,10 @@ SRC_FILES =  \
 	calcDp_initialize.c \
 	calcDp_terminate.c \
 	calcDp.c \
+	monitor_function.c \
 	distm.c \
 	sum.c \
 	repmat.c \
-	gradllh.c \
-	power.c \
 	calcDp_api.c \
 	calcDp_emxutil.c \
 	calcDp_mex.c

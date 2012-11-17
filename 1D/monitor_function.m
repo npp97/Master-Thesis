@@ -1,7 +1,7 @@
-function [ Ddash ] = monitor_function( x , Dzero)
+function [ Ddash ] = monitor_function( DF , Dzero)
     %UNTITLED Summary of this function goes here
     %   Detailed explanation goes here
-    Ddash = Dzero ./ (sqrt( 1 + sum(gradllh(0,x).^2,2).^2));
+    Ddash = Dzero ./ (sqrt( 1 + DF.^2));
     
 end
 

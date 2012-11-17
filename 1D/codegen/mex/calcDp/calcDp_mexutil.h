@@ -3,7 +3,7 @@
  *
  * Code generation for function 'calcDp_mexutil'
  *
- * C source code generated on: Wed Nov 14 18:19:50 2012
+ * C source code generated on: Sat Nov 17 15:52:36 2012
  *
  */
 
@@ -31,7 +31,7 @@
 /* Variable Definitions */
 
 /* Function Declarations */
-extern const mxArray *b_message(const mxArray *b, emlrtMCInfo *location);
 extern void error(const mxArray *b, emlrtMCInfo *location);
+extern const mxArray *message(const mxArray *b, emlrtMCInfo *location);
 #endif
 /* End of code generation (calcDp_mexutil.h) */
