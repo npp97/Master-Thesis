@@ -1,4 +1,4 @@
-function [L,D1,D2,I] = Lop(X_eval,X_source,eps,U,V)
+function [L,D1,D2,I,E] = Lop(X_eval,X_source,eps,U,V)
     
     M_int = distm(X_source,X_source);
     M_eval = distm(X_eval,X_source);
@@ -30,7 +30,7 @@ function [L,D1,D2,I] = Lop(X_eval,X_source,eps,U,V)
     
     % assemble operator
     
-    L = (U*D1+V*D2)/I;
+    L = (-U*D1+V*D2)/I;
     
     D1 = D1/I;
     D2 = D2/I;

@@ -51,16 +51,16 @@ dt = dx/du;
 
 %% 1.4 Kernel 
 
-rcp = 3;
+eps = 3;
 
 
 
 %% 1.3 Particle Distribution
 
 %upper bound on the inter particle spacing
-vs = 5;
-D0 = 2;
-Nstar = 10;
+vs = 3;
+D0 = 1.5;
+Nstar = 12;
 rstar = 5;
 dc = 2.5;
 
@@ -77,23 +77,27 @@ quiver(XX,YY,reshape(GG(:,1),size(XX)),reshape(GG(:,2),size(XX)))
 
 %% 2.1 Initialization
 
-N = 100;
+N = 10;
 d = 2;
 
-rcp = ones(N,1);
+
 
 % initialise positions
-Xp = randn(N,d)+2;
+
+
+[XX,YY] = meshgrid(linspace(0,2,10),linspace(0,2,10));
+Xp = [XX(:),YY(:)];
+rcp = eps*ones(size(Xp,1),1);
 D = distm_mex(Xp,Xp);
 
 % initialise CD-PSE
-f = exp(-sum((Xp-1).^2,2));
+f = exp(-10*sum((Xp-1).^2,2));
 wp = rbf(D,rcp)\f;
 
 % initialise radii
-DOP = DiffOp(Xp,Xp,rcp);
-DF = DOP*f;
-Dp = calcDp(Xp,Xp,rstar,D0,DF);
+
+
+Dp = calcDp(Xp,Xp,rstar,D0,rcp,f);
 rcp = rstar*Dp;
 
 % Time Stepping
@@ -115,31 +119,37 @@ while (t<tf)
     subplot(2,2,1)
     plot(Xp(:,1),Xp(:,2),'o')
     drawnow
-    [OP,D1,D2,E] = Lop(Xp_adv,Xp,rcp,1,1);
+    [OP,D1,D2,M_int,M_eval] = Lop(Xp_adv,Xp,rcp,1,1);
     
     EV = eig(OP);
     % scale dt according to eigenvalues to assure stability
     dt = 1/max(abs(eig(OP)));
-    
-    L = dt*OP + E;
-
+    % euler integration scheme
+    L = dt*OP + M_eval/M_int;
+    % apply operator
     f=L*f;
+    
+    % assure conservation
+    c=M_int\f;
+    I=irbf(c,eps);
+    c=c/sum(I);
+    f=M_eval*c;
+
+    
     Xp=Xp_adv;
     % reorganize particles ?
     n=n-1;
+    
+    subplot(2,2,2)
+    plot3(Xp(:,1),Xp(:,2),f,'x')
+    
     if (n==0)
 
         n=10;
         % construct CD-PSE operators
         
-        DOP = DiffOp(Xp,Xp,rcp);
-        
-        % evaluate field derivaties 
-        
-        DF = DOP*f;
-        
         % compute Dpn
-        Dp = calcDp(Xp,Xp,rstar,D0,DF);
+        Dp = calcDp(Xp,Xp,rstar,D0,rcp,f);
         rcp = rstar*Dp;
 
 
@@ -152,6 +162,12 @@ while (t<tf)
         while(true)            
             subplot(2,2,1)
             hold off
+            
+            % remove bad particles
+            ind = Dp>0;
+            Xp=Xp(ind,:);
+            Dp=Dp(ind);
+            rcp=rcp(ind);
             
             size(Xp,1)
             
@@ -181,6 +197,9 @@ while (t<tf)
             end
             drawnow
             % new particles
+                        
+            size(Xp,1)
+            
             
             kk=size(Xp,1);
             Nlist = (distm_mex(Xp,Xp)<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)));
@@ -206,12 +225,14 @@ while (t<tf)
                end
                Nlist = (distm_mex(Xp,Xp)<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)));
                Nfill = Nstar-sum(Nlist);
-            end
+           end
+
             drawnow
+          
             % construct neighbor lists within x_new and between x_new and x_old
             
             % compute Dp of x_new by interpolation from Dp of x_old
-            Dp = IntOp(Xp,X_old,rcp)*f;
+            Dp = calcDp(Xp,X_old,rstar,D0,rcp_old,f);
             rcp = rstar*Dp;
             % compute total energy and gradient
             Dpq = bsxfun(@min,Dp,Dp');
@@ -229,13 +250,13 @@ while (t<tf)
             end
             % line search for gradient descent step size and move particels by one step
             
-            [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,f,D0),-1,opts);
+            [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,X_old,rcp_old,f,D0),-1,opts);
             Xp = Xp + gamma*wp;
-            Dp = IntOp(Xp,X_old,rcp)*f;
+            Dp = calcDp(Xp,X_old,rstar,D0,rcp_old,f);
             rcp = rstar*Dp;
             plot(Xp(:,1),Xp(:,2),'yo')
             %drawnow
-            % compute total energy and gradient
+            % compute totalm energy and gradient
             Dpq = bsxfun(@min,Dp,Dp');
             Rpq = distm_mex(Xp,Xp);
             crit = Dpq./Rpq;
@@ -261,7 +282,7 @@ while (t<tf)
 
         end
         
-        f=IntOp(Xp,X_old,rcp)*f;
+        f=IntOp(Xp,X_old,rcp_old)*f;
         
     end
     
