@@ -25,15 +25,13 @@ function [L,D1,D2] = Lop(X_eval,X_source,eps,U,V)
         
     end
     
+    D1/I;
     
     D2 = d2rbf(M_eval,eps);
     
     % assemble operator
     
     L = (-U*D1+V*D2)/I;
-    
-    D1 = D1/I;
-    D2 = D2/I;
     %L = (V*D2)/I;
 
 end

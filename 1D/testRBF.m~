@@ -8,13 +8,13 @@ X_source = X_eval;
 
 eps = 5;
 
-f = exp(-1/2*sum((X_source-1).^2,2));
+%f = exp(-1/2*sum((X_source-1).^2,2));
 
-%f = sin(1/10*sum((X_source-1).^2,2));
+f = sin(sum((X_source-1).^2,2));
 
 D_int = distm(X_source,X_source);
 D_eval = distm(X_eval,X_source);
-
+?
 M_int = rbf(D_int,eps);
 M_eval =  rbf(D_eval,eps);
 
@@ -50,10 +50,6 @@ while(t<10)
     
     %f = RBF_RK4(Lop(X_eval,X_eval,eps,1,1),Lop(X_eval,X_source,eps,1,1),M_eval/M_int, f, dt);
     f = L*f;
-    c=M_int\f;
-    I=irbf(c,eps);
-    c=c/sum(I);
-    f=M_eval*c;
     t=t+dt;
     subplot(3,3,1)
     surf(XX,YY,reshape(F,size(XX)))
