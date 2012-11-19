@@ -1,3 +1,7 @@
+clear all
+figure(1)
+clf
+
 vs = 10;
 
 [XX,YY] = meshgrid(linspace(-vs,vs,30),linspace(-vs,vs,30));
@@ -35,11 +39,14 @@ colorbar
 
 subplot(3,3,7)
 surf(XX,YY,reshape(rbf(distm(X_source,[0 0]),eps),size(XX)))
+title('GRBF')
 subplot(3,3,8)
 surf(XX,YY,reshape(drbf(distm(X_eval,[0 0]),eps,diffm(X_eval(:,2),[0])),size(XX)))
+title('d/dx GRBF')
 %surf(XX,YY,reshape(drbf(distm(X_eval,[0 0]),1,diffm(X_eval(:,1),[0])),size(XX)))
 subplot(3,3,9)
 surf(XX,YY,reshape(d2rbf(distm(X_source,[0 0]),eps),size(XX)))
+title('laplace GRBF')
 
 while(t<10)
     
@@ -63,9 +70,12 @@ while(t<10)
     surf(XX,YY,reshape(f,size(XX)))
     subplot(3,3,4)
     surf(XX,YY,reshape(D1F,size(XX)))
+    title('||grad(f)||')
     subplot(3,3,5)
     surf(XX,YY,reshape(D2F,size(XX)))
+    title('div(grad(f))')
     subplot(3,3,6)
     surf(XX,YY,reshape(OPF,size(XX)))
+    title('-grad(U)*grad(f)+div(grad(f))')
     drawnow
 end

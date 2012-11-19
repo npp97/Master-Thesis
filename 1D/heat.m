@@ -56,35 +56,42 @@ eps = 3;
 %% 1.3 Particle Distribution
 
 %upper bound on the inter particle spacing
-vs = 20;
-D0 = 1.5;
+vs = 10;
+D0 = 1;
 Nstar = 12;
-rstar = 3;
+%rstar = sqrt(3);
+rstar = 5;
 dc = 2.5;
 
 %% 1.4 Graphical Output
 
-[XX,YY] = meshgrid(linspace(-vs,vs,40),linspace(-vs,vs,40));
-GG = -gradllh(0,[XX(:),YY(:)]);
-subplot(2,3,3)
-quiver(XX,YY,reshape(GG(:,1),size(XX)),reshape(GG(:,2),size(XX)))
+[VX,VY] = meshgrid(linspace(-vs,vs,30),linspace(-vs,vs,30));
+Xv = [VX(:),VY(:)];
+GG = -gradllh(0,Xv);
+subplot(3,3,3)
+quiver(VX,VY,reshape(GG(:,1),size(VX)),reshape(GG(:,2),size(VX)))
+figure(1)
+
+%% 1.5 Prior
+
+prior = @(x) exp(-3*sum((x-1).^2,2));
+ngprior = @(x) 6*sqrt((sum((x-1).^2,2))).*prior(x);
+
 
 %% 2 Implementation
 
 %% 2.1 Initialization
 
-N = 10;
+N = 100;
 d = 2;
 
 % initialise positions
 
-[XX,YY] = meshgrid(linspace(-4,6,15),linspace(-4,6,15));
-Xp = [XX(:),YY(:)];
+Xp = sqrt(5)*randn(N,d)+1;
+Xp = [0 0];
 D = distm_mex(Xp,Xp);
 
 
-prior = @(x) exp(-10*sum((x-1).^2,2));
-ngprior = @(x) 20*sqrt((sum((x-1).^2,2))).*prior(x);
 
 % initialise radii
 
@@ -97,7 +104,7 @@ n=1;
 
 
 while(true)
-    subplot(2,3,1)
+    subplot(3,3,1)
     hold off
     % remove bad particles
     ind = Dp>0;
@@ -110,6 +117,8 @@ while(true)
     k=1;
     hold off
     plot(Xp(:,1),Xp(:,2),'o')
+    xlim([-vs,vs])
+    ylim([-vs,vs])
     drawnow
     hold on
     while(true)
@@ -141,7 +150,7 @@ while(true)
             hold on
             xnew = randn(1,size(Xp,2));
             % normalize & make sure we do not insert points inside the cutoff radii ...
-            xnew = ((rand(1)+1/2)*Dp(l))*xnew/norm(xnew)+Xp(l,:);
+            xnew = (((rstar-1/2)*rand(1)+1/2)*Dp(l))*xnew/norm(xnew)+Xp(l,:);
             Xp = [Xp; xnew];
             Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
             rcp(end+1) = rstar*Dp(end);
@@ -187,23 +196,35 @@ while(true)
     Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)))-logical(eye(size(Xp,1)));
     % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
     % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
-    subplot(2,3,4)
     tri = delaunay(Xp(:,1),Xp(:,2));
-    trisurf(tri,Xp(:,1),Xp(:,2),Dp)
+    VI=IntOp(Xv,Xp,eps);
+    subplot(3,3,2)
+    trisurf(tri,Xp(:,1),Xp(:,2),max(sum(Nlist,2)+1,Nstar))
+    %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
+    xlim([-vs,vs])
+    ylim([-vs,vs])
     shading interp
     view(0,90)
     colorbar
-    title('Dp')
-    subplot(2,3,5)
-    tri = delaunay(Xp(:,1),Xp(:,2));
-    trisurf(tri,Xp(:,1),Xp(:,2),prior(Xp))
+    title('#Neighbors')
+    subplot(3,3,4)
+    %trisurf(tri,Xp(:,1),Xp(:,2),rcp)
+    surf(VX,VY,reshape(VI*Dp,size(VX)))
+    xlim([-vs,vs])
+    ylim([-vs,vs])
+    shading interp
+    view(0,90)
+    colormap(jet)
+    colorbar
+    title('rcp')
+    subplot(3,3,5)
+    surf(VX,VY,reshape(prior(Xv),size(VX)))
     shading interp
     view(0,90)
     colorbar
     title('f')
-    subplot(2,3,6)
-    tri = delaunay(Xp(:,1),Xp(:,2));
-    trisurf(tri,Xp(:,1),Xp(:,2),ngprior(Xp))
+    subplot(3,3,6)
+    surf(VX,VY,reshape(ngprior(Xv),size(VX)))
     shading interp
     view(0,90)
     colorbar
