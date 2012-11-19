@@ -78,7 +78,7 @@ d = 2;
 
 % initialise positions
 
-[XX,YY] = meshgrid(linspace(-4,6,15),linspace(-4,6,15));
+[XX,YY] = meshgrid(linspace(-4,6,10),linspace(-4,6,20));
 Xp = [XX(:),YY(:)];
 D = distm_mex(Xp,Xp);
 
@@ -213,8 +213,6 @@ while(true)
         break;
     end
 end
-
-f = prior(Xp);
 
 %% Start solving PDE 
 
