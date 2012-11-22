@@ -58,7 +58,7 @@ while(t<10)
     %f = RBF_RK4(Lop(X_eval,X_eval,eps,1,1),Lop(X_eval,X_source,eps,1,1),M_eval/M_int, f, dt);
     f = L*f;
     c=M_int\f;
-    I=irbf(c,eps);
+    I=irbf(c,eps,sum(X_source,2));
     c=c/sum(I);
     f=M_eval*c;
     t=t+dt;
@@ -66,6 +66,7 @@ while(t<10)
     surf(XX,YY,reshape(F,size(XX)))
     subplot(3,3,2)
     surf(XX,YY,reshape(F,size(XX)))
+    view(0,90)
     subplot(3,3,3)
     surf(XX,YY,reshape(f,size(XX)))
     subplot(3,3,4)

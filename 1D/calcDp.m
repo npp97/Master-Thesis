@@ -18,7 +18,7 @@ function Dp = calcDp(Xp,Xp_old,rstar,Dzero,rcp_old,f)
         k=0;
         while((((abs(Dp_old-Dp(j)))/Dp(j))>1e-2) && k < 15)
             Dp_old = Dp(j);
-            ind = (distm(Xp(j,:),Xp)<=rstar*Dp(j,:));
+            ind = (distm_mex(Xp(j,:),Xp)<=rstar*Dp(j,:));
             if(sum(ind)>0)
                 Dp(j) = min(MF(ind));
                 k=k+1;

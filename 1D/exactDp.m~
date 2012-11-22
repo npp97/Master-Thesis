@@ -4,7 +4,6 @@ function Dp = exactDp(Xp,DF,rstar,Dzero)
     assert( isa(rstar,'double'))
     assert( isa(Dzero,'double'))
     
-    Dp=zeros(size(Xp,1),1);
     
     MF=monitor_function(DF,Dzero);
     
@@ -23,5 +22,8 @@ function Dp = exactDp(Xp,DF,rstar,Dzero)
                 break;
             end
         end
+    end
+    if(size(Dp,2)>size(Dp,1))
+        Dp=Dp';
     end
 end

@@ -56,12 +56,14 @@ eps = 3;
 %% 1.3 Particle Distribution
 
 %upper bound on the inter particle spacing
-vs = 10;
-D0 = 1;
+vs = 5;
+D0 = 0.5;
 Nstar = 12;
 %rstar = sqrt(3);
-rstar = 5;
+rstar = 3;
 dc = 2.5;
+% probability tolerance for spawning of new particles
+tol = 1e-4;
 
 %% 1.4 Graphical Output
 
@@ -72,12 +74,6 @@ subplot(3,3,3)
 quiver(VX,VY,reshape(GG(:,1),size(VX)),reshape(GG(:,2),size(VX)))
 figure(1)
 
-%% 1.5 Prior
-
-prior = @(x) exp(-3*sum((x-1).^2,2));
-ngprior = @(x) 6*sqrt((sum((x-1).^2,2))).*prior(x);
-
-
 %% 2 Implementation
 
 %% 2.1 Initialization
@@ -87,8 +83,8 @@ d = 2;
 
 % initialise positions
 
-Xp = sqrt(5)*randn(N,d)+1;
-Xp = [0 0];
+Xp = randn(N,d)+1;
+%Xp = [0 0];
 D = distm_mex(Xp,Xp);
 
 
@@ -98,22 +94,21 @@ D = distm_mex(Xp,Xp);
 Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
 rcp = rstar*Dp;
 
+% initialise energy
+W = [];
+
 % Time Stepping
 t=t0;
 n=1;
 
+%% 2.2 Initial particle distribution
 
+Iiter = 1;
 while(true)
     subplot(3,3,1)
     hold off
-    % remove bad particles
-    ind = Dp>0;
-    Xp=Xp(ind,:);
-    Dp=Dp(ind);
-    rcp=rcp(ind);
-    size(Xp,1)
-    % fuse particles where |xp_xq|<Dpq/
-    % do this in a greedy-type fashion by removing particles with most points inside the cutoff radius first
+    Iiter
+
     k=1;
     hold off
     plot(Xp(:,1),Xp(:,2),'o')
@@ -121,135 +116,71 @@ while(true)
     ylim([-vs,vs])
     drawnow
     hold on
-    while(true)
-        Dpq = bsxfun(@min,Dp,Dp');
-        ind = distm_mex(Xp,Xp)<Dpq/2;
-        if(max(sum(ind))==1)
-            break
-        else
-            [m,ind] = max(sum(ind));
-            plot(Xp(ind,1),Xp(ind,2),'ro')
-            Dp=Dp([1:ind-1 ind+1:end]);
-            Xp=Xp([1:ind-1 ind+1:end],:);
-            rcp = rstar*Dp;
-        end
-    end
-    drawnow
-    % new particles
-    size(Xp,1)
-    Rpq = distm_mex(Xp,Xp);
-    Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)));
-    ind = find(Nstar-sum(Nlist)>0);
-    for l=ind
-        Nfill=Nstar-sum(distm_mex(Xp(l,:),Xp)<min(rcp,rcp(l))');
-        for j=1:Nfill
-            % wiki n-sphere
-            plot(Xp(l,1),Xp(l,2),'co')
-            circle(Xp(l,1),Xp(l,2),Dp(l)/2);
-            circle(Xp(l,1),Xp(l,2),rcp(l));
-            hold on
-            xnew = randn(1,size(Xp,2));
-            % normalize & make sure we do not insert points inside the cutoff radii ...
-            xnew = (((rstar-1/2)*rand(1)+1/2)*Dp(l))*xnew/norm(xnew)+Xp(l,:);
-            Xp = [Xp; xnew];
-            Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-            rcp(end+1) = rstar*Dp(end);
-            plot(xnew(1),xnew(2),'go')
-            %%%drawnow
-        end
-        if(size(rcp,2)>size(rcp,1))
-            rcp=rcp';
-        end
-    end
     
-    drawnow
+    % fuse particles
+    [Xp,rcp] = fuse_particles( Xp,Dp,rstar );
     
-    % construct neighbor lists within x_new and between x_new and x_old
     Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
     rcp = rstar*Dp;
-    % compute total energy and gradient
-    Dpq = bsxfun(@min,Dp,Dp');
-    W = sum(sum(Dpq.^2*V1(distm_mex(Xp,Xp)./Dpq)));
-    wp = zeros(size(Xp));
-    for k = 1:size(Xp,1);
-        ind = distm_mex(Xp,Xp(k,:))<min(rcp(k),rcp);
-        ind(k) = 0;
-        Np = Xp(ind,:);
-        NDp = Dp(ind);
-        for l=1:size(Np,1)
-            r=norm(Xp(k,:)-Np(l,:))/min(Dp(k),NDp(l));
-            wp(k,:) = wp(k,:) - 2*min(Dp(k),NDp(l))*(dV1(r)*(Xp(k,:)-Np(l,:))/norm(Xp(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
-        end
-    end
-    % line search for gradient descent step size and move particels by one step
     
+    % spawn new particels
+    [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol );    
+    
+    Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
+    rcp = rstar*Dp;
+    
+    % gradient descent direction
+    [ wp,W ] = gradient_descent( Xp,Dp,rcp,rstar,D0,W,Iiter,opts );
+    
+    % line search for gradient descent step size and move particels by one step   
     [gamma] = fminsearch(@(g) InitOrgEnergy(Xp+g*wp,ngprior(Xp),rstar,D0),-1,opts);
     Xp = Xp + gamma*wp;
+    
+    plot(Xp(:,1),Xp(:,2),'yo')
+    drawnow
+    
     Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
     rcp = rstar*Dp;
-    plot(Xp(:,1),Xp(:,2),'yo')
-    %drawnow
-    % compute totalm energy and gradient
+    
     Dpq = bsxfun(@min,Dp,Dp');
     Rpq = distm_mex(Xp,Xp);
     crit = Dpq./Rpq;
     Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)))-logical(eye(size(Xp,1)));
+    
+    %graphical output
+    NI(Iiter) = sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1);
+    CI(Iiter) = max(max(crit(logical(Nlist))));
+    %plot_points( Xv,Xp,Dp,rcp,VX,VY,W,NN,CC,dc,iter,Nlist,Nstar,vs )
+    
+    Iiter = Iiter+1;
+    
     % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
     % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
-    tri = delaunay(Xp(:,1),Xp(:,2));
-    VI=IntOp(Xv,Xp,eps);
-    subplot(3,3,2)
-    trisurf(tri,Xp(:,1),Xp(:,2),max(sum(Nlist,2)+1,Nstar))
-    %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
-    xlim([-vs,vs])
-    ylim([-vs,vs])
-    shading interp
-    view(0,90)
-    colorbar
-    title('#Neighbors')
-    subplot(3,3,4)
-    %trisurf(tri,Xp(:,1),Xp(:,2),rcp)
-    surf(VX,VY,reshape(VI*Dp,size(VX)))
-    xlim([-vs,vs])
-    ylim([-vs,vs])
-    shading interp
-    view(0,90)
-    colormap(jet)
-    colorbar
-    title('rcp')
-    subplot(3,3,5)
-    surf(VX,VY,reshape(prior(Xv),size(VX)))
-    shading interp
-    view(0,90)
-    colorbar
-    title('f')
-    subplot(3,3,6)
-    surf(VX,VY,reshape(ngprior(Xv),size(VX)))
-    shading interp
-    view(0,90)
-    colorbar
-    title('||grad(f)||')
-    drawnow
-    if(sum(sum(Nlist)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)
+    if(sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)
         break;
     end
 end
 
 f = prior(Xp);
+pause
 
-%% Start solving PDE 
+%% 2.3 Start solving PDE 
+
+Piter = 1;
 
 while (t<tf)
     % advect particles
     disp('advecting')
-%     for m=1:size(Xp,1)
-%         [ik,xt]=ode45(@gradllh,[t,t+dt],Xp(m,:)');
-%         Xp(m,:) = xt(end,:)';
-%     end
-    Xp_adv = Xp - dt*gradllh(0,Xp);
+    Xp_adv=zeros(size(Xp));
+    for m=1:size(Xp,1)
+        [ik,xt]=ode45(@(t,x) -gradllh(t,x),[t,t+dt],Xp(m,:)');
+        Xp_adv(m,:) = xt(end,:)';
+    end
+%    Xp_adv = Xp - dt*gradllh(0,Xp);
     subplot(2,3,1)
     plot(Xp(:,1),Xp(:,2),'o')
     drawnow
+    hold on
     [OP,D1,D2,M_int,M_eval] = Lop(Xp_adv,Xp,rcp,1,1);
     
     EV = eig(OP);
@@ -262,7 +193,7 @@ while (t<tf)
     
     % assure conservation
     c=M_int\f;
-    I=irbf(c,eps);
+    I=irbf(c,eps,sum(Xp,2));
     c=c/sum(I);
     f=M_eval*c;
  
@@ -285,16 +216,16 @@ while (t<tf)
         Dp_old = Dp;
         rcp_old = rcp;
     
+        % init plotting 
+        Aiter = 1;
+        WA=[];
+        
         % create x_new
         while(true)            
             subplot(2,3,1)
             hold off           
             % remove bad particles
-            ind = Dp>0;
-            Xp=Xp(ind,:);
-            Dp=Dp(ind);
-            rcp=rcp(ind);         
-            size(Xp,1)            
+          
             % fuse particles where |xp_xq|<Dpq/
             % do this in a greedy-type fashion by removing particles with most points inside the cutoff radius first
             k=1;
@@ -302,112 +233,47 @@ while (t<tf)
             plot(Xp(:,1),Xp(:,2),'o')
             drawnow
             hold on
-            while(true)
-                
-                Dpq = bsxfun(@min,Dp,Dp');
-                ind = distm_mex(Xp,Xp)<Dpq/2;
-                if(max(sum(ind))==1)
-                    break
-                else
-                    [m,ind] = max(sum(ind));
-                    plot(Xp(ind,1),Xp(ind,2),'ro')
-                    Dp=Dp([1:ind-1 ind+1:end]);
-                    Xp=Xp([1:ind-1 ind+1:end],:);
-                    rcp = rstar*Dp;
-                end
- 
-            end
-            drawnow
-            % new particles                       
-            size(Xp,1)
-            Rpq = distm_mex(Xp,Xp);
-            Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)));
-            ind = find(Nstar-sum(Nlist)>0);
-            for l=ind
-                Nfill=Nstar-sum(distm_mex(Xp(l,:),Xp)<min(rcp,rcp(l))');
-                for j=1:Nfill
-                    % wiki n-sphere
-                    plot(Xp(l,1),Xp(l,2),'co')
-                    circle(Xp(l,1),Xp(l,2),Dp(l)/2);
-                    circle(Xp(l,1),Xp(l,2),rcp(l));
-                    hold on
-                    xnew = randn(1,size(Xp,2));
-                    % normalize & make sure we do not insert points inside the cutoff radii ...
-                    xnew = ((rand(1)+1/2)*Dp(l))*xnew/norm(xnew)+Xp(l,:);
-                    Xp = [Xp; xnew];
-                    Dp(end+1) = IntOp(xnew,Xp_old,rcp_old)*f;
-                    rcp(end+1) = rstar*Dp(end);
-                    plot(xnew(1),xnew(2),'go')
-                    %%%drawnow
-                end
-                if(size(rcp,2)>size(rcp,1))
-                    rcp=rcp';
-                end
-            end
-
-            drawnow
-          
-            % construct neighbor lists within x_new and between x_new and x_old
             
-            % compute Dp of x_new by interpolation from Dp of x_old
+            % fuse particles
+            [Xp,rcp] = fuse_particles( Xp,Dp,rstar );
+            
+            Dp = calcDp(Xp,Xp_old,rstar,D0,rcp_old,f);
+            rcp=Dp*rstar;
+            
+            % spawn particles                      
+            [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol ); 
+            
             Dp = calcDp(Xp,Xp_old,rstar,D0,rcp_old,f);
             rcp = rstar*Dp;
-            % compute total energy and gradient
-            Dpq = bsxfun(@min,Dp,Dp');
-            W = sum(sum(Dpq.^2*V1(distm_mex(Xp,Xp)./Dpq)));
-            wp = zeros(size(Xp));
-            for k = 1:size(Xp,1);
-                ind = distm_mex(Xp,Xp(k,:))<min(rcp(k),rcp);
-                ind(k) = 0;
-                Np = Xp(ind,:);
-                NDp = Dp(ind);
-                for l=1:size(Np,1)
-                    r=norm(Xp(k,:)-Np(l,:))/min(Dp(k),NDp(l));
-                    wp(k,:) = wp(k,:) - 2*min(Dp(k),NDp(l))*(dV1(r)*(Xp(k,:)-Np(l,:))/norm(Xp(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
-                end
-            end
-            % line search for gradient descent step size and move particels by one step
             
+            % compute total energy and gradient
+            [ wp,WA ] = gradient_descent( Xp,Dp,rcp,rstar,D0,WA,Iiter,opts );
+            
+            % line search for gradient descent step size and move particels by one step
             [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,Xp_old,rcp_old,f,D0),-1,opts);
             Xp = Xp + gamma*wp;
+            
             Dp = calcDp(Xp,Xp_old,rstar,D0,rcp_old,f);
             rcp = rstar*Dp;
+            
             plot(Xp(:,1),Xp(:,2),'yo')
-            %drawnow
-            % compute totalm energy and gradient
+            drawnow
+            
+            % compute total energy and gradient
             Dpq = bsxfun(@min,Dp,Dp');
             Rpq = distm_mex(Xp,Xp);
             crit = Dpq./Rpq;
             Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)))-logical(eye(size(Xp,1)));
+            
+            %graphical output
+            NA(Aiter) = sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1);
+            CA(Aiter) = max(max(crit(logical(Nlist))));
+            plot_points( Xv,Xp,Dp,rcp,VX,VY,WA,NA,CA,dc,Aiter,Nlist,Nstar,vs )
+            
+            Aiter = Aiter+1;
+            
             % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
-            % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
-            subplot(2,3,4)       
-            tri = delaunay(Xp(:,1),Xp(:,2));
-            trisurf(tri,Xp(:,1),Xp(:,2),Dp)
-            shading interp
-            view(0,90)
-            colorbar
-            title('Dp')
-            subplot(2,3,5)
-            tri = delaunay(Xp(:,1),Xp(:,2));
-            trisurf(tri,Xp(:,1),Xp(:,2),IntOp(Xp,Xp_old,rcp_old)*f)
-            shading interp
-            view(0,90)
-            colorbar
-            title('f')
-            DF = zeros(size(Xp,1),1);
-            for d=1:size(Xp_old,2)
-                DF = DF +(DiffOp(Xp,Xp_old,rcp_old,d)*f).^2;
-            end
-            DF=sqrt(DF);
-            subplot(2,3,6)         
-            tri = delaunay(Xp(:,1),Xp(:,2));
-            trisurf(tri,Xp(:,1),Xp(:,2),DF)
-            shading interp
-            view(0,90)
-            colorbar
-            title('||grad(f)||')
-            drawnow
+            % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1         
             if(sum(sum(Nlist)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)               
                 break;
             end        
@@ -415,6 +281,7 @@ while (t<tf)
         f=IntOp(Xp,Xp_old,rcp_old)*f;       
     end
     
+    Piter = Piter + 1;
     % Advance time
     t = t + dt;
 end

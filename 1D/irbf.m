@@ -1,5 +1,5 @@
-function I = irbf(c,eps)
+function I = irbf(c,eps,d)
 
-I = c*sqrt(pi)./sqrt(eps^2);
+I = c.*(sqrt(pi./eps.^2)).^d;
 
 end
