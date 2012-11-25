@@ -1,10 +1,21 @@
-function [] = plot_points( Xv,Xp,Dp,rcp,VX,VY,W,NN,CC,dc,iter,Nlist,Nstar,vs )
+function [] = plot_points( Xv,Xp,rcp,Fp,VX,VY,W,NN,CC,dc,iter,Nlist,Nstar,vs,fig )
     %PLOT_POINTS Summary of this function goes here
     %   Detailed explanation goes here
+    figure(fig)
     tri = delaunay(Xp(:,1),Xp(:,2));
     VI=IntOp(Xv,Xp,rcp);
     
     subplot(3,3,2)
+    trisurf(tri,Xp(:,1),Xp(:,2),Fp)
+    %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
+    xlim([-vs,vs])
+    ylim([-vs,vs])
+    shading interp
+    view(0,90)
+    colorbar
+    title('f')
+    
+    subplot(3,3,3)
     trisurf(tri,Xp(:,1),Xp(:,2),max(sum(Nlist,2)+1,Nstar))
     %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
     xlim([-vs,vs])
@@ -16,7 +27,7 @@ function [] = plot_points( Xv,Xp,Dp,rcp,VX,VY,W,NN,CC,dc,iter,Nlist,Nstar,vs )
     
     subplot(3,3,4)
     trisurf(tri,Xp(:,1),Xp(:,2),rcp)
-    %surf(VX,VY,reshape(rstar*VI*Dp,size(VX)))
+    %surf(VX,VY,reshape(VI*rcp,size(VX)))
     xlim([-vs,vs])
     ylim([-vs,vs])
     shading interp
@@ -30,14 +41,14 @@ function [] = plot_points( Xv,Xp,Dp,rcp,VX,VY,W,NN,CC,dc,iter,Nlist,Nstar,vs )
     shading interp
     view(0,90)
     colorbar
-    title('f')
+    title('prior f')
     
     subplot(3,3,6)
     surf(VX,VY,reshape(ngprior(Xv),size(VX)))
     shading interp
     view(0,90)
     colorbar
-    title('||grad(f)||')
+    title('prior ||grad(f)||')
     drawnow
     
     subplot(3,3,7)

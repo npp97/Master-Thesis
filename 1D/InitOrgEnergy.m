@@ -5,5 +5,5 @@ function W = InitOrgEnergy(Xp,DF,rstar,D0)
     assert( isa( D0 , 'double'))
     Dp = exactDp(Xp,DF,rstar,D0);
     Dpq = bsxfun(@min,Dp,Dp');
-    W = sum(sum(Dpq.^2.*V1(distm(Xp,Xp)./Dpq)));
+    W = sum(sum(Dpq.^2.*V1_mex(distm_mex(Xp,Xp)./Dpq)));
 end

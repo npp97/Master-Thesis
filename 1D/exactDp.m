@@ -7,6 +7,8 @@ function Dp = exactDp(Xp,DF,rstar,Dzero)
     Dp=zeros(size(Xp,1),1);
     
     MF=monitor_function(DF,Dzero);
+   
+    D = distm_mex(Xp,Xp);
     
     for j=1:size(Xp,1)
         Dp_old = -inf;
@@ -14,7 +16,7 @@ function Dp = exactDp(Xp,DF,rstar,Dzero)
         k=0;
         while((((abs(Dp_old-Dp(j)))/Dp(j))>1e-2) && k < 15)
             Dp_old = Dp(j);
-            ind = (distm_mex(Xp(j,:),Xp)<=rstar*Dp(j));
+            ind = (D(:,j)<=rstar*Dp(j));
             if(sum(ind)>0)
                 Dp(j) = min(MF(ind));
                 k=k+1;

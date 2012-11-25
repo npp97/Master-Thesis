@@ -3,10 +3,11 @@ function [ wp,W ] = gradient_descent( Xp,Dp,rcp,rstar,D0,W,iter,opts )
     %   Detailed explanation goes here
     % compute total energy and gradient
     Dpq = bsxfun(@min,Dp,Dp');
-    W(iter) = sum(sum(Dpq.^2*V1(distm_mex(Xp,Xp)./Dpq)));
+    W(iter) = sum(sum(Dpq.^2*V1_mex(distm_mex(Xp,Xp)./Dpq)));
     wp = zeros(size(Xp));
+    D = distm_mex(Xp,Xp);
     for k = 1:size(Xp,1);
-        ind = distm_mex(Xp,Xp(k,:))<min(rcp(k),rcp);
+        ind = D(:,k)<min(rcp(k),rcp);
         ind(k) = 0;
         Np = Xp(ind,:);
         NDp = Dp(ind);

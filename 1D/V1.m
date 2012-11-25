@@ -1,4 +1,5 @@
 function [ V ] = V1( r )
+    assert( isa(r,'double'))
     V = zeros(size(r));
     r = abs(r);
     V(0.5>r) = 0.0847*(r(0.5>r>=0.4));
