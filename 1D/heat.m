@@ -57,7 +57,7 @@ eps = 3;
 
 %upper bound on the inter particle spacing
 vs = 5;
-D0 = 0.5;
+D0 = 0.4;
 Nstar = 12;
 %rstar = sqrt(3);
 rstar = 3;
@@ -173,11 +173,11 @@ while (t<tf)
     % advect particles
     disp('advecting')
     Xp_adv=zeros(size(Xp));
-    for m=1:size(Xp,1)
-        [ik,xt]=ode45(@(t,x) -gradllh(t,x),[t,t+dt],Xp(m,:)');
-        Xp_adv(m,:) = xt(end,:)';
-    end
-%    Xp_adv = Xp - dt*gradllh(0,Xp);
+%     for m=1:size(Xp,1)
+%         [ik,xt]=ode45(@(t,x) -gradllh(t,x),[t,t+dt],Xp(m,:)');
+%         Xp_adv(m,:) = xt(end,:)';
+%     end
+    Xp_adv = Xp - dt*gradllh(0,Xp);
     subplot(3,3,1)
     plot(Xp(:,1),Xp(:,2),'o')
     xlim([-vs,vs])
@@ -188,7 +188,7 @@ while (t<tf)
     
     EV = eig(OP);
     % scale dt according to eigenvalues to assure stability
-    dt = 1/max(abs(eig(OP)));
+    dt = 1/max(abs(EV));
     % euler integration scheme
     L = dt*OP + M_eval/M_int;
     % apply operator
@@ -196,8 +196,8 @@ while (t<tf)
     
     % assure conservation
     c=M_int\f;
-    I=irbf(c,eps,sum(Xp,2));
-    c=c/sum(I);
+    I=sum(irbf(c,eps,sum(Xp,2)));
+    c=c/I;
     f=M_eval*c;
  
     Xp=Xp_adv;

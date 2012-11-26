@@ -10,7 +10,7 @@ else
     eps=repmat(eps,size(r,1),1);
 end
 
-D = bsxfun(@times,exp(-(eps.*r).^2).*(-2*(eps).^2),dx);
+D = exp(-(eps.*r).^2).*(-2*(eps).^2).*dx;
 
 %% MQ RBF
 

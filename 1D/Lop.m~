@@ -1,4 +1,4 @@
-function [L,D1,D2,I,E] = Lop(X_eval,X_source,eps,U,V)
+ function [L,D1,D2,I,E] = Lop(X_eval,X_source,eps,U,V)
     
     M_int = distm(X_source,X_source);
     M_eval = distm(X_eval,X_source);
@@ -13,7 +13,7 @@ function [L,D1,D2,I,E] = Lop(X_eval,X_source,eps,U,V)
     
     D1 = zeros(size(E));
     
-    grad = gradllh(0,X_eval);
+    grad = gradllh(0,X_source)';
     
     % grad has dimension [ size(Xp,2) x size(X_source,1)]
     
@@ -21,7 +21,7 @@ function [L,D1,D2,I,E] = Lop(X_eval,X_source,eps,U,V)
         
         % sum_j=1^d(\frac{\delta U}{\delta x_j}*\frac{\delta y}{\delta x_j})
         
-        D1 = D1 + bsxfun(@times,grad(:,d),drbf(M_eval,eps,diffm(X_eval(:,d),X_source(:,d))));
+        D1 = D1 + repmat(grad(d,:),size(X_eval,1),1).*drbf(M_eval,eps,diffm(X_eval(:,d),X_source(:,d)));
         
     end
     
@@ -34,5 +34,6 @@ function [L,D1,D2,I,E] = Lop(X_eval,X_source,eps,U,V)
     
     D1 = D1/I;
     D2 = D2/I;
+    %L = (V*D2)/I;
 
 end
