@@ -3,7 +3,7 @@ function [] = plot_points( Xv,Xp,rcp,Fp,VX,VY,W,NN,CC,dc,iter,Nlist,Nstar,vs,fig
     %   Detailed explanation goes here
     figure(fig)
     tri = delaunay(Xp(:,1),Xp(:,2));
-    VI=IntOp(Xv,Xp,rcp);
+    %VI=IntOp(Xv,Xp,rcp);
     
     subplot(3,3,2)
     trisurf(tri,Xp(:,1),Xp(:,2),Fp)

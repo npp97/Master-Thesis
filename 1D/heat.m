@@ -57,7 +57,7 @@ eps = 3;
 
 %upper bound on the inter particle spacing
 vs = 5;
-D0 = 0.4;
+D0 = 0.3;
 Nstar = 12;
 %rstar = sqrt(3);
 rstar = 3;
@@ -94,118 +94,133 @@ rcp = rstar*Dp;
 % initialise energy
 WI = [];
 
-% Time Stepping
-t=t0;
-n=1;
+
 
 %% 2.2 Initial particle distribution
 figure(1)
 clf
 Iiter = 1;
-while(true)
-    subplot(3,3,1)
-    hold off
-    Iiter
-
-    k=1;
-    hold off
-    plot(Xp(:,1),Xp(:,2),'o')
-    xlim([-vs,vs])
-    ylim([-vs,vs])
-    drawnow
-    hold on
-    
-    % fuse particles
-    [Xp,rcp] = fuse_particles( Xp,Dp,rstar );
-    
-    Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-    rcp = rstar*Dp;
-    
-    % spawn new particels
-    [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol );    
-    
-    Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-    rcp = rstar*Dp;
-    
-    % gradient descent direction
-    [ wp,WI ] = gradient_descent( Xp,Dp,rcp,rstar,D0,WI,Iiter,opts );
-    
-    % line search for gradient descent step size and move particels by one step   
-    [gamma] = fminsearch(@(g) InitOrgEnergy(Xp+g*wp,ngprior(Xp),rstar,D0),-1,opts);
-    Xp = Xp + gamma*wp;
-    
-    plot(Xp(:,1),Xp(:,2),'mo')
-    drawnow
-    
-    Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-    rcp = rstar*Dp;
-    
-    Dpq = bsxfun(@min,Dp,Dp');
-    Rpq = distm_mex(Xp,Xp);
-    crit = Dpq./Rpq;
-    Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)))-logical(eye(size(Xp,1)));
-    
-    %graphical output
-    NI(Iiter) = sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1);
-    CI(Iiter) = max(max(crit(logical(Nlist))));
-    plot_points( Xv,Xp,rcp,prior(Xp),VX,VY,WI,NI,CI,dc,Iiter,Nlist,Nstar,vs,1 )
-    
-    Iiter = Iiter+1;
-    
-    % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
-    % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
-    if(sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)
-        break;
+try 
+    load Xp_init
+    Xp = Xp_init;
+catch    
+    while(true)
+        subplot(3,3,1)
+        hold off
+        Iiter
+        
+        k=1;
+        hold off
+        plot(Xp(:,1),Xp(:,2),'o')
+        xlim([-vs,vs])
+        ylim([-vs,vs])
+        drawnow
+        hold on
+        
+        % fuse particles
+        [Xp,rcp] = fuse_particles( Xp,Dp,rstar );
+        
+        Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
+        rcp = rstar*Dp;
+        
+        % spawn new particels
+        [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol );
+        
+        Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
+        rcp = rstar*Dp;
+        
+        % gradient descent direction
+        [ wp,WI ] = gradient_descent( Xp,Dp,rcp,rstar,D0,WI,Iiter,opts );
+        
+        % line search for gradient descent step size and move particels by one step
+        [gamma] = fminsearch(@(g) InitOrgEnergy(Xp+g*wp,ngprior(Xp),rstar,D0),-1,opts);
+        Xp = Xp + gamma*wp;
+        
+        plot(Xp(:,1),Xp(:,2),'mo')
+        drawnow
+        
+        Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
+        rcp = rstar*Dp;
+        
+        Dpq = bsxfun(@min,Dp,Dp');
+        Rpq = distm_mex(Xp,Xp);
+        crit = Dpq./Rpq;
+        Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)))-logical(eye(size(Xp,1)));
+        
+        %graphical output
+        NI(Iiter) = sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1);
+        CI(Iiter) = max(max(crit(logical(Nlist))));
+        plot_points( Xv,Xp,rcp,prior(Xp),VX,VY,WI,NI,CI,dc,Iiter,Nlist,Nstar,vs,1 )
+        
+        Iiter = Iiter+1;
+        
+        % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
+        % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
+        if(sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)
+            break;
+        end
     end
 end
 
 Xp_init=Xp;
+save Xp_init
 rcp_init=rcp;
+
+
+tolf=1e-5;
 f = prior(Xp);
-pause
+Xp = Xp(f>tolf,:);
+f = f(f>tolf);
+Dp = Dp(f>tolf);
+rcp = rcp(f>tolf);
 
 %% 2.3 Start solving PDE 
-figure(2)
-clf
+
 Piter = 1;
+% Time Stepping
+t=t0;
+n=10;
 
 while (t<tf)
+    figure(2)
+    clf
     % advect particles
     disp('advecting')
-    Xp_adv=zeros(size(Xp));
+%     Xp_adv=zeros(size(Xp));
 %     for m=1:size(Xp,1)
 %         [ik,xt]=ode45(@(t,x) -gradllh(t,x),[t,t+dt],Xp(m,:)');
 %         Xp_adv(m,:) = xt(end,:)';
 %     end
     Xp_adv = Xp - dt*gradllh(0,Xp);
-    subplot(3,3,1)
-    plot(Xp(:,1),Xp(:,2),'o')
-    xlim([-vs,vs])
-    ylim([-vs,vs])
-    drawnow
-    hold on
+
+
     [OP,D1,D2,M_int,M_eval] = Lop(Xp_adv,Xp,rcp,1,1);
     
     EV = eig(OP);
     % scale dt according to eigenvalues to assure stability
-    dt = 1/max(abs(EV));
+    dt = 1/((max(abs(EV))+min(abs(EV)))/2);
     % euler integration scheme
-    L = dt*OP + M_eval/M_int;
+    E = M_eval/M_int;
+    L = dt*OP + E;
     % apply operator
-    f=L*f;
-    
+    F=L*f;
     % assure conservation
-    c=M_int\f;
+    c=M_int\F;
     I=sum(irbf(c,eps,sum(Xp,2)));
     c=c/I;
-    f=M_eval*c;
+    F=M_eval*c;
+    
+    plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,2 )
+    
+    f=F;
  
     Xp=Xp_adv;
     % reorganize particles ?
     n=n-1;
     
     if (n==0)
-
+        figure(3)
+        clf
         n=10;
         % construct CD-PSE operators
         
@@ -231,7 +246,6 @@ while (t<tf)
         
         cDp = TriScatteredInterp(Xp,Dp);
         
-    
         % init plotting 
         Aiter = 1;
         WA=[];
@@ -250,7 +264,7 @@ while (t<tf)
             hold on
             
             % fuse particles
-            [Xp,rcp] = fuse_particles( Xp,Dp,rstar );
+            [Xp,rcp] = fuse_particles( Xp, Dp, rstar );
             
             % spawn particles                      
             [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol ); 
@@ -280,7 +294,7 @@ while (t<tf)
             %graphical output
             NA(Aiter) = sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1);
             CA(Aiter) = max(max(crit(logical(Nlist))));
-            plot_points( Xv,Xp,rcp,IntOp(Xp,Xp_old,rcp_old)*f,VX,VY,WA,NA,CA,dc,Aiter,Nlist,Nstar,vs,2 )
+            plot_points( Xv,Xp,rcp,IntOp(Xp,Xp_old,rcp_old)*f,VX,VY,WA,NA,CA,dc,Aiter,Nlist,Nstar,vs,3 )
             
             Aiter = Aiter+1;
             
