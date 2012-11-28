@@ -1,4 +1,4 @@
-function [] = plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,fig )
+function [] = plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,c,fig )
     %PLOT_OPERATOR Summary of this function goes here
     %   Detailed explanation goes here
     figure(fig)
@@ -30,6 +30,10 @@ function [] = plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,fig )
     plot(dt*EV,'k*')
     hold on  
     circle(-1,0,1);
+    subplot(3,3,8)
+    semilogy(abs(c),'k.-');
+    subplot(3,3,9)
+    trisurf(tri_adv,Xp_adv(:,1),Xp_adv(:,2),c);
     drawnow
     
 end

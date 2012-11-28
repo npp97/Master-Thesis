@@ -48,7 +48,7 @@ du = 1;
 dx = 0.01;
 % CFL
 dt = dx/du;
-
+g
 %% 1.4 Kernel 
 
 eps = 3;
@@ -194,7 +194,7 @@ while (t<tf)
     Xp_adv = Xp - dt*gradllh(0,Xp);
 
 
-    [OP,D1,D2,M_int,M_eval] = Lop(Xp_adv,Xp,rcp,1,1);
+    [OP,D1,D2,M_int,M_eval,M_target] = Lop(Xp_adv,Xp,rcp,1,1);
     
     EV = eig(OP);
     % scale dt according to eigenvalues to assure stability
@@ -205,12 +205,12 @@ while (t<tf)
     % apply operator
     F=L*f;
     % assure conservation
-    c=M_int\F;
+    c=M_target\F;
     I=sum(irbf(c,eps,sum(Xp,2)));
     c=c/I;
-    F=M_eval*c;
+    F=M_target*c;
     
-    plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,2 )
+    plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,c,2 )
     
     f=F;
  
