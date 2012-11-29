@@ -48,7 +48,7 @@ du = 1;
 dx = 0.01;
 % CFL
 dt = dx/du;
-g
+
 %% 1.4 Kernel 
 
 eps = 3;
@@ -57,13 +57,13 @@ eps = 3;
 
 %upper bound on the inter particle spacing
 vs = 5;
-D0 = 0.3;
+D0 = 1;
 Nstar = 12;
 %rstar = sqrt(3);
 rstar = 3;
 dc = 2.5;
 % probability tolerance for spawning of new particles
-tol = 1e-4;
+tol = 1e-10;
 
 %% 1.4 Graphical Output
 
@@ -167,12 +167,11 @@ save Xp_init
 rcp_init=rcp;
 
 
-tolf=1e-5;
 f = prior(Xp);
-Xp = Xp(f>tolf,:);
-f = f(f>tolf);
-Dp = Dp(f>tolf);
-rcp = rcp(f>tolf);
+Xp = Xp(f>tol,:);
+f = f(f>tol);
+Dp = Dp(f>tol);
+rcp = rcp(f>tol);
 
 %% 2.3 Start solving PDE 
 
@@ -205,10 +204,10 @@ while (t<tf)
     % apply operator
     F=L*f;
     % assure conservation
-    c=M_target\F;
-    I=sum(irbf(c,eps,sum(Xp,2)));
-    c=c/I;
-    F=M_target*c;
+     c=M_target\F;
+%     I=sum(irbf(c,eps,sum(Xp,2)));
+%     c=c/I;
+%    F=M_target*c;
     
     plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,c,2 )
     

@@ -100,3 +100,4 @@ loglog(epvec,errvecR2d,'-^r','linewidth',3)
 loglog(epvec,err_Trefethen_1d*ones(size(epvec)),':b')
 loglog(epvec,err_Trefethen_2d*ones(size(epvec)),':r')
 hold off
+legend('D1 collocation','D2 collocation','D1 QR','D2 QR','D1 Regression','D2 Regression','Location','Northeastoutside')

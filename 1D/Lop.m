@@ -32,7 +32,7 @@ function [L,D1,D2,I,E,T] = Lop(X_eval,X_source,eps,U,V)
     
     % assemble operator
     
-    L = (-U*D1+V*D2)/I;
+    L = (-U*D1 -laplllh(0,X_eval)*E+V*D2)/I;
     
     D1 = D1/I;
     D2 = D2/I;

@@ -40,7 +40,7 @@ Lfu = Lf(xx,yy);
 D2 = D^2;
 I = eye(N);
 L = kron(I,D2) + kron(D2,I);
-err_Trefethen = errcompute(L*u,Lfu);
+%err_Trefethen = errcompute(L*u,Lfu);
 
 epvec = logspace(-2,1,40);
 pts = [xx,yy];

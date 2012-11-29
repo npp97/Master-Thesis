@@ -12,18 +12,18 @@ N=30;
 
 %X_source = 2*vs*rand(1000,2)-vs;
 X_eval = [XX(:),YY(:)];
-X_source = [VX(:),VY(:)];
+X_source = X_eval;
 
 
-eps = 2;
+eps = 1.5;
 
-oo=1;
+oo=4;
 
-f = exp(-1/2*sum((X_source-oo).^2,2));
-%f=rand(N^2,1);
+%f = exp(-1/2*sum((X_source-oo).^2,2));
+f=rand(N^2,1);
 df = sum((X_source-oo).*X_source,2).*exp(-1/2*sum((X_source-oo).^2,2));
 d2f = sum(((X_source-2*oo).*X_source),2).*exp(-1/2*sum((X_source-oo).^2,2));
-ftarget = exp(-llh(0,X_source));
+ftarget = exp(-llh(0,X_eval));
 
 %f = sin(1/10*sum((X_source-1).^2,2));
 
@@ -33,10 +33,9 @@ D_eval = distm(X_eval,X_source);
 M_int = rbf(D_int,eps);
 M_eval =  rbf(D_eval,eps);
 
-E = M_int/M_int;
+E = M_eval/M_int;
 
-[VOP,VD1,VD2] = Lop(X_eval,X_source,eps,1,1);
-[OP,D1,D2] = Lop(X_source,X_source,eps,1,1);
+[OP,D1,D2] = Lop(X_eval,X_source,eps,1,1);
 
 EV = eig(OP);
 max(real(EV))
@@ -68,15 +67,15 @@ Piter=1;
 while(t<10)
     
     F = f;
-    D1F = VD1*f;
-    D2F = VD2*f;
-    OPF = VOP*f;
+    D1F = D1*f;
+    D2F = D2*f;
+    OPF = OP*f;
     
     %f = RBF_RK4(Lop(X_eval,X_eval,eps,1,1),Lop(X_eval,X_source,eps,1,1),M_eval/M_int, f, dt);
     f = L*f;
-    c=M_int\f;
-    I=sum(irbf(c,eps,sum(X_source,2)));
-    f=f*It/I;
+%     c=M_int\f;
+%     I=sum(irbf(c,eps,sum(X_source,2)));
+%     f=f*It/I;
     t=t+dt;
     Piter=Piter+1;
     if mod(Piter,10)==0
@@ -95,15 +94,15 @@ while(t<10)
         title('rbf f')
         shading interp
         subplot(3,4,5)
-        surf(VX,VY,reshape(D1F,size(VX)))
+        surf(XX,YY,reshape(D1F,size(XX)))
         shading interp
         title('rbf grad(f)*grad(u)')
         subplot(3,4,6)
-        surf(VX,VY,reshape(D2F,size(VX)))
+        surf(XX,YY,reshape(D2F,size(XX)))
         shading interp
         title('rbf div(grad(f))')
         subplot(3,4,7)
-        surf(VX,VY,reshape(OPF,size(VX)))
+        surf(XX,YY,reshape(OPF,size(XX)))
         shading interp
         title('rbf -grad(U)*grad(f)+div(grad(f))')
         subplot(3,4,4)
@@ -121,8 +120,8 @@ while(t<10)
         subplot(3,4,12)
         title('average L2 and absolute Linf error')
         hold on
-        semilogy(t,norm(f-ftarget,2)/(N^2),'r.-')
-        semilogy(t,norm(f-ftarget,inf),'k.-')
+        semilogy(t,norm(mean(ftarget./f)*f-ftarget,2)/(N^2),'r.-')
+        semilogy(t,norm(mean(ftarget./f)*f-ftarget,inf),'k.-')
         set(gca,'YScale','log')
         hold off
         drawnow
