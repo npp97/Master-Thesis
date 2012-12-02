@@ -57,8 +57,8 @@ eps = 3;
 
 %upper bound on the inter particle spacing
 vs = 5;
-D0 = 1;
-Nstar = 12;
+D0 = 0.5;
+Nstar = 8;
 %rstar = sqrt(3);
 rstar = 3;
 dc = 2.5;
@@ -103,6 +103,7 @@ Iiter = 1;
 try 
     load Xp_init
     Xp = Xp_init;
+    vs = 3;
 catch    
     while(true)
         subplot(3,3,1)
@@ -124,7 +125,7 @@ catch
         rcp = rstar*Dp;
         
         % spawn new particels
-        [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol );
+        [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol,prior(Xp) );
         
         Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
         rcp = rstar*Dp;
@@ -178,7 +179,7 @@ rcp = rcp(f>tol);
 Piter = 1;
 % Time Stepping
 t=t0;
-n=10;
+n=3;
 
 while (t<tf)
     figure(2)
@@ -187,10 +188,10 @@ while (t<tf)
     disp('advecting')
 %     Xp_adv=zeros(size(Xp));
 %     for m=1:size(Xp,1)
-%         [ik,xt]=ode45(@(t,x) -gradllh(t,x),[t,t+dt],Xp(m,:)');
+%         [ik,xt]=ode45(@(t,x) gradllh(t,x),[t,t+dt],Xp(m,:)');
 %         Xp_adv(m,:) = xt(end,:)';
 %     end
-    Xp_adv = Xp - dt*gradllh(0,Xp);
+    Xp_adv = Xp + dt*gradllh(0,Xp);
 
 
     [OP,D1,D2,M_int,M_eval,M_target] = Lop(Xp_adv,Xp,rcp,1,1);
@@ -204,12 +205,12 @@ while (t<tf)
     % apply operator
     F=L*f;
     % assure conservation
-     c=M_target\F;
-%     I=sum(irbf(c,eps,sum(Xp,2)));
-%     c=c/I;
-%    F=M_target*c;
+    c=M_target\F;
+    I=sum(irbf(c,eps,sum(Xp,2)));
+    c=c/I;
+    F=M_target*c;
     
-    plot_operator( Xp,Xp_adv,vs,f,F,E,D1,D2,EV,dt,c,2 )
+    plot_operator( Xp,Xp_adv,rcp,vs,f,F,E,D1,D2,EV,dt,c,2,0 )
     
     f=F;
  
@@ -218,15 +219,18 @@ while (t<tf)
     n=n-1;
     
     if (n==0)
+        
         figure(3)
         clf
-        n=10;
+        n=15;
         % construct CD-PSE operators
         
         % compute Dpn
         Dp = calcDp(Xp,Xp,rstar,D0,rcp,f);
         rcp = rstar*Dp;
-        
+        if any(isnan(rcp))
+            display('Something went wrong')
+        end
         subplot(3,3,4)
         tri = delaunay(Xp(:,1),Xp(:,2));
         trisurf(tri,Xp(:,1),Xp(:,2),rcp)
@@ -244,10 +248,14 @@ while (t<tf)
         rcp_old = rcp;
         
         cDp = TriScatteredInterp(Xp,Dp);
+        cDpNN = TriScatteredInterp(Xp,Dp,'nearest');
+        cFp = TriScatteredInterp(Xp,f);
         
         % init plotting 
         Aiter = 1;
         WA=[];
+        NA=[];
+        CA=[];
         
         % create x_new
         while(true)            
@@ -265,21 +273,30 @@ while (t<tf)
             % fuse particles
             [Xp,rcp] = fuse_particles( Xp, Dp, rstar );
             
+            Fp=cFp(Xp);
             % spawn particles                      
-            [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol ); 
+            [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol,Fp ); 
             
             Dp = cDp(Xp);
             rcp = rstar*Dp;
+            if any(isnan(rcp))
+                Dp(isnan(rcp)) = cDpNN(Xp(isnan(rcp),:));
+                rcp = rstar*Dp;
+            end
             
             % compute total energy and gradient
             [ wp,WA ] = gradient_descent( Xp,Dp,rcp,rstar,D0,WA,Aiter,opts );
             
             % line search for gradient descent step size and move particels by one step
-            [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,cDp,D0),-1,opts);
+            [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,cDp,cDpNN,D0),-1,opts);
             Xp = Xp + gamma*wp;
             
             Dp = cDp(Xp);
             rcp = rstar*Dp;
+            if any(isnan(rcp))
+                Dp(isnan(rcp)) = cDpNN(Xp(isnan(rcp),:));
+                rcp = rstar*Dp;
+            end
             
             plot(Xp(:,1),Xp(:,2),'mo')
             drawnow
@@ -299,11 +316,15 @@ while (t<tf)
             
             % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
             % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1         
-            if(sum(sum(Nlist)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)               
+            if(sum(sum(Nlist(cFp(Xp)>tol,:),2)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)              
                 break;
             end        
         end       
-        f=IntOp(Xp,Xp_old,rcp_old)*f;       
+        f=IntOp(Xp,Xp_old,rcp_old)*f;     
+        Xp = Xp(f>tol,:);
+        f = f(f>tol);
+        Dp = Dp(f>tol);
+        rcp = rcp(f>tol);
     end
     
     Piter = Piter + 1;

@@ -10,7 +10,7 @@ function [] = plot_operator( Xp,Xp_adv,rcp,vs,f,F,E,D1,D2,EV,dt,c,fig,method )
         tri_p=delaunay(Xp(:,1),Xp(:,2));
         figure(fig)
         subplot(3,3,1)
-        trisurf(tri_p,Xp(:,1),Xp(:,2),f)
+        plot(Xp(:,1),Xp(:,2),'bo')
         xlim([-vs,vs])
         ylim([-vs,vs])
         drawnow

@@ -1,10 +1,11 @@
 function [L,D1,D2,I,E,T] = Lop(X_eval,X_source,eps,U,V)
+
     
     M_int = distm(X_source,X_source);
     M_eval = distm(X_eval,X_source);
     M_target = distm(X_eval,X_eval);
-    
-    
+    %eps=eps/min(min(M_int(M_int>0)));
+    eps=3;
     % M has dimension [ size(X_eval,1) x size(X_source,1) ]
     
     I = rbf(M_int,eps);
