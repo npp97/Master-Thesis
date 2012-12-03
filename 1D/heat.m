@@ -29,7 +29,7 @@
 % $$ g_t = - x * g_x + \beta^{-1} g_xx
 clear all;
 clf
-opts=optimset('TolFun',1e-2,'TolX',1e-2);
+P.opts=optimset('TolFun',1e-2,'TolX',1e-2);
 
 %% 1 Parameters
 
@@ -37,59 +37,60 @@ opts=optimset('TolFun',1e-2,'TolX',1e-2);
 
 beta = @(t) 1;
 
-t0 = 0;
-tf = 1000;
+P.t0 = 0;
+P.tf = 1000;
 
 %% 1.1 Time Stepping
 
 % lagrangian velocity D()/Dt = d()/dt + u*\nabla()
-du = 1;
+P.du = 1;
 % smallest inter particle spacing
-dx = 0.01;
+P.dx = 0.01;
 % CFL
-dt = dx/du;
+P.dt = P.dx/P.du;
 
 %% 1.4 Kernel 
 
-eps = 3;
+P.eps = 3;
 
 %% 1.3 Particle Distribution
 
 %upper bound on the inter particle spacing
-vs = 5;
-D0 = 0.5;
-Nstar = 8;
+P.vs = 5;
+P.D0 = 0.5;
+P.Nstar = 8;
 %rstar = sqrt(3);
-rstar = 3;
-dc = 2.5;
+P.rstar = 3;
+P.dc = 2.5;
 % probability tolerance for spawning of new particles
-tol = 1e-10;
+P.tol = 1e-50;
 
 %% 1.4 Graphical Output
 
-[VX,VY] = meshgrid(linspace(-vs,vs,30),linspace(-vs,vs,30));
-Xv = [VX(:),VY(:)];
+[P.VX,P.VY] = meshgrid(linspace(-P.vs,P.vs,30),linspace(-P.vs,P.vs,30));
+P.Xv = [P.VX(:),P.VY(:)];
 figure(1)
 
 %% 2 Implementation
 
 %% 2.1 Initialization
 
-N = 100;
-d = 2;
+P.N = 100;
+P.dim = 2;
 
 % initialise positions
 
-Xp = randn(N,d)+1;
+P.Xp = randn(P.N,P.dim)+1;
 %Xp = [0 0];
-D = distm_mex(Xp,Xp);
+P.R = distm_mex(P.Xp,P.Xp);
 
 
 
 % initialise radii
 
-Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-rcp = rstar*Dp;
+
+P.DF = ngprior(P.Xp);
+P = exactDp(P);
 
 % initialise energy
 WI = [];
@@ -99,89 +100,91 @@ WI = [];
 %% 2.2 Initial particle distribution
 figure(1)
 clf
-Iiter = 1;
+P.Iiter = 1;
+
+P.init = true;
 try 
     load Xp_init
-    Xp = Xp_init;
     vs = 3;
 catch    
     while(true)
         subplot(3,3,1)
         hold off
-        Iiter
+        P.Iiter
         
         k=1;
         hold off
-        plot(Xp(:,1),Xp(:,2),'o')
-        xlim([-vs,vs])
-        ylim([-vs,vs])
+        plot(P.Xp(:,1),P.Xp(:,2),'o')
+        xlim([-P.vs,P.vs])
+        ylim([-P.vs,P.vs])
         drawnow
         hold on
         
         % fuse particles
-        [Xp,rcp] = fuse_particles( Xp,Dp,rstar );
+        P = fuse_particles( P );
         
-        Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-        rcp = rstar*Dp;
+        P.DF = ngprior(P.Xp);
+        P = exactDp( P );
         
         % spawn new particels
-        [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol,prior(Xp) );
+        P = spawn_particles( P );
         
-        Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-        rcp = rstar*Dp;
-        
+        P.DF = ngprior(P.Xp);
+        P = exactDp( P );
+
         % gradient descent direction
-        [ wp,WI ] = gradient_descent( Xp,Dp,rcp,rstar,D0,WI,Iiter,opts );
+        P = gradient_descent( P );
         
         % line search for gradient descent step size and move particels by one step
-        [gamma] = fminsearch(@(g) InitOrgEnergy(Xp+g*wp,ngprior(Xp),rstar,D0),-1,opts);
-        Xp = Xp + gamma*wp;
+        [gamma] = fminsearch(@(g) InitOrgEnergy(P),-1,P.opts);
+        P.Xp = P.Xp + gamma*P.wp;
         
-        plot(Xp(:,1),Xp(:,2),'mo')
+        plot(P.Xp(:,1),P.Xp(:,2),'mo')
         drawnow
         
-        Dp = exactDp(Xp,ngprior(Xp),rstar,D0);
-        rcp = rstar*Dp;
+        P.DF = ngprior(P.Xp);
+        P = exactDp(P);
         
-        Dpq = bsxfun(@min,Dp,Dp');
-        Rpq = distm_mex(Xp,Xp);
-        crit = Dpq./Rpq;
-        Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)))-logical(eye(size(Xp,1)));
+        P.Dpq = bsxfun(@min,P.Dp,P.Dp');
+        P.R = distm_mex(P.Xp,P.Xp);
+        P.crit = P.Dpq./P.R;
+        P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
         
         %graphical output
-        NI(Iiter) = sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1);
-        CI(Iiter) = max(max(crit(logical(Nlist))));
-        plot_points( Xv,Xp,rcp,prior(Xp),VX,VY,WI,NI,CI,dc,Iiter,Nlist,Nstar,vs,1 )
+        P.NI(P.Iiter) = sum(sum(P.Nlist(prior(P.Xp)>P.tol,:),2)<P.Nstar-1);
+        P.CI(P.Iiter) = max(max(P.crit(logical(P.Nlist))));
+        plot_points( P,1 )
         
-        Iiter = Iiter+1;
+        P.Iiter = P.Iiter+1;
         
         % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
         % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
-        if(sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)
+        if(sum(sum(P.Nlist(prior(P.Xp)>P.tol,:),2)<P.Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.dc)
             break;
         end
     end
 end
 
-Xp_init=Xp;
-save Xp_init
-rcp_init=rcp;
+save Xp_Init
 
 
-f = prior(Xp);
-Xp = Xp(f>tol,:);
-f = f(f>tol);
-Dp = Dp(f>tol);
-rcp = rcp(f>tol);
+P.f = prior(P.Xp);
+P.Xp = P.Xp(P.f>P.tol,:);
+P.f = P.f(P.f>P.tol);
+P.Dp = P.Dp(P.f>P.tol);
+P.rcp = P.rcp(P.f>P.tol);
+P.N=size(P.Xp,1);
 
 %% 2.3 Start solving PDE 
 
-Piter = 1;
+P.init = false;
+
+P.Piter = 1;
 % Time Stepping
-t=t0;
+P.t=P.t0;
 n=3;
 
-while (t<tf)
+while (P.t<P.tf)
     figure(2)
     clf
     % advect particles
@@ -191,30 +194,33 @@ while (t<tf)
 %         [ik,xt]=ode45(@(t,x) gradllh(t,x),[t,t+dt],Xp(m,:)');
 %         Xp_adv(m,:) = xt(end,:)';
 %     end
-    Xp_adv = Xp + dt*gradllh(0,Xp);
+    P.Xp_adv = P.Xp + P.dt*gradllh(0,P.Xp);
 
 
-    [OP,D1,D2,M_int,M_eval,M_target] = Lop(Xp_adv,Xp,rcp,1,1);
+    [P.OP,P.D1,P.D2,P.M_int,P.M_eval,P.M_target] = Lop(P.Xp_adv,P.Xp,P.rcp,1,1);
     
-    EV = eig(OP);
+    P.EV = eig(P.OP);
     % scale dt according to eigenvalues to assure stability
-    dt = 1/((max(abs(EV))+min(abs(EV)))/2);
+    P.dt = 1/((max(abs(P.EV))+min(abs(P.EV)))/2);
     % euler integration scheme
-    E = M_eval/M_int;
-    L = dt*OP + E;
+    P.E = P.M_eval/P.M_int;
+    P.L = P.dt*P.OP + P.E;
     % apply operator
-    F=L*f;
+    P.F=P.L*P.f;
     % assure conservation
-    c=M_target\F;
-    I=sum(irbf(c,eps,sum(Xp,2)));
-    c=c/I;
-    F=M_target*c;
+    P.c=P.M_target\P.F;
+    P.IF=sum(irbf(P.c,P.eps,P.dim));
+    P.c=P.c/P.IF;
+    P.F=P.M_target*P.c;
     
-    plot_operator( Xp,Xp_adv,rcp,vs,f,F,E,D1,D2,EV,dt,c,2,0 )
+    plot_operator( P.Xp,P.Xp_adv,P.rcp,P.vs,P.f,P.F,P.E,P.D1,P.D2,P.EV,P.dt,P.c,2,0 )
     
-    f=F;
- 
-    Xp=Xp_adv;
+    P = calcDp(P);
+    
+    P.f=P.F;
+    
+    
+    P.Xp=P.Xp_adv;
     % reorganize particles ?
     n=n-1;
     
@@ -225,17 +231,11 @@ while (t<tf)
         n=15;
         % construct CD-PSE operators
         
-        % compute Dpn
-        Dp = calcDp(Xp,Xp,rstar,D0,rcp,f);
-        rcp = rstar*Dp;
-        if any(isnan(rcp))
-            display('Something went wrong')
-        end
         subplot(3,3,4)
-        tri = delaunay(Xp(:,1),Xp(:,2));
-        trisurf(tri,Xp(:,1),Xp(:,2),rcp)
-        xlim([-vs,vs])
-        ylim([-vs,vs])
+        tri = delaunay(P.Xp(:,1),P.Xp(:,2));
+        trisurf(tri,P.Xp(:,1),P.Xp(:,2),P.rcp)
+        xlim([-P.vs,P.vs])
+        ylim([-P.vs,P.vs])
         shading interp
         view(0,90)
         colormap(jet)
@@ -243,19 +243,19 @@ while (t<tf)
         title('rcp')
 
         % save points
-        Xp_old = Xp;
-        Dp_old = Dp;
-        rcp_old = rcp;
+        P.Xp_old = P.Xp;
+        P.Dp_old = P.Dp;
+        P.rcp_old = P.rcp;
         
-        cDp = TriScatteredInterp(Xp,Dp);
-        cDpNN = TriScatteredInterp(Xp,Dp,'nearest');
-        cFp = TriScatteredInterp(Xp,f);
+        P.cDp = TriScatteredInterp(P.Xp,P.Dp);
+        P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
+        P.cFp = TriScatteredInterp(P.Xp,P.f);
         
         % init plotting 
-        Aiter = 1;
-        WA=[];
-        NA=[];
-        CA=[];
+        P.Aiter = 1;
+        P.WA=[];
+        P.NA=[];
+        P.CA=[];
         
         % create x_new
         while(true)            
@@ -266,70 +266,71 @@ while (t<tf)
             % fuse particles where |xp_xq|<Dpq/
             % do this in a greedy-type fashion by removing particles with most points inside the cutoff radius first
             k=1;
-            plot(Xp(:,1),Xp(:,2),'o')
+            plot(P.Xp(:,1),P.Xp(:,2),'o')
             drawnow
             hold on
             
             % fuse particles
-            [Xp,rcp] = fuse_particles( Xp, Dp, rstar );
+            P = fuse_particles( P );
             
-            Fp=cFp(Xp);
+            P.Fp=P.cFp(P.Xp);
             % spawn particles                      
-            [Xp] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol,Fp ); 
+            P = spawn_particles( P );
             
-            Dp = cDp(Xp);
-            rcp = rstar*Dp;
-            if any(isnan(rcp))
-                Dp(isnan(rcp)) = cDpNN(Xp(isnan(rcp),:));
-                rcp = rstar*Dp;
+            P.Dp = P.cDp(P.Xp);
+            P.rcp = P.rstar*P.Dp;
+            if any(isnan(P.rcp))
+                P.Dp(isnan(P.rcp)) = P.cDpNN(P.Xp(isnan(P.rcp),:));
+                P.rcp = P.rstar*P.Dp;
             end
             
             % compute total energy and gradient
-            [ wp,WA ] = gradient_descent( Xp,Dp,rcp,rstar,D0,WA,Aiter,opts );
+            P = gradient_descent( P );
             
             % line search for gradient descent step size and move particels by one step
-            [gamma] = fminsearch(@(g) OrgEnergy(Xp+g*wp,cDp,cDpNN,D0),-1,opts);
-            Xp = Xp + gamma*wp;
+            [gamma] = fminsearch(@(g) OrgEnergy(P),-1,P.opts);
+            P.Xp = P.Xp + gamma*P.wp;
             
-            Dp = cDp(Xp);
-            rcp = rstar*Dp;
-            if any(isnan(rcp))
-                Dp(isnan(rcp)) = cDpNN(Xp(isnan(rcp),:));
-                rcp = rstar*Dp;
+            P.Dp = P.cDp(P.Xp);
+            P.rcp = P.rstar*P.Dp;
+            if any(isnan(P.rcp))
+                P.Dp(isnan(P.rcp)) = P.cDpNN(P.Xp(isnan(P.rcp),:));
+                P.rcp = P.rstar*P.Dp;
             end
             
-            plot(Xp(:,1),Xp(:,2),'mo')
+            plot(P.Xp(:,1),P.Xp(:,2),'mo')
             drawnow
             
             % compute total energy and gradient
-            Dpq = bsxfun(@min,Dp,Dp');
-            Rpq = distm_mex(Xp,Xp);
-            crit = Dpq./Rpq;
-            Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)))-logical(eye(size(Xp,1)));
+            P.Dpq = bsxfun(@min,P.Dp,P.Dp');
+            P.R = distm_mex(P.Xp,P.Xp);
+            P.crit = P.Dpq./P.R;
+            P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
             
             %graphical output
-            NA(Aiter) = sum(sum(Nlist(prior(Xp)>tol,:),2)<Nstar-1);
-            CA(Aiter) = max(max(crit(logical(Nlist))));
-            plot_points( Xv,Xp,rcp,IntOp(Xp,Xp_old,rcp_old)*f,VX,VY,WA,NA,CA,dc,Aiter,Nlist,Nstar,vs,3 )
+            P.NA(P.Aiter) = sum(sum(P.Nlist(P.cFp(P.Xp)>P.tol,:),2)<P.Nstar-1);
+            P.CA(P.Aiter) = max(max(P.crit(logical(P.Nlist))));
+            plot_points( P,3 )
             
-            Aiter = Aiter+1;
+            P.Aiter = P.Aiter+1;
             
             % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
             % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1         
-            if(sum(sum(Nlist(cFp(Xp)>tol,:),2)<Nstar-1)==0 && max(max(crit(logical(Nlist))))<=dc)              
+            if(sum(sum(P.Nlist(P.cFp(P.Xp)>P.tol,:),2)<P.Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.dc)              
                 break;
             end        
         end       
-        f=IntOp(Xp,Xp_old,rcp_old)*f;     
-        Xp = Xp(f>tol,:);
-        f = f(f>tol);
-        Dp = Dp(f>tol);
-        rcp = rcp(f>tol);
+        P.f=IntOp(P.Xp,P.Xp_old,P.rcp_old)*P.f;     
+        P.Xp = P.Xp(P.f>P.tol,:);
+        P.f = P.f(P.f>P.tol);
+        P.Dp = P.Dp(P.f>P.tol);
+        P.rcp = P.rcp(P.f>P.tol);
+        P.N=size(P.Xp,1);
     end
     
-    Piter = Piter + 1;
+    P.Piter = P.Piter + 1;
     % Advance time
-    t = t + dt;
+    P.t = P.t + P.dt;
 end
 
 

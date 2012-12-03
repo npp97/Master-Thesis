@@ -1,11 +1,12 @@
-function [ Xp,Dp,rcp ] = spawn_particles( Xp,Dp,rcp,Nstar,rstar,D0,tol,IO,f )
+function [ Xp,Dp,rcp ] = spawn_particles( P )
     %NEW_PARTICLES Inserts new particles where neighborhood is too small
     %   Detailed explanation goes here
-    Rpq = distm_mex(Xp,Xp);
-    Nlist = (Rpq<min(repmat(rcp,1,size(Xp,1)),repmat(rcp',size(Xp,1),1)));
-    ind = find(Nstar-sum(Nlist)>0);
+    P.R = distm_mex(Xp,Xp);
+    P.Nlist = (Rpq<min(repmat(rcp,1,P.N),repmat(rcp',P.N,1)));
+    ind = find(P.Nstar-sum(P.Nlist)>0);
+    
     for l=ind
-        if(prior(Xp(l,:))>tol)
+        if(fp(l)>P.tol)
             Nfill=Nstar-sum(distm_mex(Xp(l,:),Xp)<min(rcp,rcp(l))');
             for j=1:Nfill
                 % wiki n-sphere

@@ -5,7 +5,7 @@ hold off
 
 vs = 4;
 
-N=30;
+N = 30;
 
 [XX,YY] = meshgrid(linspace(-vs,vs,N),linspace(-vs,vs,N));
 [VX,VY] = meshgrid(linspace(-3,3,N),linspace(-3,3,N));

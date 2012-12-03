@@ -1,22 +1,19 @@
-function Dp = exactDp(Xp,DF,rstar,Dzero)
-    assert( isa(Xp,'double'))
-    assert( isa(DF,'double'))
-    assert( isa(rstar,'double'))
-    assert( isa(Dzero,'double'))
+function P = exactDp(P)
+
     
-    Dp=zeros(size(Xp,1),1);
+    Dp=zeros(P.N,1);
     
-    MF=monitor_function(DF,Dzero);
+    MF=monitor_function(P.DF,P.D0);
    
-    D = distm_mex(Xp,Xp);
+    P.R = distm_mex(P.Xp,P.Xp);
     
-    for j=1:size(Xp,1)
+    for j=1:P.N
         Dp_old = -inf;
         Dp(j) = MF(j);
         k=0;
         while((((abs(Dp_old-Dp(j)))/Dp(j))>1e-2) && k < 15)
             Dp_old = Dp(j);
-            ind = (D(:,j)<=rstar*Dp(j));
+            ind = (P.R(:,j)<=P.rstar*Dp(j));
             if(sum(ind)>0)
                 Dp(j) = min(MF(ind));
                 k=k+1;
@@ -26,4 +23,6 @@ function Dp = exactDp(Xp,DF,rstar,Dzero)
             end
         end
     end
+    P.Dp=Dp;
+    P.rcp=P.rstar*P.Dp;
 end

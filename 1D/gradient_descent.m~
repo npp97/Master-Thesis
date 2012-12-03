@@ -1,0 +1,20 @@
+function [ P ] = gradient_descent( P )
+    %GRADIENT_DESCENT Summary of this function goes here
+    %   Detailed explanation goes here
+    % compute total energy and gradient
+    P.Dpq = bsxfun(@min,P.Dp,P.Dp');
+    P.R = distm_mex(Xp,Xp);
+    P.W(iter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
+    P.wp = zeros(size(P.Xp));
+    for k = 1:size(P.Xp,1);
+        ind = P.R(:,k)<min(P.rcp(k),P.rcp);
+        ind(k) = 0;
+        Np = P.Xp(ind,:);
+        NDp = Dp(ind);
+        for l=1:size(Np,1)
+            r=norm(Xp(k,:)-Np(l,:))/min(Dp(k),NDp(l));
+            wp(k,:) = wp(k,:) - 2*min(Dp(k),NDp(l))*(dV1(r)*(Xp(k,:)-Np(l,:))/norm(Xp(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
+        end
+    end    
+end
+

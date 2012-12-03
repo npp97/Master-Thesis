@@ -1,19 +1,23 @@
-function [ wp,W ] = gradient_descent( Xp,Dp,rcp,rstar,D0,W,iter,opts )
+function [ P ] = gradient_descent( P )
     %GRADIENT_DESCENT Summary of this function goes here
     %   Detailed explanation goes here
     % compute total energy and gradient
-    Dpq = bsxfun(@min,Dp,Dp');
-    W(iter) = sum(sum(Dpq.^2*V1_mex(distm_mex(Xp,Xp)./Dpq)));
-    wp = zeros(size(Xp));
-    D = distm_mex(Xp,Xp);
-    for k = 1:size(Xp,1);
-        ind = D(:,k)<min(rcp(k),rcp);
+    P.Dpq = bsxfun(@min,P.Dp,P.Dp');
+    P.R = distm_mex(P.Xp,P.Xp);
+    if(P.init)
+        P.W(P.iter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
+    else
+        P.WA(P.Aiter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
+    end
+    P.wp = zeros(size(P.Xp));
+    for k = 1:size(P.Xp,1);
+        ind = P.R(:,k)<min(P.rcp(k),P.rcp);
         ind(k) = 0;
-        Np = Xp(ind,:);
-        NDp = Dp(ind);
+        Np = P.Xp(ind,:);
+        NDp = P.Dp(ind);
         for l=1:size(Np,1)
-            r=norm(Xp(k,:)-Np(l,:))/min(Dp(k),NDp(l));
-            wp(k,:) = wp(k,:) - 2*min(Dp(k),NDp(l))*(dV1(r)*(Xp(k,:)-Np(l,:))/norm(Xp(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
+            r=norm(P.Xp(k,:)-Np(l,:))/min(P.Dp(k),NDp(l));
+            P.wp(k,:) = P.wp(k,:) - 2*min(P.Dp(k),NDp(l))*(dV1(r)*(P.Xp(k,:)-Np(l,:))/norm(P.Xp(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
         end
     end    
 end

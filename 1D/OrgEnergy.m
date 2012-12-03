@@ -1,8 +1,8 @@
-function W = OrgEnergy(Xp,cDp,cDpNN,D0)
-    Dp = cDp(Xp);
+function W = OrgEnergy(P)
+    Dp = P.cDp(P.Xp);
     if any(isnan(Dp))
-        Dp(isnan(Dp)) = cDpNN(Xp(isnan(Dp),:));
+        Dp(isnan(Dp)) = P.cDpNN(P.Xp(isnan(Dp),:));
     end
     Dpq = bsxfun(@min,Dp,Dp');
-    W = sum(sum(Dpq.^2.*V1_mex(distm_mex(Xp,Xp)./Dpq)));
+    W = sum(sum(Dpq.^2.*V1_mex(distm_mex(P.Xp,P.Xp)./Dpq)));
 end
