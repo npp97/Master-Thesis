@@ -20,7 +20,7 @@ eps = 2;
 oo=1;
 
 f = exp(-1/2*sum((X_source-oo).^2,2));
-%f=rand(N^2,1);
+f=rand(N^2,1);
 df = sum((X_source-oo).*X_source,2).*exp(-1/2*sum((X_source-oo).^2,2));
 d2f = sum(((X_source-2*oo).*X_source),2).*exp(-1/2*sum((X_source-oo).^2,2));
 ftarget = exp(-llh(0,X_source));

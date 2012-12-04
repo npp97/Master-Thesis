@@ -5,7 +5,7 @@ function [ P ] = gradient_descent( P )
     P.Dpq = bsxfun(@min,P.Dp,P.Dp');
     P.R = distm_mex(P.Xp,P.Xp);
     if(P.init)
-        P.W(P.iter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
+        P.W(P.Iiter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
     else
         P.WA(P.Aiter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
     end

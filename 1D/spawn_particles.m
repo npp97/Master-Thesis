@@ -27,12 +27,13 @@ function [ P ] = spawn_particles( P )
                 P.rcp(end+1) = P.rstar*P.Dp(end);
                 plot(xnew(1),xnew(2),'go')
                 P.N=P.N+1;
-                drawnow
+
             end
             if(size(P.rcp,2)>size(P.rcp,1))
                 P.rcp=P.rcp';
             end
         end
     end
+    drawnow
 end
 

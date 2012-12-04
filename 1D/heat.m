@@ -63,7 +63,7 @@ P.Nstar = 8;
 P.rstar = 3;
 P.dc = 2.5;
 % probability tolerance for spawning of new particles
-P.tol = 1e-50;
+P.tol = 1e-10;
 
 %% 1.4 Graphical Output
 
@@ -108,6 +108,7 @@ try
     vs = 3;
 catch    
     while(true)
+        tic;
         subplot(3,3,1)
         hold off
         P.Iiter
@@ -159,6 +160,7 @@ catch
         
         % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
         % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
+        toc
         if(sum(sum(P.Nlist(prior(P.Xp)>P.tol,:),2)<P.Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.dc)
             break;
         end
@@ -168,11 +170,12 @@ end
 save Xp_Init
 
 
-P.f = prior(P.Xp);
-P.Xp = P.Xp(P.f>P.tol,:);
-P.f = P.f(P.f>P.tol);
-P.Dp = P.Dp(P.f>P.tol);
-P.rcp = P.rcp(P.f>P.tol);
+ P.f = prior(P.Xp);
+
+% P.Xp = P.Xp(P.f>P.tol,:);
+% P.f = P.f(P.f>P.tol);
+% P.Dp = P.Dp(P.f>P.tol);
+% P.rcp = P.rcp(P.f>P.tol);
 P.N=size(P.Xp,1);
 
 %% 2.3 Start solving PDE 
@@ -320,11 +323,11 @@ while (P.t<P.tf)
                 break;
             end        
         end       
-        P.f=IntOp(P.Xp,P.Xp_old,P.rcp_old)*P.f;     
-        P.Xp = P.Xp(P.f>P.tol,:);
-        P.f = P.f(P.f>P.tol);
-        P.Dp = P.Dp(P.f>P.tol);
-        P.rcp = P.rcp(P.f>P.tol);
+         P.f=IntOp(P.Xp,P.Xp_old,P.rcp_old)*P.f;     
+%         P.Xp = P.Xp(P.f>P.tol,:);
+%         P.f = P.f(P.f>P.tol);
+%         P.Dp = P.Dp(P.f>P.tol);
+%         P.rcp = P.rcp(P.f>P.tol);
         P.N=size(P.Xp,1);
     end
     
