@@ -1,82 +1,57 @@
-function [] = plot_operator( Xp,Xp_adv,rcp,vs,f,F,E,D1,D2,EV,dt,c,fig,method )
+function [] = plot_operator( P,fig )
     %PLOT_OPERATOR Summary of this function goes here
     %   Detailed explanation goes here
-    if method==0
-        [XX,YY]=meshgrid(linspace(-vs,vs,30),linspace(-vs,vs,30));
-        Xv=[XX(:),YY(:)];
-        VI=IntOp(Xv,Xp,rcp);
-        VI_adv=IntOp(Xv,Xp_adv,rcp);
-        tri_adv=delaunay(Xp_adv(:,1),Xp_adv(:,2));
-        tri_p=delaunay(Xp(:,1),Xp(:,2));
-        figure(fig)
-        subplot(3,3,1)
-        trisurf(tri_p,Xp(:,1),Xp(:,2),f)
-        xlim([-vs,vs])
-        ylim([-vs,vs])
-        drawnow
-        hold on
-        plot(Xp(:,1),Xp(:,2),'ro')
-        subplot(3,3,2)
-        surf(XX,YY,reshape(VI*f,size(XX)))
-        title('starting f')
-        subplot(3,3,3)
-        surf(XX,YY,reshape(VI_adv*F,size(XX)))
-        title('new f')
-        subplot(3,3,4)
-        surf(XX,YY,reshape(VI_adv*E*f,size(XX)))
-        title('interpolated F')
-        subplot(3,3,5)
-        surf(XX,YY,reshape(VI_adv*D1*f,size(XX)))
-        title('grad(U)*grad(f)')
-        subplot(3,3,6)
-        surf(XX,YY,reshape(VI_adv*D2*f,size(XX)))
-        title('div(grad(f))')
-        subplot(3,3,7)
-        plot(dt*EV,'k*')
-        hold on
-        circle(-1,0,1);
-        subplot(3,3,8)
-        semilogy(abs(c),'k.-');
-        subplot(3,3,9)
-        trisurf(tri_adv,Xp_adv(:,1),Xp_adv(:,2),c);
-        drawnow
-    else
-        tri_p=delaunay(Xp(:,1),Xp(:,2));
-        tri_adv=delaunay(Xp_adv(:,1),Xp_adv(:,2));
-        figure(fig)
-        subplot(3,3,1)
-        plot(Xp(:,1),Xp(:,2),'bo')
-        xlim([-vs,vs])
-        ylim([-vs,vs])
-        drawnow
-        hold on
-        plot(Xp(:,1),Xp(:,2),'ro')
-        subplot(3,3,2)
-        trisurf(tri_p,Xp(:,1),Xp(:,2),f)
-        title('starting f')
-        subplot(3,3,3)
-        trisurf(tri_adv,Xp_adv(:,1),Xp_adv(:,2),F);
-        title('new f')
-        subplot(3,3,4)
-        trisurf(tri_adv,Xp_adv(:,1),Xp_adv(:,2),E*f);
-        title('interpolated F')
-        subplot(3,3,5)
-        trisurf(tri_adv,Xp_adv(:,1),Xp_adv(:,2),D1*f);
-        title('grad(U)*grad(f)')
-        subplot(3,3,6)
-        trisurf(tri_adv,Xp_adv(:,1),Xp_adv(:,2),D2*f);
-        title('div(grad(f))')
-        subplot(3,3,7)
-        plot(dt*EV,'k*')
-        hold on
-        circle(-1,0,1);
-        subplot(3,3,8)
-        semilogy(abs(c),'k.-');
-        subplot(3,3,9)
-        trisurf(tri_adv,Xp_adv(:,1),Xp_adv(:,2),c);
-        drawnow
+    [XX,YY]=meshgrid(linspace(-P.vs,P.vs,30),linspace(-P.vs,P.vs,30));
+    Xv=[XX(:),YY(:)];
+    if(not(P.adgrid))
+        P.rcp=P.eps*ones(P.N);
     end
-
-    
+    VI=IntOp(Xv,P.Xp,P.rcp);
+    Fp=VI*P.f;
+    ftarget = exp(-llh(0,Xv));
+    figure(fig)
+    subplot(3,3,1)
+    surf(XX,YY,reshape(Fp,size(XX)))
+    shading interp
+    title(['rbf f at t = ' num2str(P.t)])
+    subplot(3,3,2)
+    surf(XX,YY,reshape(Fp,size(XX)))
+    view(90,0)
+    title('rbf f')
+    shading interp
+    subplot(3,3,3)
+    surf(XX,YY,reshape(ftarget,size(XX)))
+    shading interp
+    title('equilibrium solution')
+    view(90,0)
+    subplot(3,3,4)
+    surf(XX,YY,reshape(VI*P.D1*P.f,size(XX)))
+    shading interp
+    title('rbf grad(f)*grad(u)')
+    subplot(3,3,5)
+    surf(XX,YY,reshape(VI*P.D2*P.f,size(XX)))
+    shading interp
+    title('rbf div(grad(f))')
+    subplot(3,3,6)
+    surf(XX,YY,reshape(VI*P.OP*P.f,size(XX)))
+    shading interp
+    title('rbf -(grad(U)*grad(f)+div(grad(U))*f)+div(grad(f))')
+    subplot(3,3,7)
+    plot(P.dt*P.EV,'k*')
+    hold on
+    circle(-1,0,1);
+    title('eigenvalues and stability region')
+    subplot(3,3,8)
+    semilogy(abs(P.c),'k.-');
+    title('rbf coefficients')
+    subplot(3,3,9)
+    title('average L1 and absolute Linf error')
+    hold on
+    semilogy(P.t,norm(P.f-ftarget,1),'r.-')
+    semilogy(P.t,norm(P.f-ftarget,inf),'k.-')
+    set(gca,'YScale','log')
+    xlabel('time')
+    hold off
+    drawnow
 end
 

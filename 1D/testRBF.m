@@ -1,7 +1,6 @@
 clear all
 figure(1)
 clf
-hold off
 
 vs = 4;
 
@@ -13,7 +12,6 @@ N = 30;
 %X_source = 2*vs*rand(1000,2)-vs;
 X_eval = [XX(:),YY(:)];
 X_source = [VX(:),VY(:)];
-
 
 eps = 2;
 
@@ -65,7 +63,8 @@ It = sum(irbf(M_int\ftarget,eps,sum(X_source,2)));
     I=sum(irbf(c,eps,sum(X_source,2)));
     f=f*It/I;
 Piter=1;
-while(t<10)
+nframe=1;
+while(t<10 && nframe<numframes+1)
     
     F = f;
     D1F = VD1*f;
@@ -79,7 +78,7 @@ while(t<10)
     f=f*It/I;
     t=t+dt;
     Piter=Piter+1;
-    if mod(Piter,10)==0
+    if mod(Piter,5)==0
         subplot(3,4,1)
         surf(XX,YY,reshape(f,size(XX)))
         shading interp
@@ -105,7 +104,7 @@ while(t<10)
         subplot(3,4,7)
         surf(VX,VY,reshape(OPF,size(VX)))
         shading interp
-        title('rbf -grad(U)*grad(f)+div(grad(f))')
+        title('rbf -(grad(U)*grad(f)+div(grad(U))*f)+div(grad(f))')
         subplot(3,4,4)
         surf(XX,YY,reshape(ftarget,size(XX)))
         shading interp
@@ -121,10 +120,13 @@ while(t<10)
         subplot(3,4,12)
         title('average L2 and absolute Linf error')
         hold on
-        semilogy(t,norm(f-ftarget,2)/(N^2),'r.-')
+        semilogy(t,norm(f-ftarget,1),'r.-')
         semilogy(t,norm(f-ftarget,inf),'k.-')
         set(gca,'YScale','log')
+        xlabel('time')
         hold off
         drawnow
     end
 end
+
+movie(fig1,A,1,10,winsize)
