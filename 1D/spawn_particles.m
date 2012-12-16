@@ -4,7 +4,7 @@ function [ P ] = spawn_particles( P )
     P.R = distm_mex(P.Xp,P.Xp);
     P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)));
     ind = find(P.Nstar-sum(P.Nlist)>0);
-    if(P.init)
+    if(P.init && P.pde)
         fp = prior(P.Xp);
     else
         fp = P.Fp;

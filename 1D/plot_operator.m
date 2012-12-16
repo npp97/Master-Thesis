@@ -6,21 +6,25 @@ function [] = plot_operator( P,fig )
     if(not(P.adgrid))
         P.rcp=P.eps*ones(P.N);
     end
-    VI=IntOp(Xv,P.Xp,P.rcp);
-    Fp=VI*P.f;
-    ftarget = exp(-llh(0,Xv));
+    try 
+        VI=P.VI;
+    catch
+        VI=IntOp(Xv,P.Xp,P.rcp);
+        P.VI=VI;
+    end
+    P.ftarget = exp(-P.llh);
     figure(fig)
     subplot(3,3,1)
-    surf(XX,YY,reshape(Fp,size(XX)))
+    surf(XX,YY,reshape(VI*P.f,size(XX)))
     shading interp
     title(['rbf f at t = ' num2str(P.t)])
     subplot(3,3,2)
-    surf(XX,YY,reshape(Fp,size(XX)))
+    surf(XX,YY,reshape(VI*P.f,size(XX)))
     view(90,0)
     title('rbf f')
     shading interp
     subplot(3,3,3)
-    surf(XX,YY,reshape(ftarget,size(XX)))
+    surf(XX,YY,reshape(VI*P.ftarget/P.It,size(XX)))
     shading interp
     title('equilibrium solution')
     view(90,0)
@@ -42,13 +46,14 @@ function [] = plot_operator( P,fig )
     circle(-1,0,1);
     title('eigenvalues and stability region')
     subplot(3,3,8)
-    semilogy(abs(P.c),'k.-');
-    title('rbf coefficients')
+    surf(XX,YY,reshape(abs(VI*P.f-VI*P.ftarget/P.It),size(XX)));
+    set(gca,'ZScale','log')
+    title('pointwise error')
     subplot(3,3,9)
     title('average L1 and absolute Linf error')
     hold on
-    semilogy(P.t,norm(P.f-ftarget,1),'r.-')
-    semilogy(P.t,norm(P.f-ftarget,inf),'k.-')
+    semilogy(P.t,norm(P.f-P.ftarget/P.It,1)*P.vs^P.dim/P.N^2,'r.-')
+    semilogy(P.t,norm(P.f-P.ftarget/P.It,inf),'k.-')
     set(gca,'YScale','log')
     xlabel('time')
     hold off

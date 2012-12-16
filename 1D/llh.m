@@ -1,6 +1,64 @@
-function [ U ] = llh( t, x)
-    %LLH  the log-likelihood function to be approximated
+function P = llh(P)
+   xdim = size(P.y0,1);
+   pdim = size(P.Xp,2);
+   P.N = size(P.Xp,1);
+   P.gradllh = zeros(P.N,pdim);
+   P.llh = zeros(P.N,1);
+   
+   
+   for j=1:P.N
+       p=P.Xp(j,:);
+       [~,yy] = ode15s(@(t,x) ode(t,x,exp(p)),P.tdata,[P.y0;zeros(xdim*pdim,1)]);
+       P.llh(j) = sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma))));
+       for tk=1:length(P.tdata)
+           dxdp = reshape(yy(tk,xdim+1:end),xdim,pdim);
+           jspec = 1;
+           for s=P.species
+               P.gradllh(j,:) = P.gradllh(j,:) + 2*(P.ydata(tk,jspec)-yy(tk,P.species))/P.sigma*dxdp(s,:);
+               jspec=jspec+1;
+           end
+       end
+   end
+   if(not(P.pde))
+       P.DF=P.gradllh;
+       P.Fp=P.llh;
+   end
+    figure(5)
+    quiver(P.Xp(:,1),P.Xp(:,2),P.gradllh(:,1),P.gradllh(:,2));
+    pause
+end
 
-    U = size(x,2)/2*log(2*pi) + 1/2*(sum(x.^2,2));
-    
+function xdot = ode(t,x,p)
+   xdim = size(dxdt(t,x,p),1);
+   pdim = length(p);
+   DXDP = reshape(x(xdim+1:end),xdim,pdim);
+   DFDP = dxdotdp(t,x,p);
+   DFDX = dxdotdx(t,x,p);
+   A = DFDX*DXDP + DFDP;
+   
+   xdot=[
+       dxdt(t,x,p);
+       A(:)
+       ];
+end
+
+function xdot = dxdt(t,x,p)
+   xdot = [
+       -p(1)*x(1) + p(2)*x(2);
+       -p(2)*x(2) + p(1)*x(1)
+       ];
+end
+
+function xdot = dxdotdp(t,x,p)
+    xdot = [
+        -x(1), x(2);
+        x(1), -x(2)
+        ];
+end
+
+function xdot = dxdotdx(t,x,p)
+    xdot = [
+        -p(1), p(2);
+        p(1), -p(2)
+        ];
 end

@@ -1,4 +1,5 @@
-function W = OrgEnergy(P)
+function W = OrgEnergy(P,g)
+    P.Xp = P.Xp + g*P.wp;
     Dp = P.cDp(P.Xp);
     if any(isnan(Dp))
         Dp(isnan(Dp)) = P.cDpNN(P.Xp(isnan(Dp),:));

@@ -58,13 +58,13 @@ surf(XX,YY,reshape(d2f,size(XX)))
 shading interp
 title('true initial div(grad(f))')
 
-It = sum(irbf(M_int\ftarget,eps,sum(X_source,2)));
+It = sum(irbf(M_int\ftarget,eps,size(X_source,2)));
     c=M_int\f;
     I=sum(irbf(c,eps,sum(X_source,2)));
     f=f*It/I;
 Piter=1;
 nframe=1;
-while(t<10 && nframe<numframes+1)
+while(t<10)
     
     F = f;
     D1F = VD1*f;
@@ -74,7 +74,7 @@ while(t<10 && nframe<numframes+1)
     %f = RBF_RK4(Lop(X_eval,X_eval,eps,1,1),Lop(X_eval,X_source,eps,1,1),M_eval/M_int, f, dt);
     f = L*f;
     c=M_int\f;
-    I=sum(irbf(c,eps,sum(X_source,2)));
+    I=sum(irbf(c,eps,size(X_source,2)));
     f=f*It/I;
     t=t+dt;
     Piter=Piter+1;
@@ -128,5 +128,3 @@ while(t<10 && nframe<numframes+1)
         drawnow
     end
 end
-
-movie(fig1,A,1,10,winsize)

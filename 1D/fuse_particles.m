@@ -12,6 +12,7 @@ function [ P ] = fuse_particles( P )
             plot(P.Xp(ind,1),P.Xp(ind,2),'ro')
             P.Dp=P.Dp([1:ind-1 ind+1:end]);
             P.Xp=P.Xp([1:ind-1 ind+1:end],:);
+            P.Fp=P.Fp([1:ind-1 ind+1:end]);
             P.rcp = P.rstar*P.Dp;
             P.N=P.N-1;
         end
