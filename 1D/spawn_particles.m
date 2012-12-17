@@ -24,10 +24,12 @@ function [ P ] = spawn_particles( P )
                 xnew = P.Dp(l)*xnew/norm(xnew)+P.Xp(l,:);
                 P.Xp = [P.Xp; xnew];
                 P.Dp(end+1) = P.Dp(l);
+                if(P.init && not(P.pde))
+                    P.Fp(end+1) = eval_llh(xnew,P);
+                end
                 P.rcp(end+1) = P.rstar*P.Dp(end);
                 plot(xnew(1),xnew(2),'go')
                 P.N=P.N+1;
-
             end
             if(size(P.rcp,2)>size(P.rcp,1))
                 P.rcp=P.rcp';

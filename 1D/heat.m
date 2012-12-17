@@ -165,8 +165,6 @@ if(P.adgrid)
             
             if(P.pde)
                 P.DF = ngprior(P.Xp);
-            else
-                P = llh(P);
             end
             P = exactDp( P );
             
