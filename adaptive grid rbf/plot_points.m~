@@ -1,75 +1,52 @@
 function [] = plot_points( P,fig )
     %PLOT_POINTS Summary of this function goes here
     %   Detailed explanation goes here
-    if(P.init)
-        iter=P.Iiter;
-        Wv = P.W;
-        Cv = P.CI;
-        Nv = P.NI;
-        if(P.pde)
-        P.Fp = prior(P.Xp);
-        end
-    else
-        iter=P.Aiter;
-        Wv = P.WA;
-        Cv = P.CA;
-        Nv = P.NA;
-        P.Fp = IntOp(P.Xp,P.Xp_old,P.rcp_old)*P.f;
-    end
+    iter = P.Riter;
+    Wv = P.W;
+    Cv = P.CI;
+    Nv = P.NI;
+
     figure(fig)
     tri = delaunay(P.Xp(:,1),P.Xp(:,2));
     %VI=IntOp(Xv,Xp,rcp);
     
+    subplot(3,3,1)
+    scatter(P.Xp(:,1),P.Xp(:,2)
+    
     subplot(3,3,2)
-    trisurf(tri,P.Xp(:,1),P.Xp(:,2),P.Fp)
+    trisurf(tri,P.Xp(:,1),P.Xp(:,2),P.F)
     logzplot
     logzplot colorbar
     %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
-    xlim([-P.vs,P.vs])
-    ylim([-P.vs,P.vs])
+    xlim([-P.vsx,P.vsx])
+    ylim([-P.vsy,P.vsy])
     shading interp
     view(0,90)
     colorbar
-    if(not(P.pde))
-        set(gca,'ZScale','log');
-    end
     title('f')
     
     subplot(3,3,3)
-    trisurf(tri,P.Xp(:,1),P.Xp(:,2),max(sum(P.Nlist,2)+1,P.Nstar))
+    
+    scatter(P.Xp(:,1),P.Xp(:,2),16*(sum(P.Nlist,2)+1)/max(sum(P.Nlist,2)),sum(P.Nlist,2))
     %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
-    xlim([-P.vs,P.vs])
-    ylim([-P.vs,P.vs])
+    xlim([-P.vsx,P.vsx])
+    ylim([-P.vsy,P.vsy])
     shading interp
     view(0,90)
     colorbar
     title('#Neighbors')
     
     subplot(3,3,4)
-    trisurf(tri,P.Xp(:,1),P.Xp(:,2),P.rcp)
+    scatter(P.Xp(:,1),P.Xp(:,2),12*sum(P.rcp,2)/max(sum(P.rcp,2)),sum(P.rcp)
     %surf(VX,VY,reshape(VI*rcp,size(VX)))
-    xlim([-P.vs,P.vs])
-    ylim([-P.vs,P.vs])
+    xlim([-P.vsx,P.vsx])
+    ylim([-P.vsy,P.vsy])
     shading interp
     view(0,90)
     colormap(jet)
     colorbar
     title('rcp')
     
-    subplot(3,3,5)
-    surf(P.VX,P.VY,reshape(prior(P.Xv),size(P.VX)))
-    shading interp
-    view(0,90)
-    colorbar
-    title('prior f')
-    
-    subplot(3,3,6)
-    surf(P.VX,P.VY,reshape(ngprior(P.Xv),size(P.VX)))
-    shading interp
-    view(0,90)
-    colorbar
-    title('prior ||grad(f)||')
-    drawnow
     
     subplot(3,3,7)
 
@@ -89,7 +66,7 @@ function [] = plot_points( P,fig )
 
     semilogy(1:iter,Cv,'.-')
     hold on
-    semilogy(1:iter,(1:iter)*0+P.dc,'r--')
+    semilogy(1:iter,(1:iter)*0+P.adap_dc,'r--')
     title('Maximal ratio between Dpq and the distance for neighbor points')
     xlabel('Iteration')
     ylabel('Point')

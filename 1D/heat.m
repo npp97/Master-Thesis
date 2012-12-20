@@ -68,9 +68,11 @@ P.species=1;
 %% 1.3 Particle Distribution
 
 %upper bound on the inter particle spacing
-P.vs = 2;
-P.D0 = 0.08;
-P.Nstar = 8;
+P.vs = 3;
+P.D0 = 2;
+%lower bound for notpde
+P.d0 = 0.05;
+P.Nstar = 12;
 %rstar = sqrt(3);
 P.rstar = 3;
 P.dc = 2.5;
@@ -78,6 +80,7 @@ P.dc = 2.5;
 P.tol = 1e-7;
 % adaptive grid?
 P.adgrid = true;
+P.difforder = 0;
 % number of points in every dimension for a fixed grid
 P.gridN = 10;
 
@@ -110,16 +113,20 @@ else
     P.Xp = log([P.k1,P.k2]);
     P.N = size(P.Xp,1);
     P.fmax = 1;
+    P.difforder=2;
     P = llh(P);
+    P.C = P.lapllh(1,:,:);
     P = exactDp(P);
     P.fmax = P.llh(1);
-    P.Xp = P.Xv;
+    P.difforder=0;
 end
 
 
 % initialise radii
 if(P.pde)
+    P.Fp = prior(P.Xp);
     P.DF = ngprior(P.Xp);
+    P.fmax = max(P.Fp);
 else
     P = llh(P);
 end
@@ -128,7 +135,8 @@ P = exactDp(P);
 % initialise energy
 WI = [];
 
-
+% scale tolerance;
+P.tol = P.fmax*P.tol;
 
 
 
@@ -141,6 +149,8 @@ P.init = true;
 if(P.adgrid)
     try
         load Xp_init
+        P.difforder=0;
+        assert(false)
     catch
         while(true)
             subplot(3,3,1)
@@ -185,6 +195,7 @@ if(P.adgrid)
             drawnow
             
             if(P.pde)
+                P.Fp = prior(P.Xp);
                 P.DF = ngprior(P.Xp);
             else
                 P = llh(P);
@@ -197,7 +208,7 @@ if(P.adgrid)
             P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
             
             %graphical output
-            P.NI(P.Iiter) = sum(sum(P.Nlist(prior(P.Xp)>P.tol,:),2)<P.Nstar-1);
+            P.NI(P.Iiter) = sum(sum(P.Nlist(P.Fp>P.tol,:),2)<P.Nstar-1);
             P.CI(P.Iiter) = max(max(P.crit(logical(P.Nlist))));
             plot_points( P,1 )
             
@@ -205,7 +216,7 @@ if(P.adgrid)
             
             % if stopping criterion of gradient descent is reached and every particle has N* neighbors stop, else repeat.
             % for crit to work we need to substract a logical eye from Nlist, this leads to Nstar-1
-            if(sum(sum(P.Nlist(prior(P.Xp)>P.tol,:),2)<P.Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.dc)
+            if(sum(sum(P.Nlist(P.Fp>P.tol,:),2)<P.Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.dc)
                 break;
             end
         end
@@ -235,6 +246,9 @@ end
 if(P.pde)
     save Xp_Init
     P.f = prior(P.Xp);
+else
+    P = llh(P);
+    P.f = P.llh;
 end
 
 
