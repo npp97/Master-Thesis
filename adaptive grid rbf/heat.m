@@ -23,7 +23,8 @@ P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
 % hard cutoff value
-P.thresh = 1e-10;
+P.thresh = 1e-5;
+P.rem_thresh = 1e-8;
 
 %% 1.3 Initial Particle Guess
 
@@ -45,22 +46,22 @@ P.adap_method = 1;
 % 3: residual subsampling
 
 % lower mesh bound
-P.adap_d0 = 0.05;
+P.adap_d0 = 0.2;
 
 % upper mesh bound
 P.adap_D0 = 0.5;
 
 % target Neighborhood size
-P.adap_Nstar = 10;
+P.adap_Nstar = 12;
 
 % relative optimal distance tolerance
 P.adap_dc = 2.5;
 
 % relative neighborhood size
-P.adap_rstar = 2;
+P.adap_rstar = sqrt(3);
 
 % relative gradient influence radius
-P.adap_gradr = 5;
+P.adap_gradr = 3;
 
 %% 1.5 Kernel
 
@@ -69,10 +70,12 @@ P.kernel = 1;
 % 1: gaussian
 
 % anisotropic transformation
-P.kernel_aniso = 1;
+P.kernel_aniso = 3;
 % 1: isotropic
-% 2: global anisotropic
+% 2: global anisotropic based on hessian
+% 3: global anisotropic based on covariance
 % 3: local anisotropic
+P.cov_iter = 5;
 
 % shape parameter
 P.kernel_shape = 1;
@@ -89,10 +92,21 @@ P.kernel_eps_max = 1e2;
 %% 1.6 Visualisation
 P.vsx = 3;
 P.vsy = 3;
+P.vsT = 5;
 P.vsN = 30;
 
 [P.VX,P.VY] = meshgrid(linspace(-P.vsx,P.vsx,P.vsN),linspace(-P.vsy,P.vsy,P.vsN));
 P.Xv = [P.VX(:),P.VY(:)];
+
+%% 1.7 CVODE settings
+
+% integration tolerances
+P.ode_reltol = 1e-6;
+P.ode_abstol = 1e-8;
+
+structdxdt
+
+P.mStructdxdt = mStructdxdt;
 
 %% 2 Implementation
 
@@ -107,12 +121,19 @@ P.xdim = 2;
 
 
 P.Xp = log([P.k1,P.k2]);
+if(P.kernel_aniso == 3)
+    P.Tp = zeros(1,P.pdim);
+    P.Xmean = log([P.k1,P.k2]);
+    P.M = eye(P.pdim);
+end
+
 P.N = size(P.Xp,1);
+P.Lp = ones(size(P.Xp,1),1);
 P.fmax = 1;
 
 if(P.kernel_aniso == 2)
     P = lapllh(P);
-    P.C = squeeze(P.lapllh(1,:,:))/norm(P.lapllh(1,:,:),2);
+    P.C = squeeze(P.D2F(1,:,:))/norm(squeeze(P.D2F(1,:,:)),2);
 elseif(P.adap_method == 2)
     P = gradllh(P);
 else
@@ -166,6 +187,16 @@ catch
         case 1 % 1: monitor function with function value
             while(true)
 %                 figure(2)
+                % remove points below threshold
+                
+                ind = P.F > P.fmax*P.rem_thresh;
+                P.F = P.F(ind);
+                P.Xp = P.Xp(ind,:);
+                P.Tp = P.Tp(ind,:);
+                P.Dp = P.Dp(ind);
+                P.Lp = P.Lp(ind);
+                P.rcp = P.rcp(ind);
+                P.N = size(P.Xp,1);
                 
                 P = fuse_particles( P );
                 
@@ -177,29 +208,58 @@ catch
                 
                 P = gradient_descent( P );
                 
-                P.cDp = TriScatteredInterp(P.Xp,P.Dp);
-                P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
+                if(P.kernel_aniso == 3)
+                    P.cDp = TriScatteredInterp(P.Tp,P.Dp);
+                    P.cDpNN = TriScatteredInterp(P.Tp,P.Dp,'nearest');
+                else
+                    P.cDp = TriScatteredInterp(P.Xp,P.Dp);
+                    P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
+                end
+
                 [gamma] = fminsearch(@(g) OrgEnergy(P,g),-1,P.opts);
                 
-                P.Xp = P.Xp + gamma*P.wp;
+                if(P.kernel_aniso == 3)
+                    P.Tp = P.Tp + gamma*P.wp;
+                else
+                    P.Xp = P.Xp + gamma*P.wp;
+                end
                 
+                if(P.kernel_aniso == 3)
+                    P = TptoXp(P);
+                end
                 P = llh(P);
+
                 
                 P = exactDp(P);
                 
+                if(P.kernel_aniso == 3)
+                    P.R = distm_mex(P.Tp,P.Tp);
+                else
+                    P.R = distm_mex(P.Xp,P.Xp);
+                end
                 P.Dpq = bsxfun(@min,P.Dp,P.Dp');
-                P.R = distm_mex(P.Xp,P.Xp);
+                
                 P.crit = P.Dpq./P.R;
                 P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
                 
+                
                 P.NI(P.Riter) = sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1);
                 P.CI(P.Riter) = max(max(P.crit(logical(P.Nlist))));
-                P.PI(P.Riter) = P.N;
-                plot_points( P,1 )
+                P.PI(P.Riter) = sum(P.F>P.fmax*P.thresh);
+                P.Lp = P.Lp+ones(size(P.Lp));
+
+                if(P.kernel_aniso == 3 && mod(P.Riter,P.cov_iter)==0)
+                   P = TptoXp(P);
+                   P = calc_transform(P);
+                   P = XptoTp(P);
+                end
                 
+
+                plot_points( P,1 )
+   
                 P.Riter = P.Riter+1;
                 
-                if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.dc)
+                if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.adap_dc)
                     break;
                 end
             end
@@ -212,18 +272,20 @@ catch
     end
 end
 
-
-
 %% 2.4 Interpolation
 
-P.R = distm_mex(P.Xp,P.Xp);
+if(P.kernel_aniso == 3)
+    P.R = distm_mex(P.Tp,P.Tp);
+else
+    P.R = distm_mex(P.Xp,P.Xp);
+end
 P = llh(P);
 
 switch(P.kernel_shape)
     case 1% 1: global
         P.eps = fminsearch(@(ep) CostEpsRiley(ep,P),P.kernel_eps_min,P.kernel_eps_max);
         P.RBF = rbf(P.R,P.eps);
-        P.c = Riley_mex(P.RBF,P.llh,P.riley_mu);
+        P.c = Riley_mex(P.RBF,P.F,P.riley_mu);
     case 2% 2: local
         
     case 3% 3: local anisotropic

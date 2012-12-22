@@ -1,8 +1,14 @@
 function P = llh(P)
    P.F = zeros(P.N,1);
+
+   if(P.kernel_aniso == 3)
+       
+   else
+       XX=P.Xp;
+   end
    
    for j=1:P.N
-       p=P.Xp(j,:);
+       p=XX(j,:);
        P.F(j) = eval_llh(p,P);
    end
 end

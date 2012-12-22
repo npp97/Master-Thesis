@@ -1,6 +1,14 @@
 function P = exactDp(P)
     MF=monitor_function(sqrt(((P.adap_D0/P.adap_d0)^2-1))*P.F/P.fmax,P.adap_D0);
-    P.R = distm_mex(P.Xp,P.Xp);
+    
+    if(P.kernel_aniso == 3)
+        P.R = distm_mex(P.Tp,P.Tp);
+    else
+        P.R = distm_mex(P.Xp,P.Xp);
+    end
+    
+    Dp = ones(size(MF));
+    
     for j=1:P.N
         Dp_old = -inf;
         Dp(j) = MF(j);

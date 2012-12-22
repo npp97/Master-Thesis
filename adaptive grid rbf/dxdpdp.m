@@ -1,5 +1,5 @@
-function xdot = dxdpdp(t,x,p)
-   xdim = size(dxdt(t,x,p),1);
+function xdot = dxdpdp(t,x,p,u,mStruct)
+   xdim = size(dxdt(t,x,p,u,mStruct),1);
    pdim = length(p);    
    DFDX = dxdotdx(t,x,p);
    DXDP = reshape(x(xdim+1:xdim+xdim*pdim),xdim,pdim);
@@ -42,7 +42,7 @@ function xdot = dxdpdp(t,x,p)
    B = DFDPDP + B1 + B2 + B3 + B4;
     
     xdot = [
-        dxdp(t,x(1:xdim+xdim*pdim),p);
+        dxdp(t,x(1:xdim+xdim*pdim),p,u,mStruct);
         B(:)
         ];
     

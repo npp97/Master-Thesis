@@ -12,7 +12,7 @@ function [ P ] = spawn_particles( P )
     for l=ind
         if(P.F(l)>P.fmax*P.thresh)
             if(P.kernel_aniso == 3)
-                Nfill=P.adap_Nstar-sum(distm_mex(P.Tp(l,:),P.Tp)<min(P.rcp,P.rcp(l))');
+                Nfill=P.adap_Nstar-sum(distm_mex(P.Tp(l,:),P.Xp)<min(P.rcp,P.rcp(l))');
             else
                 Nfill=P.adap_Nstar-sum(distm_mex(P.Xp(l,:),P.Xp)<min(P.rcp,P.rcp(l))');
             end
@@ -25,21 +25,10 @@ function [ P ] = spawn_particles( P )
                 xnew = randn(1,size(P.Xp,2));
                 % normalize & make sure we do not insert points inside the cutoff radii ...
                 %xnew = (((rstar-1/2)*rand(1)+1/2)*Dp(l))*xnew/norm(xnew)+Xp(l,:);
-                
-                if(P.kernel_aniso == 3)
-                    xnew = P.Dp(l)*xnew/norm(xnew)+P.Tp(l,:);
-                    P.Tp = [P.Tp; xnew];
-                else
-                    xnew = P.Dp(l)*xnew/norm(xnew)+P.Xp(l,:);
-                    P.Xp = [P.Xp; xnew];
-                end
+                xnew = P.Dp(l)*xnew/norm(xnew)+P.Xp(l,:);
+                P.Xp = [P.Xp; xnew];
                 P.Dp(end+1) = P.Dp(l);
-                if(P.kernel_aniso == 3)
-                    P.F(end+1) = eval_llh(xnew*P.M+P.Xmean,P);
-                else
-                    P.F(end+1) = eval_llh(xnew,P);
-                end
-                P.Lp(end+1) = 0;
+                P.F(end+1) = eval_llh(xnew,P);
                 P.rcp(end+1) = P.adap_rstar*P.Dp(end);
 %                 plot(xnew(1),xnew(2),'go')
                 P.N=P.N+1;
