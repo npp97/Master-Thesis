@@ -9,11 +9,7 @@ function [ P ] = fuse_particles( P )
     end
     while(true)
         P.Dpq = bsxfun(@min,P.Dp,P.Dp');
-        if(P.kernel_aniso == 3)
-            ind = P.R<P.Dpq/2;
-        else
-            ind = P.R<P.Dpq/2;
-        end
+        ind = P.R<P.Dpq/2;
         if(max(sum(ind))==1)
             P.rcp = P.adap_rstar*P.Dp;
             break

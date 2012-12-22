@@ -156,6 +156,8 @@ P.fmax = P.F(1);
 % initialise energy
 WI = [];
 
+P.Lh = [];
+
 %% 2.2 Initial particle distribution
 
 P.Iiter = 1;
@@ -246,7 +248,9 @@ catch
                 P.NI(P.Riter) = sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1);
                 P.CI(P.Riter) = max(max(P.crit(logical(P.Nlist))));
                 P.PI(P.Riter) = sum(P.F>P.fmax*P.thresh);
+                P.XI(P.Riter) = P.N;
                 P.Lp = P.Lp+ones(size(P.Lp));
+                P.Lh = [P.Lh,zeros(1,max(size(hist(P.Lp),2)-size(P.Lh,2),0));hist(P.Lp)/P.N,zeros(1,max(size(P.Lh,2)-size(hist(P.Lp),2),0))];
 
                 if(P.kernel_aniso == 3 && mod(P.Riter,P.cov_iter)==0)
                    P = TptoXp(P);
