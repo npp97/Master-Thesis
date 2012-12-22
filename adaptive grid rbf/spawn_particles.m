@@ -1,6 +1,7 @@
 function [ P ] = spawn_particles( P )
     %NEW_PARTICLES Inserts new particles where neighborhood is too small
     %   Detailed explanation goes here
+    P.kspawn(P.Riter)=0;
     if(P.kernel_aniso == 3)
         P.R = distm_mex(P.Tp,P.Tp);
     else
@@ -22,7 +23,7 @@ function [ P ] = spawn_particles( P )
 %                 circle(P.Xp(l,1),P.Xp(l,2),P.Dp(l)/2);
 %                 circle(P.Xp(l,1),P.Xp(l,2),P.rcp(l));
 %                 hold on
-                xnew = randn(1,size(P.Xp,2));
+                xnew = randn(1,P.pdim);
                 % normalize & make sure we do not insert points inside the cutoff radii ...
                 %xnew = (((rstar-1/2)*rand(1)+1/2)*Dp(l))*xnew/norm(xnew)+Xp(l,:);
                 
@@ -42,6 +43,7 @@ function [ P ] = spawn_particles( P )
                 P.Lp(end+1) = 0;
                 P.rcp(end+1) = P.adap_rstar*P.Dp(end);
 %                 plot(xnew(1),xnew(2),'go')
+                P.kspawn(P.Riter)=P.kspawn(P.Riter)+1;
                 P.N=P.N+1;
             end
             if(size(P.rcp,2)>size(P.rcp,1))

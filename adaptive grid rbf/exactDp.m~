@@ -27,11 +27,7 @@ function P = exactDp(P)
             end
         end
     else
-        Dp = (P.D0 + P.d0)/2 * ones(size(P.F));
-    end
-    if(size(Dp,2)>size(Dp,1))
-        Dp = Dp';
-    end
+        Dp = (P.D0 + P.d0) ones(size(MF));
     P.Dp=Dp;
     P.rcp=P.adap_rstar*P.Dp;
 end

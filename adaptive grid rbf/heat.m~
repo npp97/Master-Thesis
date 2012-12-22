@@ -23,8 +23,8 @@ P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
 % hard cutoff value
-P.thresh = 1e-5;
-P.rem_thresh = 1e-8;
+P.thresh = 1e-4;
+P.rem_thresh = 1e-6;
 
 %% 1.3 Initial Particle Guess
 
@@ -36,32 +36,37 @@ P.init_method = 3;
 
 % initial grid spacing
 P.init_d0 = 0.1;
+P.init_D0 = 0.5;
 
 %% 1.4 Adaptive Grid
 
 % method for adapting the grid
-P.adap_method = 1;
-% 1: monitor function with function value
-% 2: monitor function with gradient
-% 3: residual subsampling
+P.adap_method = 3;
+% 1: local monitor function with function value
+% 2: local monitor function with gradient
+% 3: global neighborhood size
+% 5: residual subsampling
 
 % lower mesh bound
-P.adap_d0 = 0.2;
+P.adap_d0 = 0.25;
 
 % upper mesh bound
-P.adap_D0 = 0.5;
+P.adap_D0 = 1.5;
 
 % target Neighborhood size
 P.adap_Nstar = 12;
-
 % relative optimal distance tolerance
-P.adap_dc = 2.5;
+P.adap_dc = 1.7;
 
 % relative neighborhood size
-P.adap_rstar = sqrt(3);
+P.adap_rstar = 3;
 
 % relative gradient influence radius
 P.adap_gradr = 3;
+
+
+% number of gradient steps
+P.adap_ngradstep = 5;
 
 %% 1.5 Kernel
 
@@ -75,7 +80,9 @@ P.kernel_aniso = 3;
 % 2: global anisotropic based on hessian
 % 3: global anisotropic based on covariance
 % 3: local anisotropic
-P.cov_iter = 5;
+
+% steps until update of covariance matrix
+P.cov_iter = 3;
 
 % shape parameter
 P.kernel_shape = 1;
@@ -117,7 +124,12 @@ P.pdim = 2;
 % species dimension
 P.xdim = 2;
 
+
+
 % initialise positions
+
+P.D0 = P.init_D0;
+P.d0 = P.init_d0;
 
 
 P.Xp = log([P.k1,P.k2]);
@@ -156,6 +168,8 @@ P.fmax = P.F(1);
 % initialise energy
 WI = [];
 
+P.Lh = [];
+
 %% 2.2 Initial particle distribution
 
 P.Iiter = 1;
@@ -183,16 +197,17 @@ P.Riter = 1;
 try
     load Xp_init
 catch
-    switch(P.adap_method)
-        case 1 % 1: monitor function with function value
             while(true)
 %                 figure(2)
                 % remove points below threshold
                 
                 ind = P.F > P.fmax*P.rem_thresh;
+                P.kthresh(P.Riter)=P.N-sum(ind);
                 P.F = P.F(ind);
                 P.Xp = P.Xp(ind,:);
-                P.Tp = P.Tp(ind,:);
+                if(P.kernel_aniso == 3)
+                    P.Tp = P.Tp(ind,:);
+                end
                 P.Dp = P.Dp(ind);
                 P.Lp = P.Lp(ind);
                 P.rcp = P.rcp(ind);
@@ -206,22 +221,26 @@ catch
                 
                 P = exactDp( P );
                 
-                P = gradient_descent( P );
                 
-                if(P.kernel_aniso == 3)
-                    P.cDp = TriScatteredInterp(P.Tp,P.Dp);
-                    P.cDpNN = TriScatteredInterp(P.Tp,P.Dp,'nearest');
-                else
-                    P.cDp = TriScatteredInterp(P.Xp,P.Dp);
-                    P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
-                end
-
-                [gamma] = fminsearch(@(g) OrgEnergy(P,g),-1,P.opts);
-                
-                if(P.kernel_aniso == 3)
-                    P.Tp = P.Tp + gamma*P.wp;
-                else
-                    P.Xp = P.Xp + gamma*P.wp;
+                for s=1:P.adap_ngradstep
+                    P = gradient_descent( P );
+                    
+                    if(P.kernel_aniso == 3)
+                        P.cDp = TriScatteredInterp(P.Tp,P.Dp);
+                        P.cDpNN = TriScatteredInterp(P.Tp,P.Dp,'nearest');
+                    else
+                        P.cDp = TriScatteredInterp(P.Xp,P.Dp);
+                        P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
+                    end
+                    
+                    
+                    [gamma] = fminsearch(@(g) OrgEnergy(P,g),-1,P.opts);
+                    
+                    if(P.kernel_aniso == 3)
+                        P.Tp = P.Tp + gamma*P.wp;
+                    else
+                        P.Xp = P.Xp + gamma*P.wp;
+                    end
                 end
                 
                 if(P.kernel_aniso == 3)
@@ -246,10 +265,12 @@ catch
                 P.NI(P.Riter) = sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1);
                 P.CI(P.Riter) = max(max(P.crit(logical(P.Nlist))));
                 P.PI(P.Riter) = sum(P.F>P.fmax*P.thresh);
+                P.XI(P.Riter) = P.N;
                 P.Lp = P.Lp+ones(size(P.Lp));
-                P.Lh = [P.Lh,zeros(1,max(size(hist(P.Lp),2)-size(Lh,2))hist(P.Lp);
+                P.Lh = [P.Lh,zeros(1,max(size(hist(P.Lp),2)-size(P.Lh,2),0));hist(P.Lp)/P.N,zeros(1,max(size(P.Lh,2)-size(hist(P.Lp),2),0))];
 
                 if(P.kernel_aniso == 3 && mod(P.Riter,P.cov_iter)==0)
+                   P.cov_iter=P.cov_iter+2;
                    P = TptoXp(P);
                    P = calc_transform(P);
                    P = XptoTp(P);
@@ -264,13 +285,7 @@ catch
                     break;
                 end
             end
-            
-        case 2 % 2: monitor function with gradient
-            
-        case 3 % 3: residual subsampling
-            % needs a good idea how to preinitialse 
-        
-    end
+
 end
 
 %% 2.4 Interpolation

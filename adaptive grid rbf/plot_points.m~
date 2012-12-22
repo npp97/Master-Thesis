@@ -17,7 +17,7 @@ function [] = plot_points( P,fig )
     figure(fig)
     
     subplot(3,4,1)
-    scatter(P.Xp(:,1),P.Xp(:,2),ones(size(P.rcp))*10,log(P.F)/log(10));
+    scatter(P.Xp(:,1),P.Xp(:,2),16*P.rcp/max(P.rcp),log(P.F));
     colorbar
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
@@ -49,7 +49,7 @@ function [] = plot_points( P,fig )
     
     subplot(3,4,4)
     
-    scatter(XX(:,1),XX(:,2),10*ones(size(P.Lp)),P.Lp);
+    scatter(P.Tp(:,1),P.Tp(:,2),10*ones(size(P.Lp)),P.Lp);
     colorbar
     xlim([-P.vsT,P.vsT])
     ylim([-P.vsT,P.vsT])
@@ -79,17 +79,15 @@ function [] = plot_points( P,fig )
     
     subplot(3,4,8)
     
-    if(size(P.Lh,1)>1&&size(P.Lh,2)>1)
-        surf(P.Lh)
-        title('histogram of particle age')
-        xlabel('Age')
-        ylabel('Iteration')
-        view(0,90)
-        shading interp
-        xlim([1,10]);
-        ylim([1,iter+1])
-        colorbar
-    end
+    surf(P.Lh)
+    title('histogram of particle age')
+    xlabel('Age')
+    ylabel('Iteration')
+    view(0,90)
+    shading interp
+    xlim([1,10]);
+    ylim([1,iter+1])
+    colorbar
     
     subplot(3,4,9)
     
@@ -117,14 +115,8 @@ function [] = plot_points( P,fig )
     subplot(3,4,12)
     
     plot(1:iter,-P.kthresh,'c.-')
-    hold on
-    plot(1:iter,P.kspawn,'g.-')
-    plot(1:iter,-P.kfuse,'b.-')
-    plot(1:iter,P.kspawn-P.kfuse-P.kthresh,'k.-')
-    title('particle balance')
-    xlabel('Iteration')
-    ylabel('change')
-    legend('threshold','spawning','fusion','total');
+    plot(1:iter,P.spawn,'b.-')
+    plot(1:iter,-P.fuse,'
     
     
     drawnow

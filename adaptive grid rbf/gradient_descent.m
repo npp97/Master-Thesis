@@ -16,7 +16,6 @@ function [ P ] = gradient_descent( P )
     P.W(P.Riter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
     
     for k = 1:size(P.wp,1);
-        if(P.F(k)>P.fmax*P.thresh)
         ind = P.R(:,k)<min(P.adap_gradr*P.Dp(k),P.adap_gradr*P.Dp);
         ind(k) = 0;
         Np = XX(ind,:);
@@ -24,7 +23,6 @@ function [ P ] = gradient_descent( P )
         for l=1:size(Np,1)
             r=norm(XX(k,:)-Np(l,:))/min(P.Dp(k),NDp(l));
             P.wp(k,:) = P.wp(k,:) - 2*min(P.Dp(k),NDp(l))*(dV1(r)*(XX(k,:)-Np(l,:))/norm(XX(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
-        end
         end
     end    
 end
