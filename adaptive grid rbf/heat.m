@@ -7,12 +7,11 @@ P.opts=optimset('TolFun',1e-4,'TolX',1e-4);
 %% 1.1 Data
 
 % true parameters
-P.k1=0.6;
-P.k2=0.4;
+P.k=[0.6 0.4];
 P.y0=[0;1];
 P.tN=60;
 P.tdata=linspace(0,10,60);
-explsol = @(t) P.k2/(P.k1+P.k2)*sum(P.y0)*(1-exp(-(P.k1+P.k2)*t));
+explsol = @(t) P.k(2)/(P.k(1)+P.k(2))*sum(P.y0)*(1-exp(-(P.k(1)+P.k(2))*t));
 P.ydata = explsol(P.tdata)'; 
 P.sigma = 0.1;
 P.species=1;
@@ -26,6 +25,9 @@ P.method_thresh = 1;
 P.thresh = 1e-5;
 P.rem_thresh = 1e-10;
 
+% logscale
+P.logscale = [1 1];
+
 %% 1.3 Initial Particle Guess
 
 % method for spawning particles
@@ -36,7 +38,7 @@ P.init_method = 3;
 
 % initial grid spacing
 P.init_d0 = 0.1;
-P.init_D0 = 0.5;
+P.init_D0 = 0.3;
 
 %% 1.4 Adaptive Grid
 
@@ -65,10 +67,10 @@ P.adap_pot = 1;
 % 3: V1 with positive linear continuation instead of negative
 
 % lower mesh bound
-P.adap_d0 = 0.25;
+P.adap_d0 = 0.2;
 
 % upper mesh bound
-P.adap_D0 = 0.5;
+P.adap_D0 = 0.3;
 
 % target Neighborhood size
 P.adap_Nstar = 12;
@@ -148,10 +150,10 @@ P.D0 = P.init_D0;
 P.d0 = P.init_d0;
 
 
-P.Xp = log([P.k1,P.k2]);
+P.Xp = P.logscale.*log(P.k)+(1-P.logscale).*P.k;
 if(P.kernel_aniso == 3)
     P.Tp = zeros(1,P.pdim);
-    P.Xmean = log([P.k1,P.k2]);
+    P.Xmean = P.Xp;
     P.M = eye(P.pdim);
 end
 
@@ -172,9 +174,6 @@ if(P.adap_method == 1 || P.adap_method == 2 || P.adap_method == 3)
     P = exactDp(P);
 end
 
-if(P.init_method == 1)
-    P.euclid_occup(1,:) = zeros(1,P.dim,2);
-end
 
 P.fmax = P.F(1);
 
