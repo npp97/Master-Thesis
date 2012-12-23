@@ -1,6 +1,6 @@
 clear all;
 clf
-P.opts=optimset('TolFun',1e-2,'TolX',1e-2);
+P.opts=optimset('TolFun',1e-4,'TolX',1e-4);
 
 %% 1 Parameters
 
@@ -23,8 +23,8 @@ P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
 % hard cutoff value
-P.thresh = 1e-4;
-P.rem_thresh = 1e-6;
+P.thresh = 1e-5;
+P.rem_thresh = 1e-10;
 
 %% 1.3 Initial Particle Guess
 
@@ -41,11 +41,28 @@ P.init_D0 = 0.5;
 %% 1.4 Adaptive Grid
 
 % method for adapting the grid
-P.adap_method = 3;
+P.adap_method = 1;
 % 1: local monitor function with function value
 % 2: local monitor function with gradient
 % 3: global neighborhood size
 % 5: residual subsampling
+
+% spawning method
+P.adap_spawn_method = 1;
+% 1: randomly in too small neighborhood
+% 2: based on mean at edges
+
+% fusion method
+P.adap_fusion_method = 1;
+% 1: where particles are too close to each other
+% 2: no fusion
+
+% potential function
+P.adap_pot = 1;
+% 1: V1, h-stable should be used for moving grids on unbounded domains and if the argument of the monitoring function 
+% can become larger that (r*-1)
+% 2: V2, should be used on bounded domains if the argument of the monitoring function stays smaller that (r*-1)
+% 3: V1 with positive linear continuation instead of negative
 
 % lower mesh bound
 P.adap_d0 = 0.25;
@@ -63,7 +80,6 @@ P.adap_rstar = 2;
 
 % relative gradient influence radius
 P.adap_gradr = 3;
-
 
 % number of gradient steps
 P.adap_ngradstep = 1;
@@ -234,13 +250,19 @@ catch
             end
             
             
-            [gamma] = fminsearch(@(g) OrgEnergy(P,g),-1,P.opts);
+            [gamma] = fminsearch(@(g) OrgEnergy(P,g),0,P.opts);
             
             if(P.kernel_aniso == 3)
                 P.Tp = P.Tp + gamma*P.wp;
             else
                 P.Xp = P.Xp + gamma*P.wp;
             end
+            
+            P = exactDp(P);
+            
+            P.Dpq = bsxfun(@min,P.Dp,P.Dp');
+            
+            P.W2(P.Riter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
         end
         
         if(P.kernel_aniso == 3)

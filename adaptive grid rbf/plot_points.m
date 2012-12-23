@@ -3,6 +3,7 @@ function [] = plot_points( P,fig )
     %   Detailed explanation goes here
     iter = P.Riter;
     Wv = P.W;
+    W2v = P.W;
     Cv = P.CI;
     Nv = P.NI;
     Pv = P.PI;
@@ -21,7 +22,7 @@ function [] = plot_points( P,fig )
     colorbar
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
-    title('points');
+    title('points colored by log-function value');
     
     if(P.kernel_aniso == 3)
         P.vsx = P.vsT;
@@ -53,7 +54,7 @@ function [] = plot_points( P,fig )
     colorbar
     xlim([-P.vsT,P.vsT])
     ylim([-P.vsT,P.vsT])
-    title('particle age');
+    title('particle age (Iterations)');
     
     subplot(3,4,5)
     gscatter(XX(:,1),XX(:,2),and((sum(P.Nlist,2)<P.adap_Nstar),(P.F>P.thresh*P.fmax)),'br','ox')
@@ -93,7 +94,9 @@ function [] = plot_points( P,fig )
     
     subplot(3,4,9)
     
-    plot(1:iter,Wv./Pv,'.-')
+    plot(1:iter,Wv./Xv,'b.-')
+    hold on
+    plot(1:iter,W2v./Xv,'r.-')
     title('Average Potential Energy')
     xlabel('Iteration')
     ylabel('Energy')
