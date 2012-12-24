@@ -10,17 +10,17 @@ function [ P ] = fuse_particles( P )
     P.Dpq = bsxfun(@min,P.Dp,P.Dp');
     ii = sparse(P.R<P.Dpq/2-eye(P.N));
     [row,col] = find(ii);
-    ti = row(row>col);
+    ti = row>col).*row;
     P.Dp(ti)=[];
-    P.Xp(ti,:)=[];
+    P.Xp(ti)=[];
     if(P.kernel_aniso == 3)
-        P.Tp(ti,:)=[];
+        P.Tp(ti)=[];
     end
     P.F(ti)=[];
     P.Lp(ti)=[];
     P.rcp(ti)=[];
-    P.kfuse(P.Riter)=P.N-size(P.Xp,1);
-    P.N=size(P.Xp,1);
+    P.kfuse(P.Riter)=numel(ti);
+    P.N=P.N-numel(ti);
     
 %     while(true)
 %         [s,ind] = max();

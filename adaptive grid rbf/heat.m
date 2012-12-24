@@ -10,8 +10,6 @@ P.opts=optimset('TolFun',1e-4,'TolX',1e-4);
 P.ode_reltol = 1e-6;
 P.ode_abstol = 1e-8;
 
-
-
 %% 1.1 Data
 
 P.model = 2;
@@ -51,16 +49,10 @@ end
 P.tdata=linspace(0,10,P.tN);
 
 [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
-figure(1)
+figure(2)
 plot(P.tdata,yy)
 legend('A','AE','E','P')
 P.ydata = yy(P.species,:)'; 
-
-
-
-
-
-
 
 %% 1.2 Interpolation area
 
@@ -68,8 +60,8 @@ P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
 % hard cutoff value
-P.thresh = 1e-5;
-P.rem_thresh = 1e-10;
+P.thresh = 1e-4;
+P.rem_thresh = 1e-6;
 
 
 %% 1.3 Initial Particle Guess
@@ -104,7 +96,7 @@ P.adap_fusion_method = 1;
 % 2: no fusion
 
 % after how many iterations to start cohesive gradient?
-P.adap_gradient_start = 50;
+P.adap_gradient_start = 10;
 
 
 % potential function
@@ -118,13 +110,13 @@ P.adap_D0 = 0.5;
 % target Neighborhood size
 P.adap_Nstar = 18;
 % relative optimal distance tolerance
-P.adap_dc = 1.7;
+P.adap_dc = 2.5;
 
 % relative neighborhood size
 P.adap_rstar = sqrt(2);
 
 % relative gradient influence radius
-P.adap_gradr = 3;
+P.adap_gradr = sqrt(2);
 
 % number of gradient steps
 P.adap_ngradstep = 1;
@@ -330,7 +322,7 @@ catch
             P = XptoTp(P);
         end
         
-        if(mod(P.Riter,5)==0)
+        if(mod(P.Riter,3)==0)
             switch(P.pdim)
                 case 2
                     plot_points2( P,1 )

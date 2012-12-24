@@ -22,7 +22,7 @@ function [ P ] = gradient_descent( P )
         NDp = P.Dp(ind);
         for l=1:size(Np,1)
             r=norm(XX(k,:)-Np(l,:))/min(P.Dp(k),NDp(l));
-            P.wp(k,:) = P.wp(k,:) - 2*min(P.Dp(k),NDp(l))*(dV1(r)*(XX(k,:)-Np(l,:))/norm(XX(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
+            P.wp(k,:) = P.wp(k,:) - 2*min(P.Dp(k),NDp(l))*(dV1_mex(r)*(XX(k,:)-Np(l,:))/norm(XX(k,:)-Np(l,:)));% + (2*V1(r)-r*dV1(r))\nabla_x_pDpq);
         end
     end    
 end

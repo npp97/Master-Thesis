@@ -57,19 +57,21 @@ function [] = plot_points3( P,fig )
     subplot(3,4,5)
     ii=and((sum(P.Nlist,2)<P.adap_Nstar),(P.F>P.thresh*P.fmax));
     scatter3(XX(ii,1),XX(ii,2),XX(ii,3),'bo');
+    hold on
     scatter3(XX(not(ii),1),XX(not(ii),2),XX(not(ii),3),'rx');
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
-    legend('sufficient or not in \Omega','too small and in \Omega')
+%    legend('sufficient or not in \Omega','too small and in \Omega')
     title('Too Small Neighborhoods')
     
     subplot(3,4,6)
     ii=P.F<P.thresh*P.fmax;
-    scatter3(XX(ii,1),XX(ii,2),XX(ii,3),'bo');
-    scatter3(XX(not(ii),1),XX(not(ii),2),XX(not(ii),3),'rx');
+    scatter3(XX(ii,1),XX(ii,2),XX(ii,3),'rx');
+    hold on
+    scatter3(XX(not(ii),1),XX(not(ii),2),XX(not(ii),3),'bo');
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
-    legend('in \Omega','not in \Omega')
+%     legend('in \Omega','not in \Omega')
     title('Omega')
     
     subplot(3,4,7)
