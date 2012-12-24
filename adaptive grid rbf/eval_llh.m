@@ -6,7 +6,7 @@ function [f] = eval_llh(p,P)
         pt = P.logscale.*exp(p) + (1-P.logscale).*p;
         
         
-        [~,yy] = dxdt_mex(P.tdata,[P.y0],pt,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
+        [~,yy] = P.ode(P.tdata,[P.y0],pt,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
         yy = yy';
         f = exp(sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma)))));
     end

@@ -1,4 +1,4 @@
-function [] = plot_points( P,fig )
+function [] = plot_points3( P,fig )
     %PLOT_POINTS Summary of this function goes here
     %   Detailed explanation goes here
     iter = P.Riter;
@@ -18,7 +18,7 @@ function [] = plot_points( P,fig )
     figure(fig)
     
     subplot(3,4,1)
-    scatter(P.Xp(:,1),P.Xp(:,2),ones(size(P.rcp))*10,log(P.F)/log(10));
+    scatter3(P.Xp(:,1),P.Xp(:,2),P.Xp(:,3),ones(size(P.rcp))*10,log(P.F)/log(10));
     colorbar
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
@@ -31,40 +31,42 @@ function [] = plot_points( P,fig )
     
     subplot(3,4,2)
     
-    scatter(XX(:,1),XX(:,2),16*(sum(P.Nlist,1)+1)/max(sum(P.Nlist,1)),sum(P.Nlist,2))
+    scatter3(XX(:,1),XX(:,2),XX(:,3),16*(sum(P.Nlist,1)+1)/max(sum(P.Nlist,1)),sum(P.Nlist,2))
     %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
-    view(0,90)
     colorbar
     title('#Neighbors')
     
     subplot(3,4,3)
-    scatter(XX(:,1),XX(:,2),16*P.rcp/max(P.rcp),P.rcp)
+    scatter3(XX(:,1),XX(:,2),XX(:,3),16*P.rcp/max(P.rcp),P.rcp)
     %surf(VX,VY,reshape(VI*rcp,size(VX)))
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
-    view(0,90)
     colorbar
     title('rcp')
     
     subplot(3,4,4)
     
-    scatter(XX(:,1),XX(:,2),10*ones(size(P.Lp)),P.Lp);
+    scatter3(XX(:,1),XX(:,2),XX(:,3),10*ones(size(P.Lp)),P.Lp);
     colorbar
     xlim([-P.vsT,P.vsT])
     ylim([-P.vsT,P.vsT])
     title('particle age (Iterations)');
     
     subplot(3,4,5)
-    gscatter(XX(:,1),XX(:,2),and((sum(P.Nlist,2)<P.adap_Nstar),(P.F>P.thresh*P.fmax)),'br','ox')
+    ii=and((sum(P.Nlist,2)<P.adap_Nstar),(P.F>P.thresh*P.fmax));
+    scatter3(XX(ii,1),XX(ii,2),XX(ii,3),'bo');
+    scatter3(XX(not(ii),1),XX(not(ii),2),XX(not(ii),3),'rx');
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
     legend('sufficient or not in \Omega','too small and in \Omega')
     title('Too Small Neighborhoods')
     
     subplot(3,4,6)
-    gscatter(XX(:,1),XX(:,2),P.F<P.thresh*P.fmax,'br','ox')
+    ii=P.F<P.thresh*P.fmax;
+    scatter3(XX(ii,1),XX(ii,2),XX(ii,3),'bo');
+    scatter3(XX(not(ii),1),XX(not(ii),2),XX(not(ii),3),'rx');
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
     legend('in \Omega','not in \Omega')
