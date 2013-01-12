@@ -9,7 +9,7 @@ function [] = plot_points2( P,fig )
     Pv = P.PI;
     Xv = P.XI;
     
-    if(P.kernel_aniso == 3)
+    if(P.kernel_aniso > 1)
         XX = P.Tp;
     else
         XX = P.Xp;
@@ -24,7 +24,7 @@ function [] = plot_points2( P,fig )
     ylim([-P.vsy,P.vsy])
     title('points colored by log-function value');
     
-    if(P.kernel_aniso == 3)
+    if(P.kernel_aniso > 1)
         P.vsx = P.vsT;
         P.vsy = P.vsT;
     end

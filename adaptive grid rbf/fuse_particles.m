@@ -2,7 +2,7 @@ function [ P ] = fuse_particles( P )
     %FUSE_PARTICLES fuse particles where |xp_xq|<Dpq/2
     % do this in a greedy-type fashion by removing particles with most points inside the cutoff radius first
     P.kfuse(P.Riter)=0;
-    if(P.kernel_aniso == 3)
+    if(P.kernel_aniso > 1)
         P.R = distm_mex(P.Tp,P.Tp);
     else
         P.R = distm_mex(P.Xp,P.Xp);
@@ -13,8 +13,11 @@ function [ P ] = fuse_particles( P )
     ti = row(row>col);
     P.Dp(ti)=[];
     P.Xp(ti,:)=[];
-    if(P.kernel_aniso == 3)
+    if(P.kernel_aniso > 1)
         P.Tp(ti,:)=[];
+        if(P.kernel_aniso > 2)
+            P.M(:,:,ti)=[];
+        end
     end
     P.F(ti)=[];
     P.Lp(ti)=[];

@@ -20,8 +20,7 @@ function [] = plot_points3( P,fig )
     subplot(3,4,1)
     scatter3(P.Xp(:,1),P.Xp(:,2),P.Xp(:,3),ones(size(P.rcp))*10,log(P.F)/log(10));
     colorbar
-    xlim([-P.vsx,P.vsx])
-    ylim([-P.vsy,P.vsy])
+
     title('points colored by log-function value');
     
     if(P.kernel_aniso == 3)

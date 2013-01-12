@@ -1,5 +1,5 @@
 function W = OrgEnergy(P,g)
-    if(P.kernel_aniso == 3)
+    if(P.kernel_aniso > 1)
         P.Tp = P.Tp + g*P.wp;
         P.R = distm_mex(P.Tp,P.Tp);
         Dp = P.cDp(P.Tp);

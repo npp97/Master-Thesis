@@ -3,12 +3,14 @@ function [f] = eval_llh(p,P)
     if((1-P.logscale).*p<0)
         f = 0;
     else
-        pt = P.logscale.*exp(p) + (1-P.logscale).*p;
-        
-        
-        [~,yy] = P.ode(P.tdata,[P.y0],pt,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
-        yy = yy';
-        f = exp(sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma)))));
+        try
+            pt = P.logscale.*exp(p) + (1-P.logscale).*p;
+            [~,yy] = P.ode(P.tdata,[P.y0],pt,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
+            yy = yy';
+            f = exp(sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma)))));
+        catch
+            f=0;
+        end
     end
 end
 

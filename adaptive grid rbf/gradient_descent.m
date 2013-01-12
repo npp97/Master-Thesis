@@ -3,7 +3,7 @@ function [ P ] = gradient_descent( P )
     %   Detailed explanation goes here
     % compute total energy and gradient
     P.Dpq = bsxfun(@min,P.Dp,P.Dp');
-    if(P.kernel_aniso == 3)
+    if(P.kernel_aniso > 1)
         P.R = distm_mex(P.Tp,P.Tp);
         XX = P.Tp;
         P.wp = zeros(size(P.Tp));
