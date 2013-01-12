@@ -30,14 +30,6 @@ function [ P ] = init( P )
     
     P.fmax = P.F(1);
     
-    
-    
-    
-    % initialise energy
-    WI = [];
-    
-    P.Lh = [];
-    
     %% 2.3 Initial particle distribution
     
     P.Iiter = 1;

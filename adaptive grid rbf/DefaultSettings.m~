@@ -26,6 +26,9 @@ switch(P.model)
         P.xdim = 2;
         
         P.paramspec = {
+            {'k+1', P.k(1), 0}
+            {'k-1', log(P.k(2)), 0}
+            };
     case 2
         P.ode=@dxdt_M2_mex;
         structdxdt_M2
@@ -38,6 +41,12 @@ switch(P.model)
         P.logscale = [1 1 1];
         P.pdim = 3;
         P.xdim = 4;
+        
+        P.paramspec = {
+            {'k+1', P.k(1), 0}
+            {'k-1', P.k(2), 0}
+            {'k2', P.k(3), 0}
+            };
 end
 
 % true parameters
@@ -48,9 +57,9 @@ P.tdata=linspace(0,10,P.tN);
 
 [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
 figure(2)
-plot(P.tdata,yy)
-legend('A','AE','E','P')
+plot(P.tdata,yy(P.species,:),'.-')
 P.ydata = yy(P.species,:)'; 
+drawnow
 
 %% 1.2 Interpolation area
 
@@ -149,9 +158,15 @@ P.cov_iter = 1;
 % shape parameter
 P.kernel_shape = 1;
 % 1: global;
-P.riley_mu = 1e-11;
 % 2: local;
-% 3: local anisotropic;
+
+
+% method for matrix invers
+P.kernel_inverse = 1;
+% 1: pinv
+% 2: riley
+P.riley_mu = 1e-11;
+
 
 % minimum value for shape parameter
 P.kernel_eps_min = 1e-2;
@@ -159,11 +174,17 @@ P.kernel_eps_min = 1e-2;
 P.kernel_eps_max = 1e2;
 
 %% 1.6 Visualisation
-P.vsx = 3;
-P.vsy = 3;
-P.vsT = 3;
+P.vsx = 2;
+P.vsy = 2;
+P.vsT = 3.5;
 P.vsN = 30;
 
 [P.VX,P.VY] = meshgrid(linspace(-P.vsx,P.vsx,P.vsN),linspace(-P.vsy,P.vsy,P.vsN));
 P.Xv = [P.VX(:),P.VY(:)];
+
+% number of iterations between plots
+P.plotinter = 1;
+
+% whether to plot
+P.plotflag = false;
 

@@ -16,6 +16,7 @@ function [] = plot_points2( P,fig )
     end
     
     figure(fig)
+    clf
     
     subplot(3,4,1)
     scatter(P.Xp(:,1),P.Xp(:,2),ones(size(P.rcp))*10,log(P.F)/log(10));

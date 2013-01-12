@@ -1,5 +1,5 @@
 function x = Riley(A,b,mu)
-    kend = 1;
+    kend = 10;
     C = A + mu*eye(size(A));
     L = chol(C,'lower');
     z = L\b;

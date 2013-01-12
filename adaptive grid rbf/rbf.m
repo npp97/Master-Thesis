@@ -1,7 +1,7 @@
 function D = rbf(r,eps)
 %% Gaussian RBF
 
-if size(eps,1) == 1;
+if numel(eps) == 1;
     eps=repmat(eps,size(r,1),size(r,2));
 else 
     if size(eps,1)>size(eps,2)

@@ -1,6 +1,14 @@
 function [ P ] = refine_particles( P )
     %REFINE_PARTICLES Summary of this function goes here
     %   Detailed explanation goes here
+    P.Riter = 1;
+
+    P.NI = [];
+    P.CI = [];
+    P.PI = [];
+    P.XI = [];
+    P.Lh = [];
+    P.W = [];
     
     while(true)
         
@@ -62,7 +70,7 @@ function [ P ] = refine_particles( P )
         P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
         
         P.NI(P.Riter) = sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1);
-        P.CI(P.Riter) = max(max(P.crit(logical(P.Nlist))));
+        P.CI(P.Riter) = max([max(P.crit(logical(P.Nlist))),0]);
         P.PI(P.Riter) = sum(P.F>P.fmax*P.thresh);
         P.XI(P.Riter) = P.N;
         P.Lp = P.Lp+ones(size(P.Lp));
@@ -78,11 +86,10 @@ function [ P ] = refine_particles( P )
             end
         end
         
-        P.Riter = P.Riter+1;
-        
         if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.adap_dc)
             break;
         end
+        P.Riter = P.Riter+1;
     end
     
 end

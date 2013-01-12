@@ -27,7 +27,7 @@ switch(P.model)
         
         P.paramspec = {
             {'k+1', P.k(1), 0}
-            {'k-1', P.k(2), 0}
+            {'k-1', log(P.k(2)), 0}
             };
     case 2
         P.ode=@dxdt_M2_mex;
@@ -57,9 +57,9 @@ P.tdata=linspace(0,10,P.tN);
 
 [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
 figure(2)
-plot(P.tdata,yy)
-legend('A','AE','E','P')
+plot(P.tdata,yy(P.species,:),'.-')
 P.ydata = yy(P.species,:)'; 
+drawnow
 
 %% 1.2 Interpolation area
 
@@ -67,7 +67,7 @@ P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
 % hard cutoff value
-P.thresh = 1e-6;
+P.thresh = 1e-10;
 P.rem_thresh = 1e-20;
 
 %% 1.3 Initial Particle Guess
@@ -111,10 +111,10 @@ P.opts=optimset('TolFun',1e-4,'TolX',1e-4);
 % potential function
 
 % lower mesh bound
-P.adap_d0 = 0.3;
+P.adap_d0 = 0.5;
 
 % upper mesh bound
-P.adap_D0 = 0.5;
+P.adap_D0 = 1;
 
 % target Neighborhood size
 switch(P.pdim)
@@ -158,19 +158,25 @@ P.cov_iter = 1;
 % shape parameter
 P.kernel_shape = 1;
 % 1: global;
-P.riley_mu = 1e-11;
 % 2: local;
-% 3: local anisotropic;
+
+
+% method for matrix invers
+P.kernel_inverse = 1;
+% 1: pinv
+% 2: riley
+P.riley_mu = 1e-11;
+
 
 % minimum value for shape parameter
-P.kernel_eps_min = 1e-2;
+P.kernel_eps_min = 1e-4;
 % maximum value for shape parameter
-P.kernel_eps_max = 1e2;
+P.kernel_eps_max = 1e4;
 
 %% 1.6 Visualisation
-P.vsx = 3;
-P.vsy = 3;
-P.vsT = 3;
+P.vsx = 2;
+P.vsy = 2;
+P.vsT = 3.5;
 P.vsN = 30;
 
 [P.VX,P.VY] = meshgrid(linspace(-P.vsx,P.vsx,P.vsN),linspace(-P.vsy,P.vsy,P.vsN));

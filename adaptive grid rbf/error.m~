@@ -1,0 +1,11 @@
+function [ P ] = error( P )
+    %ERROR Summary of this function goes here
+    %   Detailed explanation goes here
+    
+    Finterp = rbf(distm(P.Xv/P.M,P.Tp),P.eps)*P.c;
+    
+    
+    
+    
+end
+

@@ -2,7 +2,7 @@ function [ P ] = mcmc( P )
     %MCMC Summary of this function goes here
     %   Detailed explanation goes here
     
-    model.ssfun = @(k,data) eval_llh(k,P);
+    model.ssfun = @(k,data) -2*log(eval_llh(k,P));
     model.sigma2 = P.sigma;
     
     options.nsimu = 10000;

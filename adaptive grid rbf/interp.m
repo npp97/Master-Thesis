@@ -8,16 +8,29 @@ function [ P ] = interp( P )
     end
     P = llh(P);
     
-    switch(P.kernel_shape)
-        case 1% 1: global
-            P.eps = fminsearch(@(ep) CostEpsRiley(ep,P),P.kernel_eps_min,P.kernel_eps_max);
+    
+    switch(P.kernel_inverse)
+        case 1
+            P.eps = fminbnd(@(ep) CostEps(ep,P),P.kernel_eps_min,P.kernel_eps_max);
+                
+            if(P.kernel_shape == 2)
+                P.eps = P.rcp*P.eps;
+            end
+            
+            P.RBF = rbf(P.R,P.eps);
+            P.c = P.RBF\P.F;
+        case 2
+            P.eps = fminbnd(@(ep) CostEpsRiley(ep,P),P.kernel_eps_min,P.kernel_eps_max);
+            
+            if(P.kernel_shape == 2)
+                P.eps = P.rcp*P.eps;
+            end
+            
             P.RBF = rbf(P.R,P.eps);
             P.c = Riley_mex(P.RBF,P.F,P.riley_mu);
-        case 2% 2: local
-            
-        case 3% 3: local anisotropic
-            
     end
+    
+            
     
 end
 
