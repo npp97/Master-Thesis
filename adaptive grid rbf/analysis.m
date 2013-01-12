@@ -17,8 +17,12 @@ vN = zeros(Nsamples,Ns);
 vR = zeros(Nsamples,Ns);
 vE = zeros(Nsamples,Ns);
 
+
+h = waitbar();
 for s=1:Ns
     for l = 1:Nsamples;
+        waitbar(numel(vP)/(Ns*Nsamples),h,['Sample ' num2str(l) '/' num2str(Nsamples) ' for step ' num2str(s) '/' num2str(Ns) ]);
+        
         Ps = P;
         Ps.adap_d0 = P.adap_d0 - ss(s);
         Ps.adap_D0 = P.adap_D0 - ss(s);
@@ -41,8 +45,10 @@ for s=1:Ns
         vE(l,s) = Ps.inferror;
         
         vP(l,s) = Ps;
+        
     end
 end
+close(h)
 
 %% Visualisation
 

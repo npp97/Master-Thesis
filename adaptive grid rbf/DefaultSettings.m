@@ -67,7 +67,7 @@ P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
 % hard cutoff value
-P.thresh = 1e-10;
+P.thresh = 1e-4;
 P.rem_thresh = 1e-20;
 
 %% 1.3 Initial Particle Guess
@@ -169,9 +169,9 @@ P.riley_mu = 1e-11;
 
 
 % minimum value for shape parameter
-P.kernel_eps_min = 1e-4;
+P.kernel_eps_min = 0;
 % maximum value for shape parameter
-P.kernel_eps_max = 1e4;
+P.kernel_eps_max = 5;
 
 %% 1.6 Visualisation
 P.vsx = 2;
