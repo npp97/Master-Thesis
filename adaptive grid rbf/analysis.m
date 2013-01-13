@@ -3,6 +3,8 @@ clf
 
 DefaultSettings
 
+P.kernel_aniso = 1;
+
 P = init(P);
 
 
@@ -54,7 +56,11 @@ for s=1:Ns
         Ps = error_estim(Ps);
         vEl(l,s) = Ps.inferror;
         
-        vI(l,s) = sum(Ps.c)/abs(det(Ps.M*Ps.M'));
+        if(P.kernel_aniso > 2)
+            vI(l,s) = sum(Ps.c)/abs(det(Ps.M*Ps.M'));
+        else
+            vI(l,s) = sum(Ps.c);
+        end
         vN(l,s) = Ps.N;
         vR(l,s) = Ps.Riter;
         
@@ -97,5 +103,6 @@ boxplot(vEl,str)
 set(gca,'YScale','log')
 title('Max Error with local kernel size')
 
+save([datestr(clock) '_density_analysis'])
 
     

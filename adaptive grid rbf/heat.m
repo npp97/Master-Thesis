@@ -5,6 +5,9 @@ DefaultSettings
 
 P.adap_d0 = 0.1;
 P.adap_D0 = 0.5;
+
+P.kernel_aniso = 1;
+
 P.plotflag=true;
 
 %% 2 Implementation

@@ -97,5 +97,6 @@ boxplot(vEl,str)
 set(gca,'YScale','log')
 title('Max Error with local kernel size')
 
+save 13/01/2013_density_analysis
 
     
