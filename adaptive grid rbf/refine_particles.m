@@ -86,7 +86,7 @@ function [ P ] = refine_particles( P )
             end
         end
         
-        if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max(max(P.crit(logical(P.Nlist))))<=P.adap_dc)
+        if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max([max(P.crit(logical(P.Nlist))),0])<=P.adap_dc)
             break;
         end
         P.Riter = P.Riter+1;

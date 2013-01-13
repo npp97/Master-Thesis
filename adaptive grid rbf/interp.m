@@ -8,13 +8,12 @@ function [ P ] = interp( P )
     end
     P = llh(P);
     
-    
     switch(P.kernel_inverse)
         case 1
             P.eps = fminbnd(@(ep) CostEps(ep,P),P.kernel_eps_min,P.kernel_eps_max);
                 
             if(P.kernel_shape == 2)
-                P.eps = P.rcp*P.eps;
+                P.eps = P.eps./P.rcp;
             end
             
             P.RBF = rbf(P.R,P.eps);
@@ -23,7 +22,7 @@ function [ P ] = interp( P )
             P.eps = fminbnd(@(ep) CostEpsRiley(ep,P),P.kernel_eps_min,P.kernel_eps_max);
             
             if(P.kernel_shape == 2)
-                P.eps = P.rcp*P.eps;
+                P.eps = P.eps./P.rcp;
             end
             
             P.RBF = rbf(P.R,P.eps);

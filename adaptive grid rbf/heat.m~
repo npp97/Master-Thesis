@@ -3,6 +3,11 @@ clf
 
 DefaultSettings
 
+P.adap_d0 = 0.5;
+
+% upper mesh bound
+P.adap_D0 = 1;
+
 %% 2 Implementation
 
 %% 2.1 MCMC run
@@ -20,16 +25,21 @@ P = init(P);
 
 P.inferror = Inf;
 
-while(P.inferror
-    P = refine_particles( P );
-    
-    %% 2.5 Interpolation
-    
-    P = interp(P);
-    
-    %% 2.6 Error Estimation
-    
-    P = error_estim(P);
+P = refine_particles( P );
+
+%% 2.5 Interpolation
+
+P = interp(P);
+
+%% 2.6 Error Estimation
+
+P = error_estim(P);
+
+plot_points2(P,1)
+
+P.inferror
+
+
 
 
 

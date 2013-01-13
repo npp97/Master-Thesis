@@ -21,7 +21,7 @@ function [ P ] = error_estim( P )
 %     surf(P.VX,P.VY,reshape(log(abs(Ftrue-abs(Finterp))),size(P.VX)))
 %     view(0,90)
 %     colorbar
-    
+%     
 
     
 end

@@ -3,6 +3,10 @@ clf
 
 DefaultSettings
 
+P.adap_d0 = 0.1;
+P.adap_D0 = 0.5;
+P.plotflag=true;
+
 %% 2 Implementation
 
 %% 2.1 MCMC run
