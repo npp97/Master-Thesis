@@ -54,7 +54,11 @@ function [ P ] = refine_particles( P )
             P = TptoXp(P);
             P = calc_transform(P);
             P = XptoTp(P);
+        else 
+            P.d0 = P.adap_d0;
+            P.D0 = P.adap_D0;
         end
+        
         P = llh(P);
         
         P = exactDp(P);

@@ -10,7 +10,11 @@ function [ P ] = calc_transform( P )
                 P.Xmean = mean(X);
                 Xm = bsxfun(@minus,X,P.Xmean);
                 if(P.kernel_aniso_method == 2)
-                    Xf = Xm.*repmat(qrt(P.F(ind)/P.fmax),1,P.pdim);
+                    if(size(P.F(ind),2)>size(P.F(ind),1))
+                        P.F = P.F';
+                    end
+                        
+                    Xf = Xm.*repmat(sqrt(P.F(ind)/P.fmax),1,P.pdim);
                 else
                     Xf = Xm;
                 end

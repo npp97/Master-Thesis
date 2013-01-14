@@ -2,7 +2,7 @@
 Ne=20;
 Nt=9;
 et=linspace(0,1,Nt);
-ee=logspace(-0.1,0.5,Ne);
+ee=logspace(-0.1,0.3,Ne);
 
 Ftrue = arrayfun(@(x,y) eval_llh([x y],Ps),Ps.Xv(:,1),Ps.Xv(:,2));
 ind = Ftrue>Ps.fmax*Ps.thresh;
@@ -40,7 +40,7 @@ for k=1:Nt
         Finterp = R_eval*Ps.c;
         erf(j)=max(abs(Ftrue-Finterp)/Ps.fmax);
         Ps.error_estim = 1;
-        erl(j)=CostEps(ee(j).*Ps.rcp.^(1-et(k)),Ps)/Ps.fmax;
+        erl(j)=CostEps(ee(j).*Ps.rcp.^(?,Ps)/Ps.fmax;
         erg(j)=max(abs(Ps.F-Ps.RBF*Ps.c))/Ps.fmax;
         erf1(j)=norm(abs(Ftrue-Finterp),1)/Ps.fmax;
         econdest(j)=condest(Ps.RBF);

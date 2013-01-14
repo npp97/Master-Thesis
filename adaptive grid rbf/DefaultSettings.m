@@ -21,7 +21,7 @@ switch(P.model)
         P.tN=60;
         P.species=1;
         P.sigma=0.1;
-        P.logscale = [0 1];
+        P.logscale = [1 1];
         P.pdim = 2;
         P.xdim = 2;
         
@@ -163,15 +163,25 @@ P.kernel_shape = 1;
 
 % method for matrix invers
 P.kernel_inverse = 1;
-% 1: pinv
+% 1: ldivide
 % 2: riley
 P.riley_mu = 1e-11;
+
+% method for error estimation
+P.error_estim = 1;
+% 1: Rippa's Method
+% 2: Error on particles
+% 3: Condition of Interpolation
+
+% tolerance how close to get to machine precision
+P.cond_tol = 1e1;
+
 
 
 % minimum value for shape parameter
 P.kernel_eps_min = 0;
 % maximum value for shape parameter
-P.kernel_eps_max = 5;
+P.kernel_eps_max = 1e5;
 
 %% 1.6 Visualisation
 P.vsx = 2;

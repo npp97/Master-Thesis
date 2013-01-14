@@ -3,10 +3,11 @@ clf
 
 DefaultSettings
 
-P.adap_d0 = 0.1;
-P.adap_D0 = 0.5;
+P.adap_d0 = 0.3;
+P.adap_D0 = 1;
 
-P.kernel_aniso = 1;
+P.kernel_aniso = 2;
+P.kernel_aniso_method = 2;
 
 P.plotflag=true;
 

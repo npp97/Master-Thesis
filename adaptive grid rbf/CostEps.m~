@@ -4,8 +4,6 @@ function [ ceps ] = CostEps( ep,P )
     
     if(P.kernel_shape == 2)
         ep = ep./P.rcp;
-    else
-        ep = ep/mean(P.rcp);
     end
     
     switch(P.error_estim)
@@ -21,7 +19,7 @@ function [ ceps ] = CostEps( ep,P )
             ceps = norm(P.F - A*c);
         case 3
             A = rbf(P.R,ep);
-            ceps = rcond(A) + 1/eps*(rcond(A)<P.cond_tol*eps);
+            ceps = rcond(A) + Inf*isnan((rcond(A)<P.cond_tol*eps));
     end
 end
 
