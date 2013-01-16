@@ -1,4 +1,4 @@
-function xdot = dxdotdxdp(t,x,p)
+function xdot = dxdotdxdp_M1(t,x,p)
     %(df,dx,dp)
     xdot(1,:,:) = [
         -1, 0;

@@ -2,7 +2,7 @@
 Ne=20;
 Nt=9;
 et=linspace(0,1,Nt);
-ee=logspace(-0.1,0.5,Ne);
+ee=logspace(-0.1,1,Ne);
 
 Ftrue = arrayfun(@(x,y) eval_llh([x y],Ps),Ps.Xv(:,1),Ps.Xv(:,2));
 ind = Ftrue>Ps.fmax*Ps.thresh;
@@ -53,10 +53,10 @@ for k=1:Nt
     % subplot(2,3,[5 6])
     figure(11)
     subplot(1,Nt,k)
-    loglog(ee,erf,'.-k')
+    semilogy(ee,erf,'.-k')
     hold on
-    loglog(ee,erf1,'--k')
-    loglog(ee,erl,'.-r')
+    semilogy(ee,erf1,'--k')
+    semilogy(ee,erl,'.-r')
     ylim([1e-5,1e0])
     title(['Exponent: ' num2str(et(k))])
     legend('rel. max error on extra grid','rel. l1 error on extra grid','rel. max error with Rippa Method','Location','SouthOutside')

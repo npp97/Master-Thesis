@@ -29,22 +29,23 @@ for s=1:Ns
     for l = 1:Nsamples;
         waitbar(((s-1)*Nsamples+l)/(Ns*Nsamples),h,['Generating: Sample ' num2str(l) '/' num2str(Nsamples) ' for step ' num2str(s) '/' num2str(Ns) ]);
         
-        Ps = P;
-        Ps.adap_d0 = P.adap_d0 - ss(s);
-        Ps.adap_D0 = P.adap_D0 - ss(s);
-        
-        finished = false;
-        while(not(finished))   
-            try
-                tic;
-                Ps = refine_particles( Ps );
-                vP(l,s) = Ps;
-                finished = true;
-                vTp(l,s)=toc;
-            catch
-            end
-        end
-        
+%         Ps = P;
+%         Ps.adap_d0 = P.adap_d0 - ss(s);
+%         Ps.adap_D0 = P.adap_D0 - ss(s);
+%         
+%         finished = false;
+%         while(not(finished))   
+%             try
+%                 tic;
+%                 Ps = refine_particles( Ps );
+%                 vP(l,s) = Ps;
+%                 finished = true;
+%                 vTp(l,s)=toc;
+%             catch
+%             end
+%         end
+
+        Ps = vP(l,s);
         waitbar(((s-1)*Nsamples+l)/(Ns*Nsamples),h,['Interpolating: Sample ' num2str(l) '/' num2str(Nsamples) ' for step ' num2str(s) '/' num2str(Ns) ]);
         %% 2.5 Interpolation
         
@@ -57,9 +58,9 @@ for s=1:Ns
         Ps = error_estim(Ps);
         vEg(l,s) = Ps.inferror;
         if(P.kernel_aniso > 2)
-            vIg(l,s) = sum(Ps.c)/abs(det(Ps.M*Ps.M'));
+            vIg(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim)/abs(det(Ps.M));
         else
-            vIg(l,s) = sum(Ps.c);
+            vIg(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim);
         end
         
         tic;
@@ -70,9 +71,9 @@ for s=1:Ns
         vEl(l,s) = Ps.inferror;
         
         if(P.kernel_aniso > 2)
-            vIl(l,s) = sum(Ps.c)/abs(det(Ps.M*Ps.M'));
+            vIl(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim)/abs(det(Ps.M));
         else
-            vIl(l,s) = sum(Ps.c);
+            vIl(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim);
         end
         vN(l,s) = Ps.N;
         vR(l,s) = Ps.Riter;

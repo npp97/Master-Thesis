@@ -1,12 +1,12 @@
-function xdot = dxdpdp(t,x,p,u,mStruct)
-   xdim = size(dxdt(t,x,p,u,mStruct),1);
+function xdot = dxdpdp_M1(t,x,p,u,mStruct)
+   xdim = size(dxdt_M1(t,x,p,u,mStruct),1);
    pdim = length(p);    
-   DFDX = dxdotdx(t,x,p);
+   DFDX = dxdotdx_M1(t,x,p);
    DXDP = reshape(x(xdim+1:xdim+xdim*pdim),xdim,pdim);
-   DFDPDP = dxdotdpdp(t,x,p);
-   DFDPDX = dxdotdpdx(t,x,p);
-   DFDXDP = dxdotdxdp(t,x,p);
-   DFDXDX = dxdotdxdx(t,x,p);
+   DFDPDP = dxdotdpdp_M1(t,x,p);
+   DFDPDX = dxdotdpdx_M1(t,x,p);
+   DFDXDP = dxdotdxdp_M1(t,x,p);
+   DFDXDX = dxdotdxdx_M1(t,x,p);
    DXDPDP = reshape(x(xdim+xdim*pdim+1:end),xdim,pdim,pdim);
 
    %B1 = DFDPDX*DXDP;
@@ -42,7 +42,7 @@ function xdot = dxdpdp(t,x,p,u,mStruct)
    B = DFDPDP + B1 + B2 + B3 + B4;
     
     xdot = [
-        dxdp(t,x(1:xdim+xdim*pdim),p,u,mStruct);
+        dxdp_M1(t,x(1:xdim+xdim*pdim),p,u,mStruct);
         B(:)
         ];
     

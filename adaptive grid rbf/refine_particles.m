@@ -3,6 +3,7 @@ function [ P ] = refine_particles( P )
     %   Detailed explanation goes here
     P.Riter = 1;
 
+    % Initialise Values that are updated every iteration
     P.NI = [];
     P.CI = [];
     P.PI = [];
@@ -12,8 +13,13 @@ function [ P ] = refine_particles( P )
     
     while(true)
         
+        % find particles that are below removal threshold
         ind = P.F > P.fmax*P.rem_thresh;
+        
+        % count the number of particles to be removed
         P.kthresh(P.Riter)=P.N-sum(ind);
+        
+        % remove particles and respective values
         P.F = P.F(ind);
         P.Xp = P.Xp(ind,:);
         if(P.kernel_aniso > 1)
@@ -22,23 +28,33 @@ function [ P ] = refine_particles( P )
         P.Dp = P.Dp(ind);
         P.Lp = P.Lp(ind);
         P.rcp = P.rcp(ind);
+        
+        % update number of points
         P.N = size(P.Xp,1);
         
+        % fuse close particles
         P = fuse_particles( P );
         
+        % recalculate Neighborhood sizes
         P = exactDp( P );
         
+        % spawn new particles
         P = spawn_particles( P );
         
+        % recalculate Neighborhood sizes 
         P = exactDp( P );
         
+        % check whether we should do gradient steps
         if(P.Riter>P.adap_gradient_start)
             for s=1:P.adap_ngradstep
+                % do specified number of gradient steps
                 P = gradient_step( P );
             end
+            % calculate energy
             P.Dpq = bsxfun(@min,P.Dp,P.Dp');
             P.W2(P.Riter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
         else
+            % calculate energy
             if(P.kernel_aniso > 1)
                 P.cDp = TriScatteredInterp(P.Tp,P.Dp);
                 P.cDpNN = TriScatteredInterp(P.Tp,P.Dp,'nearest');
@@ -50,19 +66,30 @@ function [ P ] = refine_particles( P )
             P.W(P.Riter) = OrgEnergy(P,0);
         end
         
-        if(P.kernel_aniso > 1 && mod(P.Riter,P.cov_iter)==0)
+        if(P.kernel_aniso > 1)
+            % transform new particles back
             P = TptoXp(P);
-            P = calc_transform(P);
-            P = XptoTp(P);
+            if(P.Riter>P.cov_iter)
+                % calculate new transformation
+                P = calc_transform(P);
+                % retransform points
+                P = XptoTp(P);
+                % start with updated 
+                P.d0 = P.adap_d0;
+                P.D0 = P.adap_D0;
+            end
+            
         else 
-            P.d0 = P.adap_d0;
-            P.D0 = P.adap_D0;
+
         end
         
+        % update function values
         P = llh(P);
         
+        % update neighborhood sizes
         P = exactDp(P);
         
+        % update distances
         if(P.kernel_aniso > 1)
             P.R = distm_mex(P.Tp,P.Tp);
         else
@@ -70,6 +97,7 @@ function [ P ] = refine_particles( P )
         end
         P.Dpq = bsxfun(@min,P.Dp,P.Dp');
         
+        % analyse distribtion 
         P.crit = P.Dpq./P.R;
         P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
         
@@ -80,7 +108,7 @@ function [ P ] = refine_particles( P )
         P.Lp = P.Lp+ones(size(P.Lp));
         P.Lh = [P.Lh,zeros(size(P.Lh,1),max(size(hist(P.Lp,1:max(P.Lp)),2)-size(P.Lh,2),0));hist(P.Lp,1:max(P.Lp))/P.N,zeros(1,max(size(P.Lh,2)-size(hist(P.Lp,1:max(P.Lp)),2),0))];
         
-        
+        % plotting
         if(mod(P.Riter,P.plotinter)==0 && P.plotflag)
             switch(P.pdim)
                 case 2
@@ -90,6 +118,7 @@ function [ P ] = refine_particles( P )
             end
         end
         
+        % check break condition
         if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max([max(P.crit(logical(P.Nlist))),0])<=P.adap_dc)
             break;
         end

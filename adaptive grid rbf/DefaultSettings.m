@@ -14,6 +14,8 @@ switch(P.model)
     
     case 1
         P.ode=@dxdt_M1_mex;
+        P.dxdp=@dxdp_M1;
+        P.dxdpdp=@dxdpdp_M1;
         structdxdt_M1
         P.mStructdxdt = mStructdxdt;
         P.k=[0.6 0.4];
@@ -29,8 +31,11 @@ switch(P.model)
             {'k+1', P.k(1), 0}
             {'k-1', log(P.k(2)), 0}
             };
+        
     case 2
         P.ode=@dxdt_M2_mex;
+        P.gradode = '';
+        P.lapode = '';
         structdxdt_M2
         P.mStructdxdt = mStructdxdt;
         P.k=[0.6 0.4 0.1];
@@ -73,10 +78,13 @@ P.rem_thresh = 1e-20;
 %% 1.3 Initial Particle Guess
 
 % method for spawning particles
-P.init_method = 3;
-% 1: equidistant euclidean
-% 2: equidistant radial
-% 3: single point at modes
+P.init_method = 1;
+% 1: single point at modes
+
+P.init_trans = 1;
+% 1: Identity matrix
+% 2: Fisher Matrix based on Hessian
+
 
 % initial grid spacing
 P.init_d0 = 0.3;
@@ -87,14 +95,11 @@ P.init_D0 = 0.5;
 % method for adapting the grid
 P.adap_method = 1;
 % 1: local monitor function with function value
-% 2: local monitor function with gradient
-% 3: global neighborhood size
-% 5: residual subsampling
+
 
 % spawning method
 P.adap_spawn_method = 1;
-% 1: randomly in too small neighborhood
-% 2: based on mean at edges
+% 1: randomly in small neighborhood
 
 % fusion method
 P.adap_fusion_method = 1;
@@ -160,7 +165,6 @@ P.kernel_shape = 1;
 % 1: global;
 % 2: local;
 
-
 % method for matrix invers
 P.kernel_inverse = 1;
 % 1: ldivide
@@ -175,8 +179,6 @@ P.error_estim = 1;
 
 % tolerance how close to get to machine precision
 P.cond_tol = 1e1;
-
-
 
 % minimum value for shape parameter
 P.kernel_eps_min = 0;

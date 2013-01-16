@@ -1,4 +1,4 @@
-mStructdxdt.s.A = 1;
+mStructdxdt.s.x1 = 1;
 mStructdxdt.s.AE = 2;
 mStructdxdt.s.E = 3;
 mStructdxdt.s.P = 4;

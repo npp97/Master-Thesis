@@ -12,7 +12,7 @@ function [ P ] = interp( P )
     
     switch(P.kernel_inverse)
         case 1
-            P.eps = fminsearch(@(ep) CostEps(ep,P),2/mean(P.rcp));
+            P.eps = fminsearch(@(ep) CostEps(ep,P),10/mean(P.rcp));
 
             if(P.kernel_shape == 2)
                 P.eps = P.eps./P.rcp;
