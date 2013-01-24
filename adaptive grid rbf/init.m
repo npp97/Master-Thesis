@@ -3,7 +3,8 @@ function [ P ] = init( P )
     % and an approximation to the anisotropy transformation
     
     % compute target neighborhood size
-    P = find_Nsize( P );    
+    %P = find_Nsize( P );    
+    P.adap_Nstar = 8;
 
     P.D0 = P.init_D0;
     P.d0 = P.init_d0;

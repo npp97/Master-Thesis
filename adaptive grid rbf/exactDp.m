@@ -14,17 +14,17 @@ function P = exactDp(P)
             Dp_old = -inf;
             Dp(j) = MF(j);
             k=0;
-            while((((abs(Dp_old-Dp(j)))/Dp(j))>1e-2) && k < 15)
-                Dp_old = Dp(j);
-                ind = (P.R(:,j)<=P.adap_rstar*Dp(j));
-                if(sum(ind)>0)
-                    Dp(j) = min(MF(ind));
-                    k=k+1;
-                else
-                    Dp(j) = MF(j);
-                    break;
-                end
-            end
+%             while((((abs(Dp_old-Dp(j)))/Dp(j))>1e-2) && k < 15)
+%                 Dp_old = Dp(j);
+%                 ind = (P.R(:,j)<=P.adap_rstar*Dp(j));
+%                 if(sum(ind)>0)
+%                     Dp(j) = min(MF(ind));
+%                     k=k+1;
+%                 else
+%                     Dp(j) = MF(j);
+%                     break;
+%                 end
+%             end
         end
     else
         Dp = (P.D0 + P.d0)/2 * ones(size(P.F));

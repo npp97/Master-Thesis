@@ -4,13 +4,13 @@ clf
 DefaultSettings
 
 
-P.init_d0 = 0.1;
-P.init_D0 = 0.3;
 P.adap_d0 = 0.3;
 P.adap_D0 = 1;
+
 %P.vsT = 15;
 
 P.kernel_aniso = 2;
+
 % P.kernel_aniso_method = 1;
 % P.init_trans = 2;
 % P.adap_fusion_method = 2;
@@ -21,7 +21,7 @@ P.kernel_aniso = 2;
 % P.adap_dc = 1.5;
 
 P.plotflag=true;
-
+P.plotinter = 1;
 %% 2 Implementation
 
 %% 2.1 MCMC run
@@ -34,10 +34,9 @@ P.plotflag=true;
 %% 2.2 Initialization
 
 P = init(P);
+P.adap_Nstar = 5;
 
 %% 2.4 Particle Refinement
-
-P.inferror = Inf;
 
 P = refine_particles( P );
 

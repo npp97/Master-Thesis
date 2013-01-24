@@ -3,15 +3,17 @@ clf
 
 DefaultSettings
 
+P.adap_d0 = 0.3;
+P.adap_D0 = 1;
 P.kernel_aniso = 2;
 P.plotflag=false;
 
 P = init(P);
 
 
-Ns = 5;
+Ns = 6;
 Nsamples = 15;
-ss = linspace(-0.5,0.3,Ns);
+ss = 5:10;
 
 vTp = zeros(Nsamples,Ns);
 vTig = zeros(Nsamples,Ns);
@@ -35,8 +37,7 @@ for s=1:Ns
         waitbar(((s-1)*Nsamples+l)/(Ns*Nsamples),h,['Generating: Sample ' num2str(l) '/' num2str(Nsamples) ' for step ' num2str(s) '/' num2str(Ns) ]);
         
         Ps = P;
-        Ps.adap_d0 = 0.3;
-        Ps.adap_D0 = P.adap_D0 - ss(s);
+        Ps.adap_Nstar = ss(s);
         finished = false;
         while(not(finished))   
             try
@@ -45,7 +46,8 @@ for s=1:Ns
                 vP(l,s) = Ps;
                 finished = true;
                 vTp(l,s)=toc;
-            catch
+            catch err
+                pause
             end
         end
 
