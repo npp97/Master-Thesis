@@ -21,5 +21,5 @@ function W = OrgEnergy(P,g)
     
 
     Dpq = bsxfun(@min,Dp,Dp');
-    W = sum(sum(Dpq.^2.*V1(P.R./Dpq,P.adap_rstar)));
+    W = sum(sum(Dpq.^2.*P.pot(P.R./Dpq,P.adap_gradr)));
 end

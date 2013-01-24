@@ -10,6 +10,7 @@ function [ P ] = refine_particles( P )
     P.XI = [];
     P.Lh = [];
     P.W = [];
+    P.fuse_hits = 0;
     
     while(true)
         
@@ -52,7 +53,7 @@ function [ P ] = refine_particles( P )
             end
             % calculate energy
             P.Dpq = bsxfun(@min,P.Dp,P.Dp');
-            P.W2(P.Riter) = sum(sum(P.Dpq.^2*V1_mex(P.R./P.Dpq)));
+            P.W(P.Riter) = sum(sum(P.Dpq.^2*P.pot(P.R./P.Dpq,P.adap_gradr)));
         else
             % calculate energy
             if(P.kernel_aniso > 1)
@@ -119,10 +120,23 @@ function [ P ] = refine_particles( P )
         end
         
         % check break condition
-        if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max([max(P.crit(logical(P.Nlist))),0])<=P.adap_dc)
+        if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max([max(P.crit(logical(P.Nlist))),0])<=P.adap_dc && P.Riter > max(P.cov_iter,P.grad_iter) )
             break;
         end
-        P.Riter = P.Riter+1;
+        if(P.switch_fusion_off && sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && P.Riter > max(P.cov_iter,P.grad_iter) )
+            P.fuse_hits = P.fuse_hits + 1;        
+            if( P.fuse_hits >= P.switch_hits );
+                P.adap_fusion_method = 2;
+                P.pot = @(r,rstar) V3(r,rstar);
+                P.dpot = @(r,rstar) dV3(r,rstar);
+            end
+        else
+            P.fuse_hits = 0;
+        end
+        if(P.Riter > P.max_iter)
+            break;
+        end
+        P.Riter = P.Riter+1
     end
     
 end

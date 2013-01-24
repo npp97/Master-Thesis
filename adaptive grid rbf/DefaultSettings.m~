@@ -76,7 +76,7 @@ P.method_thresh = 1;
 
 % hard cutoff value
 P.thresh = 1e-4;
-P.rem_thresh = 1e-10;
+P.rem_thresh = 1e-20;
 
 %% 1.3 Initial Particle Guess
 
@@ -134,7 +134,7 @@ P.finding_Nsize = false;
 P.adap_rstar = sqrt(2);
 
 % relative gradient influence radius
-P.adap_gradr = sqrt(4);
+P.adap_gradr = sqrt(2);
 
 % relative optimal distance tolerance
 P.adap_dc = 2.5;
@@ -148,8 +148,8 @@ P.grad_iter = 0;
 % whether to switch to on first occasion where no spawning happens
 P.switch_fusion_off = true;
 
-% number of consecutive iterations where no spawning happens.
-P.switch_hits = 3;
+%
+P.switch_hits
 
 %% 1.5 Kernel
 
@@ -205,10 +205,8 @@ P.vsN = 30;
 P.Xv = [P.VX(:),P.VY(:)];
 
 % number of iterations between plots
-P.plotinter = 50;
+P.plotinter = 1;
 
 % whether to plot
-P.plotflag = true;
+P.plotflag = false;
 
-% maximum number of particle refinements
-P.max_iter = 150;

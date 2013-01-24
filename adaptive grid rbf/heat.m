@@ -6,15 +6,19 @@ DefaultSettings
 
 P.init_d0 = 0.1;
 P.init_D0 = 0.3;
-P.adap_d0 = 2;
-P.adap_D0 = 5;
-P.vsT = 15;
+P.adap_d0 = 0.3;
+P.adap_D0 = 1;
+%P.vsT = 15;
 
 P.kernel_aniso = 2;
-P.kernel_aniso_method = 2;
-P.init_trans = 1;
-P.cov_iter = 10;
-P.grad_iter = 10;
+% P.kernel_aniso_method = 1;
+% P.init_trans = 2;
+% P.adap_fusion_method = 2;
+% P.pot = @(r,rstar) V3(r,rstar);
+% P.dpot = @(r,rstar) dV3(r,rstar);
+% P.cov_iter = 10;
+% P.grad_iter = 10;
+% P.adap_dc = 1.5;
 
 P.plotflag=true;
 
@@ -48,6 +52,7 @@ P = error_estim(P);
 plot_points2(P,1)
 
 P.inferror
+P.l1error
 
 
 

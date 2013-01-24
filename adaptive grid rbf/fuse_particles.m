@@ -1,48 +1,45 @@
 function [ P ] = fuse_particles( P )
     %FUSE_PARTICLES fuse particles where |xp_xq|<Dpq/2
     % do this in a greedy-type fashion by removing particles with most points inside the cutoff radius first
+
     P.kfuse(P.Riter)=0;
-    if(P.kernel_aniso > 1)
-        P.R = distm_mex(P.Tp,P.Tp);
-    else
-        P.R = distm_mex(P.Xp,P.Xp);
+    switch(P.adap_fusion_method)
+        case 1
+            % 1: where particles are too close to each other
+            % initialise counter
+            P.kfuse(P.Riter)=0;
+            % compute distances
+            if(P.kernel_aniso > 1)
+                P.R = distm_mex(P.Tp,P.Tp);
+            else
+                P.R = distm_mex(P.Xp,P.Xp);
+            end
+            % compute neighborhood sizes
+            P.Dpq = bsxfun(@min,P.Dp,P.Dp');
+            % check for too close particles
+            ii = sparse(P.R<P.Dpq/2-eye(P.N));
+            % get indexes for too small particles
+            [row,col] = find(ii);
+            ti = row(row>col);
+            % remove particles
+            P.Dp(ti)=[];
+            P.Xp(ti,:)=[];
+            if(P.kernel_aniso > 1)
+                P.Tp(ti,:)=[];
+                if(P.kernel_aniso > 2)
+                    P.M(:,:,ti)=[];
+                end
+            end
+            P.F(ti)=[];
+            P.Lp(ti)=[];
+            P.rcp(ti)=[];
+            % count removes particles
+            P.kfuse(P.Riter)=P.kfuse(P.Riter) + P.N-size(P.Xp,1);
+            % update number of particles
+            P.N=size(P.Xp,1);
+        case 2
+            % 2: no fusion
+            % nothing to do
     end
-    P.Dpq = bsxfun(@min,P.Dp,P.Dp');
-    ii = sparse(P.R<P.Dpq/2-eye(P.N));
-    [row,col] = find(ii);
-    ti = row(row>col);
-    P.Dp(ti)=[];
-    P.Xp(ti,:)=[];
-    if(P.kernel_aniso > 1)
-        P.Tp(ti,:)=[];
-        if(P.kernel_aniso > 2)
-            P.M(:,:,ti)=[];
-        end
-    end
-    P.F(ti)=[];
-    P.Lp(ti)=[];
-    P.rcp(ti)=[];
-    P.kfuse(P.Riter)=P.N-size(P.Xp,1);
-    P.N=size(P.Xp,1);
-    
-%     while(true)
-%         [s,ind] = max();
-%         if(s==1)
-%             P.rcp = P.adap_rstar*P.Dp;
-%             break
-%         else
-%             P.Dp=P.Dp([1:ind-1 ind+1:end]);
-%             P.Xp=P.Xp([1:ind-1 ind+1:end],:);
-%             if(P.kernel_aniso == 3)
-%                 P.Tp=P.Tp([1:ind-1 ind+1:end],:);
-%             end
-%             P.F=P.F([1:ind-1 ind+1:end]);
-%             P.Lp=P.Lp([1:ind-1 ind+1:end]);
-%             P.rcp = P.adap_rstar*P.Dp;
-%             ii=ii([1:ind-1 ind+1:end],[1:ind-1 ind+1:end]);
-%             P.kfuse(P.Riter)=P.kfuse(P.Riter)+1;
-%             P.N=P.N-1;
-%         end
-%     end
 end
 

@@ -11,12 +11,11 @@ P = init(P);
 
 Ns = 5;
 Nsamples = 15;
-ss = linspace(-0.5,0.3,Ns);
+ss = linspace(0,0.2,Ns);
 
 vTp = zeros(Nsamples,Ns);
 vTig = zeros(Nsamples,Ns);
 vTil = zeros(Nsamples,Ns);
-vIter = zeros(Nsamples,Ns);
 vIg = zeros(Nsamples,Ns);
 vIl = zeros(Nsamples,Ns);
 vN = zeros(Nsamples,Ns);
@@ -28,15 +27,15 @@ vEl1 = zeros(Nsamples,Ns);
 
 
 h = waitbar(0,'');
-P.switch_fusion_off = true;
 
 for s=1:Ns
     for l = 1:Nsamples;
         waitbar(((s-1)*Nsamples+l)/(Ns*Nsamples),h,['Generating: Sample ' num2str(l) '/' num2str(Nsamples) ' for step ' num2str(s) '/' num2str(Ns) ]);
         
         Ps = P;
-        Ps.adap_d0 = 0.3;
+        Ps.adap_d0 = P.adap_d0 - ss(s);
         Ps.adap_D0 = P.adap_D0 - ss(s);
+        
         finished = false;
         while(not(finished))   
             try
@@ -92,6 +91,74 @@ close(h)
 
 %% Visualisation
 
-publish('pubgraph.m')
+
+str = cellfun(@(x) num2str(x,2),num2cell(0.5-ss),'UniformOutput',false);
+
+figure(10)
+subplot(3,4,1)
+boxplot(vTp,str)
+xlabel('d0')
+ylabel('seconds')
+title('particle generation time')
+subplot(3,4,2)
+boxplot(vN,str)
+xlabel('d0')
+ylabel('#')
+title('Number of points')
+subplot(3,4,3)
+boxplot(vR,str)
+xlabel('d0')
+ylabel('#')
+title('Number of Iterations')
+
+subplot(3,4,5)
+boxplot(vTig,str)
+xlabel('d0')
+ylabel('seconds')
+title('interpolation time global kernel')
+subplot(3,4,6)
+boxplot(abs(vIg),str)
+set(gca,'YScale','log')
+xlabel('density')
+ylabel('Integral')
+title('integral approximation global kernel size')
+subplot(3,4,7)
+boxplot(abs(vEg),str)
+set(gca,'YScale','log')
+xlabel('density')
+ylabel('relative error')
+title('Max Error with global kernel size')
+subplot(3,4,8)
+boxplot(abs(vEg1),str)
+set(gca,'YScale','log')
+xlabel('density')
+ylabel('relative error')
+title('L1 Error with global kernel size')
+
+subplot(3,4,9)
+boxplot(vTil,str)
+xlabel('density')
+ylabel('seconds')
+title('interpolation time local kernel size')
+subplot(3,4,10)
+boxplot(abs(vIl),str)
+set(gca,'YScale','log')
+xlabel('density')
+ylabel('Integral')
+title('integral approximation local kernel size')
+subplot(3,4,11)
+boxplot(abs(vEl),str)
+set(gca,'YScale','log')
+xlabel('density')
+ylabel('relative error')
+title('Max Error with local kernel size')
+subplot(3,4,12)
+boxplot(abs(vEl1),str)
+set(gca,'YScale','log')
+xlabel('density')
+ylabel('relative error')
+title('L1 Error with local kernel size')
+
+publish(
 
 save([datestr(clock) '_density_analysis'])

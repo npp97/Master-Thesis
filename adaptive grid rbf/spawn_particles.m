@@ -38,14 +38,16 @@ function [ P ] = spawn_particles( P )
                             P.Xp = [P.Xp; xnew];
                         end
                         P.Dp(end+1) = P.Dp(l);
-                        if(P.kernel_aniso > 1)
-                            if(P.kernel_aniso_method > 2)
-                                P.F(end+1) = eval_llh(xnew*P.M(:,:,l)+P.Xmean,P);
+                        if(not(P.finding_Nsize))
+                            if(P.kernel_aniso > 1)
+                                if(P.kernel_aniso_method > 2)
+                                    P.F(end+1) = eval_llh(xnew*P.M(:,:,l)+P.Xmean,P);
+                                else
+                                    P.F(end+1) = eval_llh(xnew*P.M+P.Xmean,P);
+                                end
                             else
-                                P.F(end+1) = eval_llh(xnew*P.M+P.Xmean,P);
+                                P.F(end+1) = eval_llh(xnew,P);
                             end
-                        else
-                            P.F(end+1) = eval_llh(xnew,P);
                         end
                         P.Lp(end+1) = 0;
                         P.rcp(end+1) = P.adap_rstar*P.Dp(end);
@@ -61,8 +63,6 @@ function [ P ] = spawn_particles( P )
                     end
                 end
             end
-            
-            
         case 2
             ind = find(sum(P.Nlist)==0);
     end

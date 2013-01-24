@@ -3,8 +3,10 @@ function [f,Df,D2f] = eval_lapllh(p,P)
     xdim = P.xdim;
     % get number of parameters
     pdim = P.pdim;
+    % reparametrise
+    pt = P.logscale.*exp(p) + (1-P.logscale).*p;
     % solve ode with sensitivities
-    [~,yy] = ode15s(@(t,x) P.dxdpdp(t,x,exp(p),0,P.mStructdxdt),P.tdata,[P.y0;zeros(xdim*pdim,1);zeros(xdim*pdim*pdim,1)]);
+    [~,yy] = ode15s(@(t,x) P.dxdpdp(t,x,pt,[],P.mStructdxdt),P.tdata,[P.y0;zeros(xdim*pdim,1);zeros(xdim*pdim*pdim,1)]);
 
     % compute likelihood
     f = exp(sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma)))));
@@ -18,7 +20,7 @@ function [f,Df,D2f] = eval_lapllh(p,P)
         DXDPDP = reshape(yy(tk,xdim+xdim*pdim+1:end),xdim,pdim,pdim);
         jspec = 1;
         for s=P.species
-            Df = Df - f*2*(yy(tk,P.species)-P.ydata(tk,jspec))/P.sigma^2*DXDP(s,:).*exp(p);
+            Df = Df - f*2*(yy(tk,P.species)-P.ydata(tk,jspec))/P.sigma^2*DXDP(s,:).*pt;
             
             T1 = 4*((yy(tk,P.species)-P.ydata(tk,jspec))/P.sigma^2)^2-2/P.sigma^2;
             T2 = 2*(yy(tk,P.species)-P.ydata(tk,jspec))/P.sigma^2;
