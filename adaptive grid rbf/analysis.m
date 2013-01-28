@@ -11,9 +11,9 @@ P.plotflag=false;
 P = init(P);
 
 
-Ns = 6;
+Ns = 4;
 Nsamples = 15;
-ss = 5:10;
+ss = linspace(0.3,0.15,Ns);
 
 vTp = zeros(Nsamples,Ns);
 vTig = zeros(Nsamples,Ns);
@@ -37,7 +37,8 @@ for s=1:Ns
         waitbar(((s-1)*Nsamples+l)/(Ns*Nsamples),h,['Generating: Sample ' num2str(l) '/' num2str(Nsamples) ' for step ' num2str(s) '/' num2str(Ns) ]);
         
         Ps = P;
-        Ps.adap_Nstar = ss(s);
+        Ps.adap_Nstar = 8;
+        P.adap_d0 = ss(s);
         finished = false;
         while(not(finished))   
             try
@@ -47,7 +48,7 @@ for s=1:Ns
                 finished = true;
                 vTp(l,s)=toc;
             catch err
-                pause
+                err    
             end
         end
 

@@ -8,7 +8,7 @@ P.ode_abstol = 1e-8;
 
 %% 1.1 Data
 
-P.model = 1;
+P.model = 2;
 
 switch(P.model)
     
@@ -48,9 +48,9 @@ switch(P.model)
         P.xdim = 4;
         
         P.paramspec = {
-            {'k+1', P.k(1), 0}
-            {'k-1', P.k(2), 0}
-            {'k2', P.k(3), 0}
+            {'k+1', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
+            {'k-1', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
+            {'k2', log(P.k(3)), log(P.k(3))-5,log(P.k(3))+5}
             };
         case 3
             
@@ -104,6 +104,11 @@ P.adap_method = 1;
 % spawning method
 P.adap_spawn_method = 1;
 % 1: randomly in small neighborhood
+% 2: randomly in small neighborhood with mean weighting
+
+P.adap_spawn_var = true;
+% true: normalize to local radius 1
+% false: normalize randomly between local radius 1/2 and rstar
 
 % fusion method
 P.adap_fusion_method = 1;
@@ -122,7 +127,7 @@ P.pot = @(r,rstar) V1(r,rstar);
 P.dpot = @(r,rstar) dV1(r,rstar);
 
 % lower mesh bound
-P.adap_d0 = 0.5;
+P.adap_d0 = 0.3;
 
 % upper mesh bound
 P.adap_D0 = 1;

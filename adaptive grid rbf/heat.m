@@ -34,7 +34,7 @@ P.plotinter = 1;
 %% 2.2 Initialization
 
 P = init(P);
-P.adap_Nstar = 5;
+P.adap_Nstar = 8;
 
 %% 2.4 Particle Refinement
 

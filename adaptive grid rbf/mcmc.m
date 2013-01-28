@@ -18,7 +18,7 @@ function [ P ] = mcmc( P )
     % initial date specification
     data.y0 = P.y0;
     % time resolved data specification
-    data.ydata = [P.tdata';P.ydata];
+    data.ydata = [P.tdata',P.ydata];
     
     % mcmc run
     [P.mcresults,P.mcchain,P.mcs2chain] = mcmcrun(model,data,params,options);

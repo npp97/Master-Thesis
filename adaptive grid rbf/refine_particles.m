@@ -136,7 +136,7 @@ function [ P ] = refine_particles( P )
         if(P.Riter > P.max_iter)
             break;
         end
-        P.Riter = P.Riter+1
+        P.Riter = P.Riter+1;
     end
     
 end

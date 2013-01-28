@@ -1,4 +1,4 @@
-function P = find_Nsize( P )
+function [P,Px] = find_Nsize( P )
 
     
     % tries
@@ -62,6 +62,9 @@ function P = find_Nsize( P )
             Ps.R1 = distm_mex(Ps.Xp(1,:),Ps.Xp);
         end
         ind = (Ps.R1<Ps.adap_rstar);
+        if(sum(ind)>N)
+            Px = Ps;
+        end
         N = max(N,sum(ind));
     end
     

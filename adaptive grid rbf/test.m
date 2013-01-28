@@ -1,8 +1,8 @@
 
 Ne=20;
 Nt=5;
-et=linspace(0,0.25,Nt);
-ee=logspace(-0.1,0.3,Ne);
+et=linspace(0,1,Nt);
+ee=logspace(-0.1,1,Ne);
 
 Ftrue = arrayfun(@(x,y) eval_llh([x y],Ps),Ps.XX(:,1),Ps.XX(:,2));
 
