@@ -70,6 +70,10 @@ function [ P ] = refine_particles( P )
         if(P.kernel_aniso > 1)
             % transform new particles back
             P = TptoXp(P);
+
+            P.Mdiffdet(P.Riter) = 0;
+            P.Mdiffinf(P.Riter) = 0;
+
             if(P.Riter>P.cov_iter)
                 % calculate new transformation
                 P = calc_transform(P);
@@ -109,6 +113,7 @@ function [ P ] = refine_particles( P )
         P.Lp = P.Lp+ones(size(P.Lp));
         P.Lh = [P.Lh,zeros(size(P.Lh,1),max(size(hist(P.Lp,1:max(P.Lp)),2)-size(P.Lh,2),0));hist(P.Lp,1:max(P.Lp))/P.N,zeros(1,max(size(P.Lh,2)-size(hist(P.Lp,1:max(P.Lp)),2),0))];
         
+        
         % plotting
         if(mod(P.Riter,P.plotinter)==0 && P.plotflag)
             switch(P.pdim)
@@ -120,10 +125,10 @@ function [ P ] = refine_particles( P )
         end
         
         % check break condition
-        if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && max([max(P.crit(logical(P.Nlist))),0])<=P.adap_dc && P.Riter > max(P.cov_iter,P.grad_iter) )
+        if(sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && abs((P.CI(P.Riter)-P.CI(max(P.Riter-1,1)))/P.CI(P.Riter))<1e-2 && P.Riter > 5 )
             break;
         end
-        if(P.switch_fusion_off && sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0 && P.Riter > max(P.cov_iter,P.grad_iter) )
+        if(P.switch_fusion_off && sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0)
             P.fuse_hits = P.fuse_hits + 1;        
             if( P.fuse_hits >= P.switch_hits );
                 P.adap_fusion_method = 2;

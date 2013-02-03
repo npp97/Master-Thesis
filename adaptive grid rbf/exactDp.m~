@@ -8,12 +8,12 @@ function P = exactDp(P)
             P.R = distm_mex(P.Xp,P.Xp);
         end
         
-        if(size(MF,1)>size(MF,2))
-            MF = MF';
+        Dp = min(MF + (P.R(j,:)>P.adap_rstar)*max(P.adap_D);
+        
+        for j=1:P.N
+            Dp(j) = min(MF+(P.R(j,:)>P.adap_rstar*MF)*)
+            k=0;
         end
-        
-        Dp = min(repmat(MF,P.N,1) + (P.R>P.adap_rstar*repmat(MF,P.N,1))*max(P.adap_D0,P.adap_d0)*100,[],2);
-        
     else
         Dp = (P.D0 + P.d0)/2 * ones(size(P.F));
     end

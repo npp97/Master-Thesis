@@ -1,31 +1,60 @@
-function [ P ] = calc_transform( P )
+ function [ P ] = calc_transform( P )
     %CALC_TRANSFORM Summary of this function goes here
     %   Detailed explanation goes here
 
     switch(P.kernel_aniso)
         case 2
+            % 2: global anisotropic
+            % select particles in \Omega
             ind = P.F>P.fmax*P.thresh;
             X = P.Xp(ind,:);
-            if(size(X,1)>2)
-                P.Xmean = mean(X);
-                Xm = bsxfun(@minus,X,P.Xmean);
+            
+            % tranform only if we have more than pdim points, otherwise the covariance will alway be degenerated
+            if(size(X,1)>P.pdim)
                 if(P.kernel_aniso_method == 2)
+                    % 2: covariance with function value
                     if(size(P.F(ind),2)>size(P.F(ind),1))
                         P.F = P.F';
                     end
-                        
-                    Xf = Xm.*repmat(sqrt(P.F(ind)/P.fmax),1,P.pdim);
+                    % weighted locations
+                    Xf = X.*repmat(P.Dp(ind).*P.F(ind)/P.fmax,1,P.pdim);
+                    % weighted mean
+                    P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)/P.fmax));     
+                    % substract mean
+                    Xm = bsxfun(@minus,X,P.Xmean);
+                    % weighted zero mean points
+                    Xmf = Xm.*repmat(sqrt(P.Dp(ind).*P.F(ind)/P.fmax),1,P.pdim);
+                    try
+                        % take chol decomposition of weighted covariance as transformation
+                        P.Mnew = chol((Xmf'*Xmf)/(sum(P.Dp(ind))));
+                    catch
+                        % regularise if chol is not possible
+                        P.Mnew = chol((Xmf'*Xmf)/(sum(P.Dp(ind))+diag(P.pdim)*1e-10));
+                    end
                 else
-                    Xf = Xm;
+                    % 1: covariance
+                    
+%                     P.Xmean = mean(X);
+%                     Xm = bsxfun(@minus,X,P.Xmean);
+                    try
+                        P.Mnew = chol(cov(Xm));
+                    catch
+                        P.Mnew = chol(cov(Xm)+diag(P.pdim)*1e-10);
+                    end
+                    
                 end
-                try
-                    P.M = chol(cov(Xf));
-                catch
-                    P.M = chol(cov(Xf)+diag(P.pdim)*1e-10);
-                end
+                
+                P.Mnew = P.Mnew/sqrt(abs(det(P.Mnew/P.M)));
+                
+                P.Mdiffinf(P.Riter) = norm(P.M-P.Mnew,inf);
+                P.Mdiffdet(P.Riter) = abs(det(P.Mnew/P.M));
+                
+                P.M = P.Mnew;
+                
             end
 
         case 3
+            % 3: local anisotropic
             if(P.N>2)
                 P.Xmean = mean(P.Xp);
                 

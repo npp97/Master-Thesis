@@ -21,6 +21,10 @@ function [] = plot_points2( P,fig )
     subplot(3,4,1)
     scatter(P.Xp(:,1),P.Xp(:,2),ones(size(P.rcp))*10,log(P.F)/log(10));
     colorbar
+    hold on
+    [V,E] = eig(P.M'*P.M);
+    quiver(P.Xmean(1),P.Xmean(2),30*E(1,1)*V(1,1),30*E(1,1)*V(1,2))
+    quiver(P.Xmean(1),P.Xmean(2),30*E(2,2)*V(2,1),30*E(2,2)*V(2,2))
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
     title('points colored by log-function value');
@@ -79,19 +83,30 @@ function [] = plot_points2( P,fig )
     xlabel('Iteration')
     ylabel('#')
     
+%     subplot(3,4,8)
+%     
+%     if(size(P.Lh,1)>1&&size(P.Lh,2)>1)
+%         surf(P.Lh)
+%         title('histogram of particle age')
+%         xlabel('Age')
+%         ylabel('Iteration')
+%         view(0,90)
+%         shading interp
+%         xlim([1,10]);
+%         ylim([1,iter+1])
+%         colorbar
+%     end
+
     subplot(3,4,8)
     
-    if(size(P.Lh,1)>1&&size(P.Lh,2)>1)
-        surf(P.Lh)
-        title('histogram of particle age')
-        xlabel('Age')
-        ylabel('Iteration')
-        view(0,90)
-        shading interp
-        xlim([1,10]);
-        ylim([1,iter+1])
-        colorbar
-    end
+    plot(1:iter,P.Mdiffinf,'r.-')
+    hold on
+    plot(1:iter,P.Mdiffdet,'b.-')
+    title('Norm of difference in transformation')
+    legend('Inf','det')
+    xlabel('Iteration')
+    ylabel('\Vert \cdot \Vert')
+    
     
     subplot(3,4,9)
     

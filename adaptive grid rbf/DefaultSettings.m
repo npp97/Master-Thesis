@@ -8,7 +8,7 @@ P.ode_abstol = 1e-8;
 
 %% 1.1 Data
 
-P.model = 2;
+P.model = 1;
 
 switch(P.model)
     
@@ -20,7 +20,7 @@ switch(P.model)
         P.mStructdxdt = mStructdxdt;
         P.k=[0.6 0.4];
         P.y0=[1;0]; 
-        P.tN=60;
+        P.tN=15;
         P.species=1;
         P.sigma=0.1;
         P.logscale = [1 1];
@@ -32,6 +32,13 @@ switch(P.model)
             {'k-1', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
             };
         
+        P.tdata=linspace(0,10,P.tN);
+        
+        [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
+        figure(2)
+        plot(P.tdata,yy([1 2],:),'.-')
+        P.ydata = yy(P.species,:)';
+               
     case 2
         P.ode=@dxdt_M2_mex;
         P.gradode = '';
@@ -52,21 +59,54 @@ switch(P.model)
             {'k-1', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
             {'k2', log(P.k(3)), log(P.k(3))-5,log(P.k(3))+5}
             };
-        case 3
+        
+        P.tdata=linspace(0,10,P.tN);
+        
+        [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
+        figure(2)
+        plot(P.tdata,yy([1 2],:),'.-')
+        P.ydata = yy(P.species,:)';
+        
+    case 3
+        P.ode=@dxdt_M1_mex;
+        P.dxdp=@dxdp_M1;
+        P.dxdpdp=@dxdpdp_M1;
+        structdxdt_M1
+        P.mStructdxdt = mStructdxdt;
+        P.k=[0.6 0.4];
+        P.y0=[1;0]; 
+        P.tN=11;
+        P.species=2;
+        P.sigma=0.015;
+        P.logscale = [1 1];
+        P.pdim = 2;
+        P.xdim = 2;
+        
+        P.paramspec = {
+            {'k+1', log(P.k(1)), 1e-3,1e1}
+            {'k-1', log(P.k(2)), 1e-3,1e1}
+            };
             
-
+        P.tdata=linspace(0,10,P.tN);
+        
+        P.ydata=[0.0244;
+            0.0842;
+            0.1208;
+            0.1724;
+            0.2315;
+            0.2634;
+            0.2831;
+            0.3084;
+            0.3079;
+            0.3097;
+            0.3324;];
 end
 
 % true parameters
 
 
 
-P.tdata=linspace(0,10,P.tN);
 
-[~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
-figure(2)
-plot(P.tdata,yy([1 2],:),'.-')
-P.ydata = yy(P.species,:)'; 
 drawnow
 
 %% 1.2 Interpolation area
@@ -75,8 +115,8 @@ P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
 % hard cutoff value
-P.thresh = 1e-4;
-P.rem_thresh = 1e-10;
+P.thresh = 1e-2;
+P.rem_thresh = 1e-20;
 
 %% 1.3 Initial Particle Guess
 
@@ -168,12 +208,12 @@ P.kernel_aniso = 2;
 % 2: global anisotropic
 % 3: local anisotropic
 
-P.kernel_aniso_method = 1;
+P.kernel_aniso_method = 2;
 % 1: covariance
 % 2: covariance with function value
 
 % steps until update of covariance matrix
-P.cov_iter = 1;
+P.cov_iter = 150;
 
 % shape parameter
 P.kernel_shape = 1;
@@ -201,9 +241,9 @@ P.kernel_eps_min = 0;
 P.kernel_eps_max = 1e5;
 
 %% 1.6 Visualisation
-P.vsx = 2;
-P.vsy = 2;
-P.vsT = 3.5;
+P.vsx = 4;
+P.vsy = 4;
+P.vsT = 15;
 P.vsN = 30;
 
 [P.VX,P.VY] = meshgrid(linspace(-P.vsx,P.vsx,P.vsN),linspace(-P.vsy,P.vsy,P.vsN));

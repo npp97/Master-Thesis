@@ -41,9 +41,9 @@ function [ P ] = init( P )
             case 2
                 % initialise transform with fisher matrix of initial point
                 try
-                    P.M = chol(P.S'*P.S);
+                    P.M = chol(pinv(squeeze(P.S(1,:,:))));
                 catch
-                    P.M = chol(P.S'*P.S + 1e-10*diag(P.pdim));
+                    P.M = chol(pinv(squeeze(P.S(1,:,:)) + 1e-10*diag(P.pdim)));
                 end
                 
             case 3

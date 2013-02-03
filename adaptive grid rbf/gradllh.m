@@ -7,7 +7,7 @@ function P = gradllh(P)
     % compute pointwise for every particle
     for j=1:P.N
         p=P.Xp(j,:);
-        [P.F(j),P.DF(j,:),P.S(j,:)] = eval_gradllh(p,P);
+        [P.F(j),P.DF(j,:),P.S(j,:,:)] = eval_gradllh(p,P);
     end
     
 end

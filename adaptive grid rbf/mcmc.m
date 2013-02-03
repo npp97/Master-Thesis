@@ -8,7 +8,7 @@ function [ P ] = mcmc( P )
     model.sigma2 = P.sigma;
     
     % number of simulations
-    options.nsimu = 5000;
+    options.nsimu = 50000;
     % flag whether to update simulations
     options.updatesigma = 0;
     
