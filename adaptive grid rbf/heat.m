@@ -8,7 +8,7 @@ P.adap_d0 = 0.5;
 P.adap_D0 = 1;
 
 P.init_d0 = 1;
-P.init_D0 = 3;
+P.init_D0 = sqrt(2);
 
 %P.vsT = 15;
 
@@ -21,7 +21,7 @@ P.init_trans = 2;
 % P.adap_fusion_method = 2;
 % P.pot = @(r,rstar) V3(r,rstar);
 % P.dpot = @(r,rstar) dV3(r,rstar);
-P.cov_iter = 1;
+P.cov_iter = 150;
 P.grad_iter = 10;
 % P.adap_dc = 1.5;
 
@@ -39,7 +39,7 @@ P.plotinter = 1;
 %% 2.2 Initialization
 
 P = init(P);
-P.adap_Nstar = 6;
+P.adap_Nstar = 7;
 
 %% 2.4 Particle Refinement
 
@@ -58,6 +58,7 @@ plot_points2(P,1)
 P.inferror
 P.l1error
 
+marginals(P);
 
 
 

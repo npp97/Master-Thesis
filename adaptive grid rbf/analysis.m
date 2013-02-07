@@ -67,9 +67,9 @@ for s=1:Ns
         vEg1(l,s) = Ps.l1error;
         
         if(P.kernel_aniso > 2)
-            vIg(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim)/abs(det(Ps.M));
+            vIg(l,s) = sum(Ps.c.*sqrt(pi./Ps.eps.^4).^Ps.pdim)/abs(det(Ps.M));
         else
-            vIg(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim);
+            vIg(l,s) = sum(Ps.c.*sqrt(pi./Ps.eps.^4).^Ps.pdim);
         end
         
         tic;
@@ -81,9 +81,9 @@ for s=1:Ns
         vEl1(l,s) = Ps.l1error;
         
         if(P.kernel_aniso > 2)
-            vIl(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim)/abs(det(Ps.M));
+            vIl(l,s) = sum(Ps.c.*sqrt(pi./Ps.eps.^4).^Ps.pdim)/abs(det(Ps.M));
         else
-            vIl(l,s) = sum(Ps.c.*sqrt(2*pi./Ps.eps.^4).^Ps.pdim);
+            vIl(l,s) = sum(Ps.c.*sqrt(pi./Ps.eps.^4).^Ps.pdim);
         end
         vN(l,s) = Ps.N;
         vR(l,s) = Ps.Riter;

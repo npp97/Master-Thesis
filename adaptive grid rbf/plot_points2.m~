@@ -4,7 +4,7 @@ function [] = plot_points2( P,fig )
     iter = P.Riter;
     Wv = P.W;
     W2v = P.W;
-    Cv = P.RI;
+    Cv = P.CI;
     Nv = P.NI;
     Pv = P.PI;
     Xv = P.XI;
@@ -135,8 +135,6 @@ function [] = plot_points2( P,fig )
 
     subplot(3,4,11)
 
-    hist(P.crit(logical(P.Nlist)),30)
-    xlim([0,P.adap_rstar])
     
     subplot(3,4,12)
     

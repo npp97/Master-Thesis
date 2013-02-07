@@ -28,8 +28,8 @@ switch(P.model)
         P.xdim = 2;
         
         P.paramspec = {
-            {'k+1', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
-            {'k-1', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
+            {'k_{+1}', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
+            {'k_{-1}', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
             };
         
         P.tdata=linspace(0,10,P.tN);
@@ -47,7 +47,7 @@ switch(P.model)
         P.mStructdxdt = mStructdxdt;
         P.k=[0.6 0.4 0.1];
         P.y0=[1;0;4;0];
-        P.tN=60;
+        P.tN=15;
         P.species=[1 4];
         P.sigma = 0.1;
         P.logscale = [1 1 1];
@@ -55,9 +55,9 @@ switch(P.model)
         P.xdim = 4;
         
         P.paramspec = {
-            {'k+1', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
-            {'k-1', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
-            {'k2', log(P.k(3)), log(P.k(3))-5,log(P.k(3))+5}
+            {'k_{+1}', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
+            {'k_{-1}', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
+            {'k_{2}', log(P.k(3)), log(P.k(3))-5,log(P.k(3))+5}
             };
         
         P.tdata=linspace(0,10,P.tN);
@@ -83,8 +83,8 @@ switch(P.model)
         P.xdim = 2;
         
         P.paramspec = {
-            {'k+1', log(P.k(1)), 1e-3,1e1}
-            {'k-1', log(P.k(2)), 1e-3,1e1}
+            {'k_{+1}', log(P.k(1)), 1e-3,1e1}
+            {'k_{-1}', log(P.k(2)), 1e-3,1e1}
             };
             
         P.tdata=linspace(0,10,P.tN);
@@ -114,8 +114,12 @@ drawnow
 P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
-% hard cutoff value
-P.thresh = 1e-2;
+
+% confidence level
+P.alpha = 0.99;
+
+% hard cutoff value 
+P.thresh = exp(-chi2inv(P.alpha,P.pdim)/2);
 P.rem_thresh = 1e-20;
 
 %% 1.3 Initial Particle Guess
@@ -142,7 +146,7 @@ P.adap_method = 1;
 
 
 % spawning method
-P.adap_spawn_method = 1;
+P.adap_spawn_method = 2;
 % 1: randomly in small neighborhood
 % 2: randomly in small neighborhood with mean weighting
 

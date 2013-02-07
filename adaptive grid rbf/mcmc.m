@@ -5,10 +5,11 @@ function [ P ] = mcmc( P )
     % specify the sum of squares function
     model.ssfun = @(k,data) -2*log(eval_llh(k,P));
     % speficy the sigma
-    model.sigma2 = P.sigma;
+    model.sigma2 = 1;
+    model.N = 1;
     
     % number of simulations
-    options.nsimu = 50000;
+    options.nsimu = 10000;
     % flag whether to update simulations
     options.updatesigma = 0;
     
@@ -22,12 +23,21 @@ function [ P ] = mcmc( P )
     
     % mcmc run
     [P.mcresults,P.mcchain,P.mcs2chain] = mcmcrun(model,data,params,options);
-    
-    % autocorrelation length
+    T = chainstats(P.mcchain,P.mcresults);
     P.tau = max(iact(P.mcchain));
     % thin samples
     P.XX = P.mcchain(1:P.tau:end,:);
-    P.NX = size(P.XX,1);
+    P.NX = 0;
+    
+    while(min(T(:,4))<0.9 || P.NX==0)
+        [P.mcresults,P.mcchain,P.mcs2chain] = mcmcrun(model,data,params,options,P.mcresults);
+        T = chainstats(P.mcchain,P.mcresults);
+        P.tau = max(iact(P.mcchain));
+        P.NX = size(P.XX,1);
+        options.nsimu = 2*options.nsimu;
+    end
+    % autocorrelation length
+
     
 end
 

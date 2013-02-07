@@ -12,7 +12,15 @@ function [ P ] = spawn_particles( P )
     
     ind = find(P.adap_Nstar-sum(P.Nlist)>0);
     for l=ind
-        if(P.F(l)>P.fmax*P.thresh)
+        inbound = true;
+        for k=1:P.pdim
+            if(P.Xp(l,k)<P.paramspec{k}{3}||P.Xp(l,k)>P.paramspec{k}{4})
+                inbound = false;
+                break
+            end
+        end
+       
+        if(P.F(l)>P.fmax*P.thresh && inbound)
             if(P.kernel_aniso > 1)
                 nbor = distm_mex(P.Tp(l,:),P.Tp)<min(P.rcp,P.rcp(l))';
                 Nfill=P.adap_Nstar-sum(nbor)+1;

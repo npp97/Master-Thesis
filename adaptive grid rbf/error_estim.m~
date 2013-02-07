@@ -13,12 +13,7 @@ function [ P ] = error_estim( P )
     P.inferror = max(abs(Ftrue-Finterp)/P.fmax);
     P.l1error = 1/P.NX*sum(abs(1-Ftrue./Finterp));
     
-    tri = delaunay(P.XX(:,1),P.XX(:,2));
-    figure(11)
-    clf
-    trisurf(tri,P.XX(:,1),P.XX(:,2),abs(Finterp-Ftrue)/P.fmax);
-    hold on
-    scatter3(P.Xp(:,1),P.Xp(:,2),ones(P.N,1)*P.inferror)
-    set(gca,'ZScale','log')
+    tri = delauney(P.XX(1,:),P.XX(
+    
 end
 

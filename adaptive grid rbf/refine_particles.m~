@@ -129,14 +129,9 @@ function [ P ] = refine_particles( P )
         % check break condition
         if( (P.NI(P.Riter) == 0) && abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<1e-2 && P.Riter > 5 && abs(P.XI(P.Riter) - P.XI(max(P.Riter-1,1))) == 0 )
             P.break_hits = P.break_hits + 1;
-            if(P.break_hits > 5)       
-                break;
-            end
-        else
-            P.break_hits = 0;
+            if(P.break_hits > 5)
+            break;
         end
-        
-
         if(P.switch_fusion_off && sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0)
             P.fuse_hits = P.fuse_hits + 1;        
             if( P.fuse_hits >= P.switch_hits );

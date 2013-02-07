@@ -26,10 +26,10 @@
                     Xmf = Xm.*repmat(sqrt(P.Dp(ind).*P.F(ind)/P.fmax),1,P.pdim);
                     try
                         % take chol decomposition of weighted covariance as transformation
-                        P.Mnew = chol((Xmf'*Xmf)/(sum(P.Dp(ind))));
+                        P.Mnew = sqrtm((Xmf'*Xmf)/(sum(P.Dp(ind))));
                     catch
                         % regularise if chol is not possible
-                        P.Mnew = chol((Xmf'*Xmf)/(sum(P.Dp(ind))+diag(P.pdim)*1e-10));
+                        P.Mnew = sqrtm((Xmf'*Xmf)/(sum(P.Dp(ind))+diag(P.pdim)*1e-10));
                     end
                 else
                     % 1: covariance
@@ -37,9 +37,9 @@
 %                     P.Xmean = mean(X);
 %                     Xm = bsxfun(@minus,X,P.Xmean);
                     try
-                        P.Mnew = chol(cov(Xm));
+                        P.Mnew = sqrtm(cov(Xm));
                     catch
-                        P.Mnew = chol(cov(Xm)+diag(P.pdim)*1e-10);
+                        P.Mnew = sqrtm(cov(Xm)+diag(P.pdim)*1e-10);
                     end
                     
                 end
@@ -47,7 +47,7 @@
                 P.Mnew = P.Mnew/sqrt(abs(det(P.Mnew/P.M)));
                 
                 P.Mdiffinf(P.Riter) = norm(P.M-P.Mnew,inf);
-                P.Mdiffdet(P.Riter) = abs(det(P.Mnew/P.M));
+                P.Mdifffish(P.Riter) = norm(P.Minit-P.Mnew,inf);
                 
                 P.M = P.Mnew;
                 
