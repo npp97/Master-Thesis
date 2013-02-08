@@ -4,11 +4,11 @@ clf
 DefaultSettings
 
 
-P.adap_d0 = 0.5;
-P.adap_D0 = 1;
+P.adap_d0 = 2.5;
+P.adap_D0 = 2.5;
 
 P.init_d0 = 1;
-P.init_D0 = sqrt(2);
+P.init_D0 = 2;
 
 %P.vsT = 15;
 
@@ -39,7 +39,6 @@ P.plotinter = 1;
 %% 2.2 Initialization
 
 P = init(P);
-P.adap_Nstar = 7;
 
 %% 2.4 Particle Refinement
 

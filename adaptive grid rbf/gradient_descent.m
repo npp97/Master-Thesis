@@ -4,11 +4,9 @@ function [ P ] = gradient_descent( P )
     % compute total energy and gradient
     P.Dpq = bsxfun(@min,P.Dp,P.Dp');
     if(P.kernel_aniso > 1)
-        P.R = distm_mex(P.Tp,P.Tp);
         XX = P.Tp;
         P.wp = zeros(size(P.Tp));
     else
-        P.R = distm_mex(P.Xp,P.Xp);
         XX = P.Xp;
         P.wp = zeros(size(P.Xp));
     end

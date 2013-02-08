@@ -15,10 +15,9 @@ function [ P ] = gradient_step( P )
     
     if(P.kernel_aniso > 1)
         P.Tp = P.Tp + gamma*P.wp;
-        P.R = distm(P.Tp,P.Tp);
+        P.R = distm(P.
     else
         P.Xp = P.Xp + gamma*P.wp;
-        P.R = distm(P.Xp,P.Xp);
     end
     
     

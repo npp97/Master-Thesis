@@ -2,13 +2,8 @@ function [ P ] = spawn_particles( P )
     %NEW_PARTICLES Inserts new particles where neighborhood is too small
     %   Detailed explanation goes here
     P.kspawn(P.Riter)=0;
-    if(P.kernel_aniso > 1)
-        P.R = distm_mex(P.Tp,P.Tp);
-    else
-        P.R = distm_mex(P.Xp,P.Xp);
-    end
-    P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1))-eye(P.N));
     
+    P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1))-eye(P.N));
     
     ind = find(P.adap_Nstar-sum(P.Nlist)>0);
     for l=ind
@@ -22,10 +17,10 @@ function [ P ] = spawn_particles( P )
        
         if(P.F(l)>P.fmax*P.thresh && inbound)
             if(P.kernel_aniso > 1)
-                nbor = distm_mex(P.Tp(l,:),P.Tp)<min(P.rcp,P.rcp(l))';
+                nbor = distm(P.Tp(l,:),P.Tp)<min(P.rcp,P.rcp(l))';
                 Nfill=P.adap_Nstar-sum(nbor)+1;
             else
-                nbor = distm_mex(P.Xp(l,:),P.Xp)<min(P.rcp,P.rcp(l))';
+                nbor = distm(P.Xp(l,:),P.Xp)<min(P.rcp,P.rcp(l))';
                 Nfill=P.adap_Nstar-sum(nbor)+1;
             end
             
@@ -66,6 +61,14 @@ function [ P ] = spawn_particles( P )
                         P.F(end+1) = eval_llh(xnew,P);
                     end
                 end
+                if(P.kernel_aniso > 1)
+                    Rnew = distm(P.Tp(end,:),P.Tp(1:end-1,:));            
+                else
+                    Rnew = distm(P.Xp(end,:),P.Xp(1:end-1,:));
+                end
+                
+                P.R = [P.R,Rnew';Rnew,0];
+                
                 P.Lp(end+1) = 0;
                 P.rcp(end+1) = P.adap_rstar*P.Dp(end);
                 if(P.kernel_aniso == 3)

@@ -12,10 +12,7 @@ function [ P ] = interp( P )
     
     switch(P.kernel_inverse)
         case 1
-            P.eps = fminsearch(@(ep) CostEps(ep,P),2/mean(P.rcp));
-            P.eps = fminsearch(@(ep) CostEps(ep,P),P.eps);
-            P.eps = fminsearch(@(ep) CostEps(ep,P),P.eps);
-            P.eps = fminsearch(@(ep) CostEps(ep,P),P.eps);
+            P.eps = fminbnd(@(ep) CostEps(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp),optimset('Display','iter'));
             
             if(P.kernel_shape == 2)
                 P.eps = P.eps./P.rcp;
@@ -26,7 +23,7 @@ function [ P ] = interp( P )
             P.RBF = rbf(P.R,P.eps);
             P.c = P.RBF\P.F;
         case 2
-            P.eps = fminbnd(@(ep) CostEpsRiley(ep,P),P.kernel_eps_min,P.kernel_eps_max);
+            P.eps = fminbnd(@(ep) CostEpsRiley(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp));
             
             if(P.kernel_shape == 2)
                 P.eps = P.eps./P.rcp;

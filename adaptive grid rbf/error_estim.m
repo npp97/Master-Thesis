@@ -20,5 +20,11 @@ function [ P ] = error_estim( P )
     hold on
     scatter3(P.Xp(:,1),P.Xp(:,2),ones(P.N,1)*P.inferror)
     set(gca,'ZScale','log')
+    
+    figure(13)
+    
+    A = rbf(P.R,P.eps);
+    invA = pinv(A);
+    EF = (invA*P.F)./diag(invA);
 end
 

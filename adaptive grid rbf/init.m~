@@ -90,11 +90,7 @@ function [ P ] = init( P )
     
     if(P.adap_method == 1 || P.adap_method == 2 || P.adap_method == 3)
         % initialise neighborhood sizes
-        if(P.kernel_aniso > 1)
-            P.R = distm(P.Tp,P.Tp);
-        else
-            P.R = distm(P.Xp,P.Xp);
-        end
+        P.R = distm(P
         P = exactDp(P);
     end
     

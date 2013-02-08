@@ -24,20 +24,24 @@ function [ P ] = mcmc( P )
     % mcmc run
     [P.mcresults,P.mcchain,P.mcs2chain] = mcmcrun(model,data,params,options);
     T = chainstats(P.mcchain,P.mcresults);
-    P.tau = max(iact(P.mcchain));
     % thin samples
-    P.XX = P.mcchain(1:P.tau:end,:);
-    P.NX = 0;
-    
-    while(min(T(:,4))<0.9 || P.NX==0)
-        [P.mcresults,P.mcchain,P.mcs2chain] = mcmcrun(model,data,params,options,P.mcresults);
+
+    nmcmc=1;
+    while(any([min(T(:,5))<0.9, nmcmc==1]))
+        [P.mcresults,mcchain,P.mcs2chain] = mcmcrun(model,data,params,options,P.mcresults);
+        if(nmcmc>1)
+            P.mcchain=[P.mcchain;mcchain];
+        else
+            P.mcchain=mcchain;
+        end
         T = chainstats(P.mcchain,P.mcresults);
         P.tau = max(iact(P.mcchain));
-        P.NX = size(P.XX,1);
-        options.nsimu = 2*options.nsimu;
+
+        nmcmc=nmcmc+1;
     end
-    % autocorrelation length
 
     
+    P.XX = P.mcchain(1:P.tau:end,:);
+    P.NX = size(P.XX,1);
 end
 

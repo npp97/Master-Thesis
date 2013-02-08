@@ -9,10 +9,12 @@ function [ P ] = fuse_particles( P )
             % initialise counter
             P.kfuse(P.Riter)=0;
             % compute distances
-            if(P.kernel_aniso > 1)
-                P.R = distm_mex(P.Tp,P.Tp);
-            else
-                P.R = distm_mex(P.Xp,P.Xp);
+            if(P.Riter == 1) % otherwise we have already computed the distances in the previous iteration
+                if(P.kernel_aniso > 1)
+                    P.R = distm(P.Tp,P.Tp);
+                else
+                    P.R = distm(P.Xp,P.Xp);
+                end
             end
             % compute neighborhood sizes
             P.Dpq = bsxfun(@min,P.Dp,P.Dp');
@@ -30,6 +32,8 @@ function [ P ] = fuse_particles( P )
                     P.M(:,:,ti)=[];
                 end
             end
+            P.R(ti,:)=[];
+            P.R(:,ti)=[];
             P.F(ti)=[];
             P.Lp(ti)=[];
             P.rcp(ti)=[];

@@ -2,12 +2,6 @@ function P = exactDp(P)
     if(P.adap_method == 1)
         MF=monitor_function(sqrt(((P.D0/P.d0)^2-1))*P.F/P.fmax,P.D0);
         
-        if(P.kernel_aniso > 1)
-            P.R = distm_mex(P.Tp,P.Tp);
-        else
-            P.R = distm_mex(P.Xp,P.Xp);
-        end
-        
         if(size(MF,1)>size(MF,2))
             MF = MF';
         end

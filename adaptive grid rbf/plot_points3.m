@@ -4,7 +4,7 @@ function [] = plot_points3( P,fig )
     iter = P.Riter;
     Wv = P.W;
     W2v = P.W;
-    Cv = P.CI;
+    Cv = P.RI;
     Nv = P.NI;
     Pv = P.PI;
     Xv = P.XI;
@@ -16,11 +16,18 @@ function [] = plot_points3( P,fig )
     end
     
     figure(fig)
+    clf
     
     subplot(3,4,1)
     scatter3(P.Xp(:,1),P.Xp(:,2),P.Xp(:,3),ones(size(P.rcp))*10,log(P.F)/log(10));
     colorbar
-
+    hold on
+    [V,E] = eig(P.M*P.M);
+    quiver3(P.Xmean(1),P.Xmean(2),P.Xmean(3),30*E(1,1)*V(1,1),30*E(1,1)*V(1,2),30*E(1,1)*V(1,3))
+    quiver3(P.Xmean(1),P.Xmean(2),P.Xmean(3),30*E(2,2)*V(2,1),30*E(2,2)*V(2,2),30*E(2,2)*V(2,3))
+    quiver3(P.Xmean(1),P.Xmean(2),P.Xmean(3),30*E(3,3)*V(3,1),30*E(3,3)*V(3,2),30*E(3,3)*V(3,3))
+    xlim([-P.vsx,P.vsx])
+    ylim([-P.vsy,P.vsy])
     title('points colored by log-function value');
     
     if(P.kernel_aniso == 3)

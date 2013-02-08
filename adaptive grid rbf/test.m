@@ -1,10 +1,10 @@
 
-Ne=20;
-Nt=5;
+Ne=10;
+Nt=2;
 et=linspace(0,1,Nt);
-ee=logspace(-0.1,1,Ne);
+ee=logspace(-1,0,Ne);
 
-Ftrue = arrayfun(@(x,y) eval_llh([x y],Ps),Ps.XX(:,1),Ps.XX(:,2));
+Ftrue = arrayfun(@(x,y,z) eval_llh([x y z],Ps),Ps.XX(:,1),Ps.XX(:,2),Ps.XX(:,3));
 
 
 erf=zeros(Ne,1);

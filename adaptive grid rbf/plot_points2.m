@@ -22,7 +22,7 @@ function [] = plot_points2( P,fig )
     scatter(P.Xp(:,1),P.Xp(:,2),ones(size(P.rcp))*10,log(P.F)/log(10));
     colorbar
     hold on
-    [V,E] = eig(P.M'*P.M);
+    [V,E] = eig(P.M*P.M);
     quiver(P.Xmean(1),P.Xmean(2),30*E(1,1)*V(1,1),30*E(1,1)*V(1,2))
     quiver(P.Xmean(1),P.Xmean(2),30*E(2,2)*V(2,1),30*E(2,2)*V(2,2))
     xlim([-P.vsx,P.vsx])
@@ -62,7 +62,7 @@ function [] = plot_points2( P,fig )
     title('particle age (Iterations)');
     
     subplot(3,4,5)
-    gscatter(XX(:,1),XX(:,2),and((sum(P.Nlist,2)<P.adap_Nstar),(P.F>P.thresh*P.fmax)),'br','ox')
+    gscatter(XX(:,1),XX(:,2),and((sum(P.Nlist,2)<=P.adap_Nstar),(P.F>P.thresh*P.fmax)),'br','ox')
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
     legend('sufficient or not in \Omega','too small and in \Omega')

@@ -1,15 +1,24 @@
 function [ P ] = refine_particles( P )
     %REFINE_PARTICLES Summary of this function goes here
     %   Detailed explanation goes here
-    P.Riter = 1;
-
-    % Initialise Values that are updated every iteration
-    P.NI = [];
-    P.CI = [];
-    P.PI = [];
-    P.XI = [];
-    P.Lh = [];
-    P.W = [];
+    
+    
+    % we might start from a previous run
+    try
+        P.Riter = P.Riter;
+    catch
+        
+        
+        P.Riter = 1;
+        
+        % Initialise Values that are updated every iteration
+        P.NI = [];
+        P.CI = [];
+        P.PI = [];
+        P.XI = [];
+        P.Lh = [];
+        P.W = [];
+    end
     P.fuse_hits = 0;
     P.break_hits = 0;
     
@@ -97,9 +106,9 @@ function [ P ] = refine_particles( P )
         
         % update distances
         if(P.kernel_aniso > 1)
-            P.R = distm_mex(P.Tp,P.Tp);
+            P.R = distm(P.Tp,P.Tp);
         else
-            P.R = distm_mex(P.Xp,P.Xp);
+            P.R = distm(P.Xp,P.Xp);
         end
         P.Dpq = bsxfun(@min,P.Dp,P.Dp');
         
@@ -127,7 +136,7 @@ function [ P ] = refine_particles( P )
         end
         
         % check break condition
-        if( (P.NI(P.Riter) == 0) && abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<1e-2 && P.Riter > 5 && abs(P.XI(P.Riter) - P.XI(max(P.Riter-1,1))) == 0 )
+        if( abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<1e-2 && P.Riter > 5 && abs(P.XI(P.Riter) - P.XI(max(P.Riter-1,1))) == 0 )
             P.break_hits = P.break_hits + 1;
             if(P.break_hits > 5)       
                 break;

@@ -8,7 +8,7 @@ P.ode_abstol = 1e-8;
 
 %% 1.1 Data
 
-P.model = 1;
+P.model = 2;
 
 switch(P.model)
     
@@ -41,6 +41,7 @@ switch(P.model)
                
     case 2
         P.ode=@dxdt_M2_mex;
+        P.dxdp=@dxdp_M2;
         P.gradode = '';
         P.lapode = '';
         structdxdt_M2

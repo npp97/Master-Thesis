@@ -11,7 +11,7 @@ function [f,Df,F] = eval_gradllh(p,P)
     % compute likelihood
     f = exp(sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma)))));
     
-    MS = zeros(pdim,pdim);
+    MS = zeros(xdim,pdim);
     % compute gradient
     Df = zeros(1,P.pdim);
     F = zeros(P.pdim,P.pdim);
@@ -20,8 +20,8 @@ function [f,Df,F] = eval_gradllh(p,P)
             DXDP = reshape(yy(tk,xdim+1:end),xdim,pdim);
             jspec = 1;
             for s=P.species
-                Df = f*2*(P.ydata(tk,jspec)-yy(tk,P.species))/P.sigma^2*DXDP(s,:).*(P.logscale.*exp(p) + (1-P.logscale));
-                Dlogf = 2*(P.ydata(tk,jspec)-yy(tk,P.species))/P.sigma^2*DXDP(s,:).*(P.logscale.*exp(p) + (1-P.logscale));
+                Df = f*2*(P.ydata(tk,jspec)-yy(tk,s))/P.sigma^2*DXDP(s,:).*(P.logscale.*exp(p) + (1-P.logscale));
+                Dlogf = 2*(P.ydata(tk,jspec)-yy(tk,s))/P.sigma^2*DXDP(s,:).*(P.logscale.*exp(p) + (1-P.logscale));
                 jspec=jspec+1;
                 F = F + 1/P.sigma^2*(DXDP(s,:)'*DXDP(s,:));
             end
