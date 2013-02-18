@@ -1,7 +1,7 @@
 function W = OrgEnergy(P,g)
     if(P.kernel_aniso > 1)
         P.Tp = P.Tp + g*P.wp;
-        P.R = sqrt(sqdistance(P.Tp'));
+        P.R = sqrt(sqdistance((P.Tp'));
         Dp = P.cDp(P.Tp);
         if (any(isnan(Dp)) || numel(Dp)==0)
             Dp(isnan(Dp)) = P.cDpNN(P.Tp(isnan(Dp),:));

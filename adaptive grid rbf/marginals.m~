@@ -4,7 +4,7 @@ function marginals( P )
     figure(12)
     clf
     
-    if(P.kernel_aniso > 2)
+    if(P.kernel_aniso > 1)
         Integral = sum(P.c.*sqrt(pi./P.eps.^4).^P.pdim)/abs(det(P.M));
     else
         Integral = sum(P.c.*sqrt(pi./P.eps.^4).^P.pdim);
@@ -33,9 +33,9 @@ function marginals( P )
                 % 1D
                 
                 % evaluation points
-                xx = linspace(min(P.Xp(P.F>P.fmax*P.thresh,j)),max(P.Xp(P.F>P.fmax*P.thresh,j)),NV)';
+                xx = linspace(P.paramspec{j}{3},P.paramspec{j}{4},NV)';
                 % distances
-                rr = distm_mex(xx/P.M,P.Xp(P.F>P.fmax*P.thresh,j)/P.M);
+                rr = sqrt(sqdistance(xx',P.Xp(:,j)'));
                 % sigma
                 sigma = sqrt(SIGMA(j,j));
                 % evaluate rbf
@@ -43,7 +43,7 @@ function marginals( P )
                 plot(xx,yy,'r-')
                 hold on
                 % kde 
-                [~,kdedens,kdexx]=kde(P.mcchain(:,j),NV,min(P.Xp(:,j)),max(P.Xp(:,j)));
+                [~,kdedens,kdexx]=kde(P.mcchain(:,j),NV,P.paramspec{j}{3},P.paramspec{j}{4});
                 plot(kdexx,kdedens,'k-')
                 % numerical integration
                 if(P.pdim==2)
@@ -51,27 +51,30 @@ function marginals( P )
                 end
                 legend('rbf on particles','kde on mcmc samples','trapezoidal integration on equidistant grid')
                 
-                xlim([min(P.Xp(P.F>P.fmax*P.thresh,j)),max(P.Xp(P.F>P.fmax*P.thresh,j))]);
+                xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
                 xlabel(['log(' P.paramspec{j}{1} ')'])
             else
                 % 2D 
                 
                 % evaluation points
-                xx = linspace(min(P.Xp(:,k)),max(P.Xp(:,k)),NV);
-                yy = linspace(min(P.Xp(:,j)),max(P.Xp(:,j)),NV);
+                xx = linspace(P.paramspec{k}{3},P.paramspec{k}{4},NV);
+                yy = linspace(P.paramspec{j}{3},P.paramspec{j}{4},NV);
                 
                 [XX,YY] = meshgrid(xx,yy);
                 
                 X = [XX(:),YY(:)];
 
-                SIS = sqrtm(SIGMA([k j],[k j]));
-                
-                rr = distm_mex(X/SIS,P.Xp(:,[k j])/SIS);
+                SIS = pinv(sqrtm(SIGMA([k j],[k j])));
+                if(P.kernel_aniso > 1)
+                    rr = sqrt(sqdistance((bsxfun(@minus,X,P.Xmean([k j]))*SIS)',(bsxfun(@minus,P.Xp(:,[k j]),P.Xmean([k j]))*SIS)'));
+                else
+                    rr = sqrt(sqdistance((X)',(P.Xp(:,[k j]))'));
+                end
                 Z = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi^2))*rbf(rr,P.eps)*P.c/sum(P.c);
                 
                 surf(XX,YY,reshape(Z,size(XX)));
-                xlim([min(P.Xp(P.F>P.fmax*P.thresh,k)),max(P.Xp(P.F>P.fmax*P.thresh,k))]);
-                ylim([min(P.Xp(P.F>P.fmax*P.thresh,j)),max(P.Xp(P.F>P.fmax*P.thresh,j))]);
+                xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);
+                ylim([P.paramspec{j}{3},P.paramspec{j}{4}]);
                 view(0,90)
                 shading interp
                 xlabel(['log(' P.paramspec{k}{1} ')'])

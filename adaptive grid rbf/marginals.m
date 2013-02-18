@@ -1,10 +1,12 @@
 function marginals( P )
     %MARGINALS Takes problem P and plots the marginals for the rbf approximate
     
+    disp(['------- Computing Marginals -------'])
+    
     figure(12)
     clf
     
-    if(P.kernel_aniso > 2)
+    if(P.kernel_aniso > 1)
         Integral = sum(P.c.*sqrt(pi./P.eps.^4).^P.pdim)/abs(det(P.M));
     else
         Integral = sum(P.c.*sqrt(pi./P.eps.^4).^P.pdim);
@@ -35,7 +37,7 @@ function marginals( P )
                 % evaluation points
                 xx = linspace(P.paramspec{j}{3},P.paramspec{j}{4},NV)';
                 % distances
-                rr = distm_mex(xx,P.Xp(:,j));
+                rr = sqrt(sqdistance(xx',P.Xp(:,j)'));
                 % sigma
                 sigma = sqrt(SIGMA(j,j));
                 % evaluate rbf
@@ -46,6 +48,8 @@ function marginals( P )
                 [~,kdedens,kdexx]=kde(P.mcchain(:,j),NV,P.paramspec{j}{3},P.paramspec{j}{4});
                 plot(kdexx,kdedens,'k-')
                 % numerical integration
+                scatter(P.Xp(:,j),0.1*P.c/max(abs(P.c)))
+                
                 if(P.pdim==2)
                     plot(xx,nummargin(j,:),'b-')
                 end
@@ -64,9 +68,12 @@ function marginals( P )
                 
                 X = [XX(:),YY(:)];
 
-                SIS = sqrtm(SIGMA([k j],[k j]));
-                
-                rr = distm_mex(X/SIS,P.Xp(:,[k j])/SIS);
+                SIS = pinv(sqrtm(SIGMA([k j],[k j])));
+                if(P.kernel_aniso > 1)
+                    rr = sqrt(sqdistance((bsxfun(@minus,X,P.Xmean([k j]))*SIS)',(bsxfun(@minus,P.Xp(:,[k j]),P.Xmean([k j]))*SIS)'));
+                else
+                    rr = sqrt(sqdistance((X)',(P.Xp(:,[k j]))'));
+                end
                 Z = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi^2))*rbf(rr,P.eps)*P.c/sum(P.c);
                 
                 surf(XX,YY,reshape(Z,size(XX)));

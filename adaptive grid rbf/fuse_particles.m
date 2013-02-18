@@ -11,9 +11,9 @@ function [ P ] = fuse_particles( P )
             % compute distances
             if(P.Riter == 1) % otherwise we have already computed the distances in the previous iteration
                 if(P.kernel_aniso > 1)
-                    P.R = distm(P.Tp,P.Tp);
+                    P.R = sqrt(sqdistance(P.Tp'));
                 else
-                    P.R = distm(P.Xp,P.Xp);
+                    P.R = sqrt(sqdistance(P.Xp'));
                 end
             end
             % compute neighborhood sizes

@@ -44,12 +44,10 @@ function [ P ] = calc_transform( P )
                     
                 end
                 
-                P.Mnew = P.Mnew/((abs(det(P.Mnew/P.M)))^(1/P.pdim));
-                try
+                P.Mnew = P.Mnew/((abs(det(P.Mnew/P.M)))^);
+                
                 P.Mdiffinf(P.Riter) = norm(P.M-P.Mnew,inf);
                 P.Mdifffish(P.Riter) = norm(P.Minit-P.Mnew,inf);
-                catch
-                end
                 
                 P.M = P.Mnew;
                 

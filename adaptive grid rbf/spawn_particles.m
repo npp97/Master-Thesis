@@ -17,10 +17,10 @@ function [ P ] = spawn_particles( P )
        
         if(P.F(l)>P.fmax*P.thresh && inbound)
             if(P.kernel_aniso > 1)
-                nbor = distm(P.Tp(l,:),P.Tp)<min(P.rcp,P.rcp(l))';
+                nbor = sqrt(sqdistance(P.Tp(l,:)',P.Tp'))<min(P.rcp,P.rcp(l))';
                 Nfill=P.adap_Nstar-sum(nbor)+1;
             else
-                nbor = distm(P.Xp(l,:),P.Xp)<min(P.rcp,P.rcp(l))';
+                nbor = sqrt(sqdistance(P.Xp(l,:)',P.Xp'))<min(P.rcp,P.rcp(l))';
                 Nfill=P.adap_Nstar-sum(nbor)+1;
             end
             
@@ -61,13 +61,6 @@ function [ P ] = spawn_particles( P )
                         P.F(end+1) = eval_llh(xnew,P);
                     end
                 end
-                if(P.kernel_aniso > 1)
-                    Rnew = distm(P.Tp(end,:),P.Tp(1:end-1,:));            
-                else
-                    Rnew = distm(P.Xp(end,:),P.Xp(1:end-1,:));
-                end
-                
-                P.R = [P.R,Rnew';Rnew,0];
                 
                 P.Lp(end+1) = 0;
                 P.rcp(end+1) = P.adap_rstar*P.Dp(end);
@@ -81,6 +74,12 @@ function [ P ] = spawn_particles( P )
                 P.rcp=P.rcp';
             end
         end
+    end
+    
+    if(P.kernel_aniso > 1)
+        P.R = sqrt(sqdistance(P.Tp'));
+    else
+        P.R = sqrt(sqdistance(P.Xp'));
     end
 end
 

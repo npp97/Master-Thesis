@@ -115,19 +115,26 @@ drawnow
 P.method_thresh = 1;
 % 1: hard cutoff relative to maximum
 
-
-% confidence level
+% confidence level defining spawing cutoff
 P.alpha = 0.99;
 
 % hard cutoff value 
-P.thresh = exp(-chi2inv(P.alpha,P.pdim)/2);
-P.rem_thresh = 1e-20;
+P.rem_thresh = 1e-100;
 
 %% 1.3 Initial Particle Guess
 
 % method for spawning particles
 P.init_method = 1;
 % 1: single point at modes
+% 2: lattice
+
+P.init_lattice = 1;
+% 1: Zn
+% 2: An
+% 3: Dn
+
+% lattice scaling
+P.init_latt_d = 3;
 
 P.init_trans = 1;
 % 1: Identity matrix

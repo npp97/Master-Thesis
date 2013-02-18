@@ -11,7 +11,8 @@ function [ P ] = gradient_step( P )
         P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
     end
     
-    [gamma,P.W(P.Riter)] = fminsearch(@(g) OrgEnergy(P,g),0,P.opts);
+    [gamma,P.W(P.Riter)] = fminbnd(@(g) OrgEnergy(P,g),0,1,P.opts);
+    gamma
     
     if(P.kernel_aniso > 1)
         P.Tp = P.Tp + gamma*P.wp;

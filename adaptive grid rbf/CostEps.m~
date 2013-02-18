@@ -39,7 +39,7 @@ function [ ceps ] = CostEps( ep,P )
                 else
                     EF(k) = abs(rbf(sqrt(sqdistance(P.Xp([1:k-1 k+1:end],:)',P.Xp(k,:))),ep)*c-P.F(k));
                 end
-            end
+            
             
     end
 end

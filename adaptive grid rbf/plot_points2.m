@@ -4,7 +4,6 @@ function [] = plot_points2( P,fig )
     iter = P.Riter;
     Wv = P.W;
     W2v = P.W;
-    Cv = P.RI;
     Nv = P.NI;
     Pv = P.PI;
     Xv = P.XI;
@@ -13,6 +12,12 @@ function [] = plot_points2( P,fig )
         XX = P.Tp;
     else
         XX = P.Xp;
+    end
+    
+    try
+        P.Nlist;
+    catch
+        P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
     end
     
     figure(fig)
@@ -34,8 +39,7 @@ function [] = plot_points2( P,fig )
         P.vsy = P.vsT;
     end
     
-    subplot(3,4,2)
-    
+    subplot(3,4,2)    
     scatter(XX(:,1),XX(:,2),16*(sum(P.Nlist,1)+1)/max(sum(P.Nlist,1)),sum(P.Nlist,2))
     %surf(VX,VY,reshape(VI*(sum(Nlist,2)+1),size(VX)))
     xlim([-P.vsx,P.vsx])
@@ -62,7 +66,7 @@ function [] = plot_points2( P,fig )
     title('particle age (Iterations)');
     
     subplot(3,4,5)
-    gscatter(XX(:,1),XX(:,2),and((sum(P.Nlist,2)<=P.adap_Nstar),(P.F>P.thresh*P.fmax)),'br','ox')
+    gscatter(XX(:,1),XX(:,2),or((sum(P.Nlist,2)<=P.adap_Nstar),(P.F>P.thresh*P.fmax)),'br','ox')
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
     legend('sufficient or not in \Omega','too small and in \Omega')
@@ -106,8 +110,7 @@ function [] = plot_points2( P,fig )
     legend('previous iterations','fisher-information')
     xlabel('Iteration')
     ylabel('\Vert \cdot \Vert')
-    
-    
+     
     subplot(3,4,9)
     
     plot(1:iter,Wv./Xv,'b.-')

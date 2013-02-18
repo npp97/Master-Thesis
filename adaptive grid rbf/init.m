@@ -2,6 +2,9 @@ function [ P ] = init( P )
     %INIT Initialises the algorithm with an initial particle distribution
     % and an approximation to the anisotropy transformation
     
+    
+    disp(['------- Initialising Problem -------'])
+    
     % compute target neighborhood size
     %P = find_Nsize( P );  
     switch(P.pdim)
@@ -14,7 +17,14 @@ function [ P ] = init( P )
         case 4
             P.adap_Nstar = 24;
     end
-
+    
+    disp(['Neighborhood Size: ' num2str(P.adap_Nstar)])
+    
+    % compute soft spawning stop
+    P.thresh = exp(-chi2inv(P.alpha,P.pdim)/2);
+    
+    disp(['Relative spawning factor: ' num2str(P.thresh)]);
+                
     P.D0 = P.init_D0;
     P.d0 = P.init_d0;
     
@@ -69,8 +79,9 @@ function [ P ] = init( P )
         
     end
     
+    
     % initialise particle ages
-    P.Lp = ones(size(P.Xp,1),1);
+    
 
     %% 2.3 Initial particle distribution
     
@@ -78,9 +89,44 @@ function [ P ] = init( P )
     P.Iiter = 1;
     P.Init_rad = P.D0;
     
+    
     switch(P.init_method)
         case 1
+            disp(['Initialising with single point at mode'])
             % nothing to do, we already have the modes!
+        case 2
+            %Generator Matrix
+            switch(P.init_lattice)
+                case 1
+                    disp(['Initialising with Z lattice'])
+                    M = eye(P.pdim);
+                case 2
+                    disp(['Initialising with A lattice'])
+                    M = [diag(-ones(P.pdim,1),0)+diag(ones(P.pdim-1,1),1),[zeros(P.pdim-1,1);1]];
+                case 3
+                    disp(['Initialising with D lattice'])
+                    M = [diag(-ones(P.pdim,1),0)+diag(ones(P.pdim-1,1),1)'];
+                    M(1,2) = -1;
+            end
+            % Gram Matrix
+            P.Gram = P.init_latt_d*((M*M')*P.M);
+            % generate the lattice
+            P = generate_lattice(P);
+%             if(P.kernel_aniso > 1);
+%                 disp(['Regenerating Lattice with updated Covariance Matrix'])
+%                 P = XptoTp(P);
+%                 P.N = size(P.Xp,1);
+%                 if(P.kernel_aniso > 1) 
+%                     P.R = sqrt(sqdistance(P.Tp'));
+%                 else
+%                     P.R = sqrt(sqdistance(P.Xp'));
+%                 end
+%                 P = exactDp(P);
+%                 P = calc_transform( P );
+%                 P.Gram = P.init_latt_d*((M*M')*P.M);
+%                 P = generate_lattice(P);
+%             end
+            P = XptoTp(P);
     end
     
     % compute number of points
@@ -91,14 +137,20 @@ function [ P ] = init( P )
     if(P.adap_method == 1 || P.adap_method == 2 || P.adap_method == 3)
         % initialise neighborhood sizes
         if(P.kernel_aniso > 1)
-            P.R = distm(P.Tp,P.Tp);
+            
+            P.R = sqrt(sqdistance(P.Tp'));
         else
-            P.R = distm(P.Xp,P.Xp);
+            P.R = sqrt(sqdistance(P.Xp'));
         end
         P = exactDp(P);
     end
     
+    P.Lp = ones(size(P.Xp,1),1);
+    
     % approximate with markov chain, this will be used for error calculation later on
+    
+    disp(['Running MCMC for error calcuations'])
+    
     P = mcmc(P);
     
 end

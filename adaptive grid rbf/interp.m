@@ -1,15 +1,17 @@
 function [ P ] = interp( P )
     %INTERP Summary of this function goes here
     %   Detailed explanation goes here
+    
+    disp(['------- RBF Interpolation -------'])
+    
     if(P.kernel_aniso > 1)
-        P.R = distm_mex(P.Tp,P.Tp);
+        P.R = sqrt(sqdistance(P.Tp'));
     else
-        P.R = distm_mex(P.Xp,P.Xp);
+        P.R = sqrt(sqdistance(P.Xp'));
     end
+    
     P = llh(P);
-    
 
-    
     switch(P.kernel_inverse)
         case 1
             P.eps = fminbnd(@(ep) CostEps(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp),optimset('Display','iter'));

@@ -2,6 +2,7 @@ function [ P ] = refine_particles( P )
     %REFINE_PARTICLES Summary of this function goes here
     %   Detailed explanation goes here
     
+    disp(['------- Refining Particles -------'])
     
     % we might start from a previous run
     try
@@ -22,7 +23,7 @@ function [ P ] = refine_particles( P )
     P.fuse_hits = 0;
     P.break_hits = 0;
     
-    while(true)
+    while(P.Riter < P.max_iter)
         
         % find particles that are below removal threshold
         ind = P.F > P.fmax*P.rem_thresh;
@@ -39,6 +40,7 @@ function [ P ] = refine_particles( P )
         P.Dp = P.Dp(ind);
         P.Lp = P.Lp(ind);
         P.rcp = P.rcp(ind);
+        P.R = P.R(ind,ind);
         
         % update number of points
         P.N = size(P.Xp,1);
@@ -156,9 +158,7 @@ function [ P ] = refine_particles( P )
         else
             P.fuse_hits = 0;
         end
-        if(P.Riter > P.max_iter)
-            break;
-        end
+
         P.Riter = P.Riter+1;
     end
     

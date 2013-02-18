@@ -20,6 +20,15 @@ Ps.kernel_shape = 2;
 
 figure(11)
 clf
+
+if(Ps.kernel_aniso > 1)
+    RR = sqrt(sqdistance(Ps.Tp'));
+    RE = sqrt(sqdistance((bsxfun(@minus,Ps.XX,Ps.Xmean)/Ps.M)',Ps.Tp'));
+else
+    RR = sqrt(sqdistance(Ps.Xp'));
+    RE = sqrt(sqdistance(Ps.XX',Ps.Xp'));
+end
+
 for k=1:Nt
     for j=1:Ne;
         if(Ps.kernel_shape == 2)
@@ -27,13 +36,10 @@ for k=1:Nt
         else
             Ps.eps = ee(j)/mean(Ps.rcp);
         end
-        if(Ps.kernel_aniso > 1)
-            Ps.RBF = rbf(distm_mex(Ps.Tp,Ps.Tp),Ps.eps);
-            R_eval = rbf(distm_mex(bsxfun(@minus,Ps.XX,Ps.Xmean)/Ps.M,Ps.Tp),Ps.eps);
-        else
-            Ps.RBF = rbf(distm_mex(Ps.Xp,Ps.Xp),Ps.eps);
-            R_eval = rbf(distm_mex(Ps.XX,Ps.Xp),Ps.eps);
-        end
+        
+        Ps.RBF = rbf(RR,Ps.eps);
+        R_eval = rbf(RE,Ps.eps);
+
         Ps.c = Ps.RBF\Ps.F;
         
         Finterp = R_eval*Ps.c;

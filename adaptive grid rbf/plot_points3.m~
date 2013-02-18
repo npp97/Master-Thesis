@@ -145,10 +145,8 @@ function [] = plot_points3( P,fig )
 
     hist(P.crit(logical(P.Nlist)),30)
     xlim([0,P.adap_rstar])
-    title('histogram of normalized particle distances in Neighborhood')
-    xlabel('normalized distance')
-    ylabel('# of occurences')
-    
+    title('histogram of particle distances in Neighborhood')
+    xlabel('
     
     subplot(3,4,12)
     
