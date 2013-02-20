@@ -9,7 +9,7 @@ function [ P ] = mcmc( P )
     model.N = 1;
     
     % number of simulations
-    options.nsimu = 10000;
+    options.nsimu = 10*(10^P.pdim);
     % flag whether to update simulations
     options.updatesigma = 0;
     % flag for waitbar

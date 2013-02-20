@@ -15,8 +15,8 @@ P.init_D0 = 3;
 P.kernel_aniso = 2;
 
 P.init_method = 2;
-P.init_lattice = 3;
-P.init_latt_d = 2.5;
+P.init_lattice = 1;
+P.init_latt_d = 3;
 
 
 P.switch_fusion_off = false;
@@ -34,33 +34,29 @@ P.plotflag=true;
 P.plotinter = 1;
 %% 2 Implementation
 
-%% 2.1 MCMC run
-
-%P = mcmc(P);
-
-%figure(4)
-%mcmcplot(P.mcchain(1:10:end,:),[],{P.paramspec{1}{1}, P.paramspec{2}{1}},'hist');
-
-%% 2.2 Initialization
+%% 2.1 Initialization
 
 P = init(P);
 
-
-%% 2.4 Particle Refinement
+%% 2.2 Particle Refinement
 
 P = refine_particles( P );
 
+%% 2.3 Post Process
+
+P = postprocess(P);
+
 %% 2.5 Interpolation
 
-P = interp_hermite(P);
+P = interp(P);
 
 %% 2.6 Error Estimation
 
-P = error_estim_hermite(P);
+P = error_estim(P);
 
 %% 2.7 Stochastic Analysis
 
-marginals_hermite(P);
+marginals(P);
 
 
 

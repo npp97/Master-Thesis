@@ -8,7 +8,7 @@ P.ode_abstol = 1e-8;
 
 %% 1.1 Data
 
-P.model = 1;
+P.model = 2;
 
 switch(P.model)
     

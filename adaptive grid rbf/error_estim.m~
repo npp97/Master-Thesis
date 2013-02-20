@@ -42,42 +42,42 @@ function [ P ] = error_estim( P )
     subplot(2,4,1)
     plot(log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log function value')
     ylabel('log rel MCMC error')
     
     subplot(2,4,5)
     plot(log(P.F),log(abs(EF)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log function value')
     ylabel('log rel particle error')
     
     subplot(2,4,2)
     plot(log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log norm of gradient')
     ylabel('log rel MCMC error')
     
     subplot(2,4,6)
     plot(log(sqrt(sum(P.DF.^2,2))),log(abs(EF)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log norm of gradient')
     ylabel('log rel particle error')
    
     subplot(2,4,3)
     plot(log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log min distance to grid')
     ylabel('log rel MCMC error')
     
     subplot(2,4,7)
     plot(log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)]),mean([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)]))
+    error_ellipse(cov([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)]))
     xlabel('log min distance to grid')
     ylabel('log rel particle error') 
     
@@ -99,7 +99,7 @@ function [ P ] = error_estim( P )
     subplot(2,4,8)
     semilogy(sum(P.Nlist,2),log(abs(EF)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([sum(P.Nlist,2),log(abs(EF)/P.fmax)]),mean([sum(P.Nlist,2),log(abs(EF)/P.fmax)]))
+    error_ellipse(cov([sum(P.Nlist,2),log(abs(EF)/P.fmax)])+eye(P.pdim)*1e-16,mean([sum(P.Nlist,2),log(abs(EF)/P.fmax)]))
     xlabel('Neighborhood size')
     ylabel('log rel particle error')  
     
@@ -159,7 +159,7 @@ function [ P ] = error_estim( P )
     figure(16)
     clf
     % number of scans
-    Ne = 100;
+    Ne = 20;
     % scan range
     ee=logspace(-1,0.5,Ne);
     
@@ -208,14 +208,17 @@ function [ P ] = error_estim( P )
         ercond(j)=rcond(Ps.RBF);
         
         % visualisation
-        loglog(ee,erf,'.-k')
+        loglog(ee/mean(Ps.rcp),erf,'.-k')
         hold on
-        loglog(ee,erf1,'--k')
-        loglog(ee,erl,'.-r')
-        semilogy(ee,ercond,'.-b')
+        loglog(ee/mean(Ps.rcp),erf1,'--k')
+        loglog(ee/mean(Ps.rcp),erl,'.-r')
+        loglog(ee/mean(Ps.rcp),ercond,'.-b')
         ylim([1e-10,1e0])
-        title(['shape parameter analysis'])
+        title(['Shape Parameter Analysis'])
         legend('rel. max error on extra grid','rel. l1 error on extra grid','rel. max error with Rippa Method','RCOND of Interpolation Matrix','Location','SouthOutside')
+        xlabel(' Shape Parameter ')
+        ylabel(' Error ' )
+        
         drawnow
     end
     textprogressbar('done')
