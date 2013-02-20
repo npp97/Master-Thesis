@@ -1,8 +1,8 @@
 
-Ne=10;
+Ne=40;
 Nt=2;
 et=linspace(0,1,Nt);
-ee=logspace(-1,0,Ne);
+ee=logspace(-1,0.5,Ne);
 
 Ftrue = arrayfun(@(x,y,z) eval_llh([x y z],Ps),Ps.XX(:,1),Ps.XX(:,2),Ps.XX(:,3));
 
@@ -15,7 +15,7 @@ econdest=zeros(Ne,1);
 econd=zeros(Ne,1);
 ercond=zeros(Ne,1);
 
-Ps.kernel_shape = 2;
+Ps.kernel_shape = 1;
 
 
 figure(11)
@@ -45,7 +45,11 @@ for k=1:Nt
         Finterp = R_eval*Ps.c;
         erf(j)=max(abs(Ftrue-Finterp)/Ps.fmax);
         Ps.error_estim = 1;
-        erl(j)=CostEps(ee(j).*Ps.rcp.^(1-et(k)),Ps)/Ps.fmax;
+        if(Ps.kernel_shape == 2)
+            erl(j)=CostEps(ee(j).*Ps.rcp.^(1-et(k)),Ps)/Ps.fmax;
+        else
+            erl(j)=CostEps(ee(j),Ps)/Ps.fmax;
+        end
         erg(j)=max(abs(Ps.F-Ps.RBF*Ps.c))/Ps.fmax;
         erf1(j)=norm(abs(Ftrue-Finterp),1)/Ps.fmax;
         econdest(j)=condest(Ps.RBF);

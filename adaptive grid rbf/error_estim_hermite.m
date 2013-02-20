@@ -1,4 +1,4 @@
-function [ P ] = error_estim( P )
+function [ P ] = error_estim_hermite( P )
     %ERROR Summary of this function goes here
     %   Detailed explanation goes here
     
@@ -6,13 +6,19 @@ function [ P ] = error_estim( P )
     
     Ftrue = zeros(P.NX,1);
     Fgradtrue = zeros(P.NX,P.pdim);
+    dx = zeros(P.pdim,P.NX,P.N);
     if(P.kernel_aniso > 1)
         RR = sqrt(sqdistance((bsxfun(@minus,P.XX,P.Xmean)/P.M)',P.Tp'));
+        for j = 1 : P.pdim
+            Xm = (bsxfun(@minus,P.XX,P.Xmean)/P.M);
+            dx(j,:,:) = diffm(Xm(:,j),P.Tp(:,j));
+        end
     else
         RR = sqrt(sqdistance(P.XX',P.Xp'));
+        for j = 1 : P.pdim
+            dx(j,:,:) = diffm(P.XX(:,j),P.Xp(:,j));
+        end
     end
-    
-    P = gradllh(P);
     
     disp(['# Computing Gradients on MCMC Samples'])
     textprogressbar('Progress: ');
@@ -24,9 +30,9 @@ function [ P ] = error_estim( P )
     
     disp(['# Interpolating on MCMC Samples'])
     if(P.kernel_aniso > 1)
-        Finterp = rbf(RR,P.eps)*P.c;
+        Finterp = rbf_hermite_eval(RR,P.eps,dx)*P.c_herm;
     else
-        Finterp = rbf(RR,P.eps)*P.c;
+        Finterp = rbf_hermite_eval(RR,P.eps,dx)*P.c_herm;
     end
     
     P.inferror = max(abs(Ftrue-Finterp)/P.fmax);
@@ -36,48 +42,48 @@ function [ P ] = error_estim( P )
     invA = pinv(A);
     EF = (invA*P.F)./diag(invA);
 
-    figure(13)
+    figure(23)
     clf
     
     subplot(2,4,1)
     plot(log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log function value')
     ylabel('log rel MCMC error')
     
     subplot(2,4,5)
     plot(log(P.F),log(abs(EF)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(Ftrue),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log function value')
     ylabel('log rel particle error')
     
-    subplot(2,4,2)
-    plot(log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax),'r*')
-    hold on
-    error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
-    xlabel('log norm of gradient')
-    ylabel('log rel MCMC error')
-    
-    subplot(2,4,6)
-    plot(log(sqrt(sum(P.DF.^2,2))),log(abs(EF)/P.fmax),'r*')
-    hold on
-    error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
-    xlabel('log norm of gradient')
-    ylabel('log rel particle error')
+%     subplot(2,4,2)
+%     plot(log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax),'r*')
+%     hold on
+%     error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
+%     xlabel('log norm of gradient')
+%     ylabel('log rel MCMC error')
+%     
+%     subplot(2,4,6)
+%     plot(log(sqrt(sum(P.DF.^2,2))),log(abs(EF)/P.fmax),'r*')
+%     hold on
+%     error_ellipse(cov([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(sqrt(sum(Fgradtrue.^2,2))),log(abs(Ftrue-Finterp)/P.fmax)]))
+%     xlabel('log norm of gradient')
+%     ylabel('log rel particle error')
    
     subplot(2,4,3)
     plot(log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)]),mean([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(min(RR,[],2)),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('log min distance to grid')
     ylabel('log rel MCMC error')
     
     subplot(2,4,7)
     plot(log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)]),mean([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)]))
+    error_ellipse(cov([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)])+eye(P.pdim)*1e-16,mean([log(min(P.R+max(max(P.R))*eye(P.N),[],2)),log(abs(EF)/P.fmax)]))
     xlabel('log min distance to grid')
     ylabel('log rel particle error') 
     
@@ -92,19 +98,20 @@ function [ P ] = error_estim( P )
     subplot(2,4,4)
     semilogy(sum(RR<P.D0*P.adap_rstar,2),log(abs(Ftrue-Finterp)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([sum(RR<P.D0*P.adap_rstar,2),log(abs(Ftrue-Finterp)/P.fmax)]),mean([sum(RR<P.D0*P.adap_rstar,2),log(abs(Ftrue-Finterp)/P.fmax)]))
+    error_ellipse(cov([sum(RR<P.D0*P.adap_rstar,2),log(abs(Ftrue-Finterp)/P.fmax)])+eye(P.pdim)*1e-16,mean([sum(RR<P.D0*P.adap_rstar,2),log(abs(Ftrue-Finterp)/P.fmax)]))
     xlabel('Neighborhood size')
     ylabel('MCMC error')  
     
     subplot(2,4,8)
     semilogy(sum(P.Nlist,2),log(abs(EF)/P.fmax),'r*')
     hold on
-    error_ellipse(cov([sum(P.Nlist,2),log(abs(EF)/P.fmax)]),mean([sum(P.Nlist,2),log(abs(EF)/P.fmax)]))
+    error_ellipse(cov([sum(P.Nlist,2),log(abs(EF)/P.fmax)])+eye(P.pdim)*1e-16,mean([sum(P.Nlist,2),log(abs(EF)/P.fmax)]))
     xlabel('Neighborhood size')
     ylabel('log rel particle error')  
     
+        
     %% error on mcmc samples
-    figure(14)
+    figure(24)
     title('Error on MCMC samples')
     for j = 1 : P.pdim
         for k = 1 : P.pdim
@@ -130,7 +137,7 @@ function [ P ] = error_estim( P )
     end
     
     %% error on particles
-    figure(15)
+    figure(25)
     title('Error on particles')
     for j = 1 : P.pdim
         for k = 1 : P.pdim
@@ -155,11 +162,12 @@ function [ P ] = error_estim( P )
         end
     end
     
+    
     %% shape parameter analysis
     figure(16)
     clf
     % number of scans
-    Ne = 100;
+    Ne = 20;
     % scan range
     ee=logspace(-1,0.5,Ne);
     
@@ -193,32 +201,36 @@ function [ P ] = error_estim( P )
         end
         
         % compute interpolation matrix and evaluation matrix
-        Ps.RBF = rbf(Ps.R,Ps.eps);
-        R_eval = rbf(RR,Ps.eps);
+        Ps.RBF_herm = rbf_hermite(Ps.R,Ps.eps,P.DM);
+        R_eval = rbf_hermite_eval(RR,Ps.eps,dx);
         
         % interpolate
-        Ps.c = Ps.RBF\Ps.F;
-        Finterp = R_eval*Ps.c;
+        Ps.c_herm = Ps.RBF_herm\[Ps.F;Ps.DF(:)];
+        Finterp = R_eval*Ps.c_herm;
         
         % compute errors
         erf(j)=max(abs(Ftrue-Finterp)/Ps.fmax);
         Ps.error_estim = 1;
         erl(j)=CostEps(ee(j),Ps)/Ps.fmax;
         erf1(j)=norm(abs(Ftrue-Finterp),1)/Ps.fmax;
-        ercond(j)=rcond(Ps.RBF);
+        ercond(j)=rcond(Ps.RBF_herm);
         
         % visualisation
-        loglog(ee,erf,'.-k')
+        loglog(ee/mean(Ps.rcp),erf,'.-k')
         hold on
-        loglog(ee,erf1,'--k')
-        loglog(ee,erl,'.-r')
-        semilogy(ee,ercond,'.-b')
+        loglog(ee/mean(Ps.rcp),erf1,'--k')
+        loglog(ee/mean(Ps.rcp),erl,'.-r')
+        loglog(ee/mean(Ps.rcp),ercond,'.-b')
         ylim([1e-10,1e0])
-        title(['shape parameter analysis'])
+        title(['Shape Parameter Analysis'])
         legend('rel. max error on extra grid','rel. l1 error on extra grid','rel. max error with Rippa Method','RCOND of Interpolation Matrix','Location','SouthOutside')
+        xlabel(' Shape Parameter ')
+        ylabel(' Error ' )
+        
         drawnow
     end
     textprogressbar('done')
     
     warning('on','MATLAB:nearlySingularMatrix')
+
 end

@@ -32,7 +32,7 @@ switch(P.model)
             {'k_{-1}', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
             };
         
-        P.tdata=linspace(0,5,P.tN);
+        P.tdata=linspace(0,10,P.tN);
         
         [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
         figure(2)

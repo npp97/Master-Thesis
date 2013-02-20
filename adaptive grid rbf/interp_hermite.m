@@ -1,7 +1,7 @@
-function [ P ] = interp( P )
+function [ P ] = interp_hermite( P )
     %INTERP standard RBF Interpolation
     
-    disp(['------- RBF Interpolation -------'])
+    disp(['------- Hermite - RBF Interpolation -------'])
     
     % compute distances
     if(P.kernel_aniso > 1)
@@ -11,15 +11,16 @@ function [ P ] = interp( P )
     end
     
     % get function values
-    disp(['# Evaluating Function '])
-    P = llh(P);
+    P = gradllh(P);
+    P = diff_mat(P);
+    
 
     % choose inversion method
     switch(P.kernel_inverse)
         case 1
             % estimate optimal eps
             disp(['# Optimizing Shape Parameter '])
-            P.eps = fminbnd(@(ep) CostEps(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp),optimset('Display','iter'));
+            P.eps = fminbnd(@(ep) CostEps_hermite(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp),optimset('Display','iter','TolX',1e-8));
              
             % normalize eps
             if(P.kernel_shape == 2)
@@ -29,20 +30,11 @@ function [ P ] = interp( P )
             end
             
             % compute interpolation matrix 
-            P.RBF = rbf(P.R,P.eps);
+            P.RBF_herm = rbf_hermite(P.R,P.eps,P.DM);
             
-            % check for positivity constraint
-            if(P.error_estim < 4)
-                P.c = P.RBF\P.F;
-            else
-                A = P.RBF;
-                b = P.F;
-                
-                c = lsqlin(A,b,[],[],[],[],zeros(P.N,1),[],[],optimset('Display','iter'));
+            % compute coefficients
+            P.c_herm = P.RBF_herm\[P.F;P.DF(:)];
 
-                P.c = c;
-                
-            end
                 
         case 2
             % estimate optimal eps

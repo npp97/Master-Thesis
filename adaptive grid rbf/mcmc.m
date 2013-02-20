@@ -12,6 +12,10 @@ function [ P ] = mcmc( P )
     options.nsimu = 10000;
     % flag whether to update simulations
     options.updatesigma = 0;
+    % flag for waitbar
+    options.waitbar = 0;
+    % flag for verbosity
+    options.verbosity = 0;
     
     % load parameter initialisation
     params = P.paramspec;

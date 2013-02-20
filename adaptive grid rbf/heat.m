@@ -14,9 +14,9 @@ P.init_D0 = 3;
 
 P.kernel_aniso = 2;
 
-P.init_method = 1;
-P.init_lattice = 2;
-P.init_latt_d = 2;
+P.init_method = 2;
+P.init_lattice = 3;
+P.init_latt_d = 2.5;
 
 
 P.switch_fusion_off = false;
@@ -27,7 +27,7 @@ P.init_trans = 2;
 % P.dpot = @(r,rstar) dV3(r,rstar);
 P.cov_iter = 1;
 P.grad_iter = 1;
-P.max_iter = 150;
+P.max_iter = 0;
 % P.adap_dc = 1.5;
 
 P.plotflag=true;
@@ -52,15 +52,15 @@ P = refine_particles( P );
 
 %% 2.5 Interpolation
 
-P = interp(P);
+P = interp_hermite(P);
 
 %% 2.6 Error Estimation
 
-P = error_estim(P);
+P = error_estim_hermite(P);
 
 %% 2.7 Stochastic Analysis
 
-marginals(P);
+marginals_hermite(P);
 
 
 

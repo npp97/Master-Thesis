@@ -58,7 +58,11 @@ function [ P ] = generate_lattice( P )
         figure(5)
         
         XL = L*P.Gram;
-        scatter3(XL(:,1),XL(:,2),XL(:,3),max(log(LF)/log(10),1e-16),max(log(LF)/log(10),1e-16));
+        switch(P.pdim)
+            case 2
+                scatter(XL(:,1),XL(:,2),max(log(LF)/log(10),1e-16),max(log(LF)/log(10),1e-16));
+            case 3
+                scatter3(XL(:,1),XL(:,2),XL(:,3),max(log(LF)/log(10),1e-16),max(log(LF)/log(10),1e-16));
     end
 
     P.Xp = bsxfun(@plus,P.Xp(1,:),L*P.Gram);

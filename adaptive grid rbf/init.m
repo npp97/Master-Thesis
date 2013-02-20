@@ -112,20 +112,20 @@ function [ P ] = init( P )
             P.Gram = P.init_latt_d*((M*M')*P.M);
             % generate the lattice
             P = generate_lattice(P);
-%             if(P.kernel_aniso > 1);
-%                 disp(['Regenerating Lattice with updated Covariance Matrix'])
-%                 P = XptoTp(P);
-%                 P.N = size(P.Xp,1);
-%                 if(P.kernel_aniso > 1) 
-%                     P.R = sqrt(sqdistance(P.Tp'));
-%                 else
-%                     P.R = sqrt(sqdistance(P.Xp'));
-%                 end
-%                 P = exactDp(P);
-%                 P = calc_transform( P );
-%                 P.Gram = P.init_latt_d*((M*M')*P.M);
-%                 P = generate_lattice(P);
-%             end
+            if(P.kernel_aniso > 1);
+                disp(['Regenerating Lattice with updated Covariance Matrix'])
+                P = XptoTp(P);
+                P.N = size(P.Xp,1);
+                if(P.kernel_aniso > 1) 
+                    P.R = sqrt(sqdistance(P.Tp'));
+                else
+                    P.R = sqrt(sqdistance(P.Xp'));
+                end
+                P = exactDp(P);
+                P = calc_transform( P );
+                P.Gram = P.init_latt_d*((M*M')*P.M);
+                P = generate_lattice(P);
+            end
             P = XptoTp(P);
     end
     
