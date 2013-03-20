@@ -59,6 +59,8 @@ function [ P ] = generate_lattice( P )
         
         XL = L*P.Gram;
         switch(P.pdim)
+            case 1
+                semilogy(XL(:,1),LF,'bo')
             case 2
                 scatter(XL(:,1),XL(:,2),max(log(LF)/log(10),1e-16),max(log(LF)/log(10),1e-16));
             case 3

@@ -65,7 +65,7 @@ function [] = plot_points3( P,fig )
     title('particle age (Iterations)');
     
     subplot(3,4,5)
-    ii=and((sum(P.Nlist,2)<=P.adap_Nstar),(P.F>P.thresh*P.fmax));
+    ii=or((sum(P.Nlist,2)>=P.adap_Nstar),(P.F<P.thresh*P.fmax));
     scatter3(XX(ii,1),XX(ii,2),XX(ii,3),'rx');
     hold on
     scatter3(XX(not(ii),1),XX(not(ii),2),XX(not(ii),3),'bo');

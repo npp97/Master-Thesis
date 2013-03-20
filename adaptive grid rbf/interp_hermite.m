@@ -10,8 +10,7 @@ function [ P ] = interp_hermite( P )
         P.R = sqrt(sqdistance(P.Xp'));
     end
     
-    % get function values
-    P = gradllh(P);
+    % get difference matrix
     P = diff_mat(P);
     
 
@@ -20,7 +19,7 @@ function [ P ] = interp_hermite( P )
         case 1
             % estimate optimal eps
             disp(['# Optimizing Shape Parameter '])
-            P.eps = fminbnd(@(ep) CostEps_hermite(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp),optimset('Display','iter','TolX',1e-8));
+            P.eps = fminbnd(@(ep) CostEps_hermite(ep,P),1e-3/mean(P.rcp),1e3/mean(P.rcp),optimset('Display','iter','TolX',1e-8));
              
             % normalize eps
             if(P.kernel_shape == 2)

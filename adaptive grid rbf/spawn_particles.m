@@ -3,11 +3,11 @@ function [ P ] = spawn_particles( P )
     %   Detailed explanation goes here
     P.kspawn(P.Riter)=0;
     
-    P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1))-eye(P.N));
+    P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
     
     ind = find(P.adap_Nstar-sum(P.Nlist)>0);
     for l=ind
-        if(P.F(l)>P.fmax*P.thresh && inbound)
+        if(P.F(l)>P.fmax*P.thresh)
             if(P.kernel_aniso > 1)
                 nbor = sqrt(sqdistance(P.Tp(l,:)',P.Tp'))<min(P.rcp,P.rcp(l))';
                 Nfill=P.adap_Nstar-sum(nbor)+1;

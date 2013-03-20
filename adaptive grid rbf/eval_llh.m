@@ -14,30 +14,20 @@ function [f] = eval_llh(p,P)
     elseif(not(inbound))
         f = 0;
     else
-        
-        try
-            pt = P.logscale.*exp(p) + (1-P.logscale).*p;
-            [~,yy] = P.ode(P.tdata,[P.y0],pt,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
-            yy = yy';
-            f = exp(sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma)))));
-        catch
-            f=0;
+        if(P.model == 4)
+            % pre specified likelihood
+            f = exp(P.loglikelihood(p)+9.0498e5);%with added normalization
+        else
+            
+            try
+                pt = P.logscale.*exp(p) + (1-P.logscale).*p;
+                [~,yy] = P.ode(P.tdata,[P.y0],pt,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
+                yy = yy';
+                f = exp(sum(sum(log(normpdf(yy(:,P.species),P.ydata,P.sigma)))));
+            catch
+                f=0;
+            end
         end
     end
+    
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

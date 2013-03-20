@@ -66,7 +66,7 @@ function [] = plot_points2( P,fig )
     title('particle age (Iterations)');
     
     subplot(3,4,5)
-    gscatter(XX(:,1),XX(:,2),or((sum(P.Nlist,2)<=P.adap_Nstar),(P.F>P.thresh*P.fmax)),'br','ox')
+    gscatter(XX(:,1),XX(:,2),not(or((sum(P.Nlist,2)>=P.adap_Nstar),(P.F<P.thresh*P.fmax))),'br','ox')
     xlim([-P.vsx,P.vsx])
     ylim([-P.vsy,P.vsy])
     legend('sufficient or not in \Omega','too small and in \Omega')
@@ -79,7 +79,15 @@ function [] = plot_points2( P,fig )
     legend('in \Omega','not in \Omega')
     title('Omega')
     
+    
+
     subplot(3,4,7)
+    
+    voronoi(P.Tp(:,1),P.Tp(:,2))
+    xlim([-P.vsx,P.vsx])
+    ylim([-P.vsy,P.vsy])
+    
+    subplot(3,4,8)
     plot(1:iter,Pv,'r.-')
     hold on
     plot(1:iter,Xv,'b.-')
@@ -101,15 +109,15 @@ function [] = plot_points2( P,fig )
 %         colorbar
 %     end
 
-    subplot(3,4,8)
-    
-    plot(1:iter,P.Mdiffinf,'r.-')
-    hold on
-    plot(1:iter,P.Mdifffish,'b.-')
-    title('Norm of difference in transformation')
-    legend('previous iterations','fisher-information')
-    xlabel('Iteration')
-    ylabel('\Vert \cdot \Vert')
+%     subplot(3,4,8)
+%     
+%     plot(1:iter,P.Mdiffinf,'r.-')
+%     hold on
+%     plot(1:iter,P.Mdifffish,'b.-')
+%     title('Norm of difference in transformation')
+%     legend('previous iterations','fisher-information')
+%     xlabel('Iteration')
+%     ylabel('\Vert \cdot \Vert')
      
     subplot(3,4,9)
     

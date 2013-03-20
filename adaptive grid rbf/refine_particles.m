@@ -118,7 +118,7 @@ function [ P ] = refine_particles( P )
         P.crit = P.R./P.Dpq;
         P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
         
-        P.NI(P.Riter) = sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1);
+        P.NI(P.Riter) = sum(and(sum(P.Nlist,2)<P.adap_Nstar,P.F>P.fmax*P.thresh));
         P.RI(P.Riter) = max([max(P.crit(logical(P.Nlist))),0]);
         P.rI(P.Riter) = max([min(P.crit(logical(P.Nlist))),0]);
         P.PI(P.Riter) = sum(P.F>P.fmax*P.thresh);
@@ -148,7 +148,7 @@ function [ P ] = refine_particles( P )
         end
         
 
-        if(P.switch_fusion_off && sum(sum(P.Nlist(P.F>P.fmax*P.thresh,:),2)<P.adap_Nstar-1)==0)
+        if(P.switch_fusion_off && P.NI(P.Riter)==0)
             P.fuse_hits = P.fuse_hits + 1;        
             if( P.fuse_hits >= P.switch_hits );
                 P.adap_fusion_method = 2;

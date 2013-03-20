@@ -14,7 +14,7 @@ function [ ceps ] = CostEps_hermite( ep,P )
             % find solution of Ax=b and A^-1
             invA = pinv(A);
             EF = (invA*[P.F;P.DF(:)])./diag(invA);
-            ceps = norm(EF(1:P.N),inf);
+            ceps = norm(EF,inf);
         case 2
             A = rbf_hermite(P.R,ep,P.DM);
             c = A\[P.F;P.DF(:)];

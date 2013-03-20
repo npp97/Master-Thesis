@@ -29,7 +29,10 @@ function [ P ] = init( P )
     P.d0 = P.init_d0;
     
     % initialise initial point
-    P.Xp = P.logscale.*log(P.k)+(1-P.logscale).*P.k;
+    P.Xp = P.logscale.*log(P.k(P.estim_param))+(1-P.logscale).*P.k(P.estim_param);
+    if(P.model == 4)
+        P.Xp = P.Xp(1,1:P.pdim);
+    end
     
     P.N = size(P.Xp,1);
     
@@ -76,8 +79,13 @@ function [ P ] = init( P )
         end
         
         P.Minit = P.M;
+    
+    else
+        P.M = eye(P.pdim);
+        P.Minit = P.M;
         
     end
+    
     
     
     % initialise particle ages

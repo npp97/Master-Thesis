@@ -2,7 +2,7 @@ function D = rbf(r,eps)
 %% Gaussian RBF
 
 if numel(eps) == 1;
-    eps=repmat(eps,size(r,1),size(r,2));
+    eps=eps;
 else 
     if size(eps,1)>size(eps,2)
         eps=eps';
@@ -12,8 +12,12 @@ end
 
 D = exp(-(eps.*r).^2);
 
-%% MQ RBF
+%% MQ
 
-%D = sqrt( 1 + (eps*r).^2);
+%D = sqrt(1+(eps.*r).^2);
+
+%% Wendland     
+
+%D = max((1- eps.*r),0).^4;
 
 end

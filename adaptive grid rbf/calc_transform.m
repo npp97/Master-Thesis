@@ -94,6 +94,7 @@ function [ P ] = calc_transform( P )
     
     P.D0 = P.adap_D0;
     P.d0 = P.adap_d0;
+    P.M = real(P.M);
 end
 
 

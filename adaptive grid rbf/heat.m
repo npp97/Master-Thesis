@@ -4,28 +4,28 @@ clf
 DefaultSettings
 
 
-P.adap_d0 = 1.5;
-P.adap_D0 = 3;
+P.adap_d0 = 1;
+P.adap_D0 = 4;
 
-P.init_d0 = 1.5;
-P.init_D0 = 3;
+P.init_d0 = 1;
+P.init_D0 = 4;
 
 %P.vsT = 15;
 
 P.kernel_aniso = 2;
 
 P.init_method = 2;
-P.init_lattice = 1;
-P.init_latt_d = 3;
+P.init_lattice = 2;
+P.init_latt_d = 2;
 
 
-P.switch_fusion_off = false;
+P.switch_fusion_off = true;
 P.kernel_aniso_method = 2;
 P.init_trans = 2;
 % P.adap_fusion_method = 2;
 % P.pot = @(r,rstar) V3(r,rstar);
 % P.dpot = @(r,rstar) dV3(r,rstar);
-P.cov_iter = 1;
+P.cov_iter = 151;
 P.grad_iter = 1;
 P.max_iter = 0;
 % P.adap_dc = 1.5;
@@ -57,6 +57,13 @@ P = error_estim(P);
 %% 2.7 Stochastic Analysis
 
 marginals(P);
+
+P = interp_mls(P);
+
+P = error_estim_mls(P);
+
+marginals_mls(P);
+
 
 
 

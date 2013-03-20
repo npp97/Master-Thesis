@@ -9,7 +9,7 @@ function [ P ] = mcmc( P )
     model.N = 1;
     
     % number of simulations
-    options.nsimu = 10*(10^P.pdim);
+    options.nsimu = (10^P.pdim);
     % flag whether to update simulations
     options.updatesigma = 0;
     % flag for waitbar
@@ -20,7 +20,7 @@ function [ P ] = mcmc( P )
     % load parameter initialisation
     params = P.paramspec;
     
-    % initial date specification
+    % initial data specification
     data.y0 = P.y0;
     % time resolved data specification
     data.ydata = [P.tdata',P.ydata];
@@ -39,13 +39,15 @@ function [ P ] = mcmc( P )
             P.mcchain=mcchain;
         end
         T = chainstats(P.mcchain,P.mcresults);
+        % correlation length
         P.tau = max(iact(P.mcchain));
 
         nmcmc=nmcmc+1;
     end
 
-    
+    % save thinned chain
     P.XX = P.mcchain(1:P.tau:end,:);
+    % count number of samples
     P.NX = size(P.XX,1);
 end
 

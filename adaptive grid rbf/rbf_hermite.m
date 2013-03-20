@@ -35,7 +35,7 @@ function [ M ] = rbf_hermite( R , eps , DX )
             M(j*nx+1:(j+1)*nx,(k-1)*nx+1:k*nx) = -S;
         end
         
-        H = ddrbf(R,eps,squeeze(DX(j,:,:)),squeeze(DX(j,:,:)));
+        H = d2rbf(R,eps,squeeze(DX(j,:,:)));
        
         M(j*nx+1:(j+1)*nx,j*nx+1:(j+1)*nx) = -H;
         

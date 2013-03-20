@@ -8,7 +8,7 @@ P.ode_abstol = 1e-8;
 
 %% 1.1 Data
 
-P.model = 2;
+P.model = 1;
 
 switch(P.model)
     
@@ -20,7 +20,7 @@ switch(P.model)
         P.mStructdxdt = mStructdxdt;
         P.k=[0.6 0.4];
         P.y0=[1;0]; 
-        P.tN=30;
+        P.tN=15;
         P.species=1;
         P.sigma=0.1;
         P.logscale = [1 1];
@@ -101,7 +101,32 @@ switch(P.model)
             0.3079;
             0.3097;
             0.3324;];
+        
+    case 4
+        %CME example
+        
+        example_IDAS
+        
+        P.tdata = histogram.time;
+        P.y0 = model.p0;
+        P.ydata = histogram.data.values';
+        P.k = theta';
+        P.loglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:3)),theta(4:6)'],system,histogram,options);
+        P.estim_param = [1 2 3];
+        P.logscale = [1 1 1];
+        P.pdim = 3;
+        
+        P.paramspec = {
+            {'\tau_{on}', log(P.k(1)), log(P.k(1))-0.5,log(P.k(1))+0.5}
+            {'\tau_{off}', log(P.k(2)), log(P.k(2))-0.5,log(P.k(2))+0.5}
+            {'k_m', log(P.k(3)), log(P.k(3))-0.5,log(P.k(3))+0.5}
+            %{'\gamma_m', log(P.k(4)), log(P.k(4))-0.5,log(P.k(4))+0.5}
+            %{'k_m', log(P.k(5)), log(P.k(5))-0.5,log(P.k(5))+0.5}
+            %{'\gamma_p', log(P.k(6)), log(P.k(6))-0.5,log(P.k(6))+0.5}
+        };
 end
+
+
 
 % true parameters
 
@@ -213,6 +238,7 @@ P.switch_hits = 3;
 % kernel
 P.kernel = 1;
 % 1: gaussian
+% 2: wendland
 
 % anisotropic transformation
 P.kernel_aniso = 2;
