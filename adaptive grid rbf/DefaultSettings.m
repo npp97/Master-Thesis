@@ -27,9 +27,11 @@ switch(P.model)
         P.pdim = 2;
         P.xdim = 2;
         
+        P.estim_param = 1:P.pdim;
+        
         P.paramspec = {
-            {'k_{+1}', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
-            {'k_{-1}', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
+            {'k_{+1}', log(P.k(1)), log(P.k(1))-3,log(P.k(1))+3}
+            {'k_{-1}', log(P.k(2)), log(P.k(2))-3,log(P.k(2))+3}
             };
         
         P.tdata=linspace(0,5,P.tN);
@@ -38,6 +40,9 @@ switch(P.model)
         figure(2)
         plot(P.tdata,yy([1 2],:),'.-')
         P.ydata = yy(P.species,:)';
+        ylabel('Concentration')
+        xlabel('Time')
+        legend('A','B')
                
     case 2
         P.ode=@dxdt_M2_mex;
@@ -54,6 +59,8 @@ switch(P.model)
         P.logscale = [1 1 1];
         P.pdim = 3;
         P.xdim = 4;
+        
+        P.estim_param = 1:P.pdim;
         
         P.paramspec = {
             {'k_{+1}', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
@@ -80,8 +87,11 @@ switch(P.model)
         P.species=2;
         P.sigma=0.015;
         P.logscale = [1 1];
+        
         P.pdim = 2;
         P.xdim = 2;
+        
+        P.estim_param = 1:P.pdim;
         
         P.paramspec = {
             {'k_{+1}', log(P.k(1)), 1e-3,1e1}

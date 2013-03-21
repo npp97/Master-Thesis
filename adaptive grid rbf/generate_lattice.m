@@ -62,9 +62,9 @@ function [ P ] = generate_lattice( P )
             case 1
                 semilogy(XL(:,1),LF,'bo')
             case 2
-                scatter(XL(:,1),XL(:,2),max(log(LF)/log(10),1e-16),max(log(LF)/log(10),1e-16));
+                scatter(XL(:,1),XL(:,2),max(log(LF)/log(10),1e-16)+10,max(log(LF)/log(10),1e-16)+20);
             case 3
-                scatter3(XL(:,1),XL(:,2),XL(:,3),max(log(LF)/log(10),1e-16),max(log(LF)/log(10),1e-16));
+                scatter3(XL(:,1),XL(:,2),XL(:,3),max(log(LF)/log(10),1e-16)+10,max(log(LF)/log(10),1e-16)+20);
     end
 
     P.Xp = bsxfun(@plus,P.Xp(1,:),L*P.Gram);

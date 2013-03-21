@@ -38,35 +38,35 @@ function [ P ] = error_estim( P )
     hold on
     error_ellipse(cov([log(P.Ftrue)/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)])+eye(2)*1e-8,mean([log(P.Ftrue)/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)]))
     xlabel('log function value')
-    ylabel('log rel MCMC error')
+    ylabel('log rel error on MCMC samples')
     
     subplot(2,4,5)
     plot(log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10),'r*')
     hold on
     error_ellipse(cov([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-8,mean([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)]))
     xlabel('log function value')
-    ylabel('log rel particle error')
+    ylabel('log rel error on particles')
     
     subplot(2,4,2)
     plot(log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
     hold on
     error_ellipse(cov([log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)]))
     xlabel('log norm of gradient')
-    ylabel('log rel MCMC error')
+    ylabel('log rel error on MCMC samples')
     
     subplot(2,4,6)
     plot(log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10),'r*')
     hold on
     error_ellipse(cov([log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10)]))
     xlabel('log norm of gradient')
-    ylabel('log rel particle error')
+    ylabel('log rel error on particles')
    
     subplot(2,4,3)
     plot(log(min(RR,[],2))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
     hold on
     error_ellipse(cov([log(min(RR,[],2))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(min(RR,[],2))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)]))
     xlabel('log min distance to grid')
-    ylabel('log rel MCMC error')
+    ylabel('log rel error on MCMC samples')
     
     subplot(2,4,7)
     plot(log(min(P.R+max(max(P.R))*eye(P.N),[],2))/log(10),log(abs(EF)/P.fmax)/log(10),'r*')
@@ -216,7 +216,7 @@ function [ P ] = error_estim( P )
         loglog(ee/mean(Ps.rcp),ercond,'.-b')
         ylim([1e-5,1e2])
         title(['Shape Parameter Analysis'])
-        legend('rel. max error on MCMC','rel. l1 error on MCMC','rel. max error with Cross Validation','RCOND of Interpolation Matrix','Location','SouthOutside')
+        legend('rel. max error on MCMC samples','rel. l1 error on MCMC samples','rel. max error with Cross Validation','RCOND of Interpolation Matrix','Location','SouthOutside')
         xlabel(' Shape Parameter ')
         ylabel(' Error ' )
     end

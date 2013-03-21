@@ -28,8 +28,11 @@ function [ P ] = postprocess( P )
     P.Dp = P.Dp(ind,:);
     P.rcp = P.rcp(ind,:);
     P.F = P.F(ind,:);
-%    P.DF = P.DF(ind,:);
+    P.DF = P.DF(ind,:);
     P.R = P.R(ind,ind);
+    try
+        P.Nlist = P.Nlist(ind,ind);
+    end
     
     P.N = sum(ind);
     

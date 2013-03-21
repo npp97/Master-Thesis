@@ -12,7 +12,7 @@ function marginals( P )
         Integral = sum(P.c.*sqrt(pi./P.eps.^2).^P.pdim);
     end
     
-    NV = 100;
+    NV = 200;
     
     SIGMA=P.M*P.M;
     
