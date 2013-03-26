@@ -1,4 +1,4 @@
-function marginals_mls( P )
+function P = marginals_mls( P )
     %MARGINALS Takes problem P and plots the marginals for the rbf approximate
     warning( 'off' , 'MATLAB:legend:IgnoringExtraEntries')
     disp(['------- Computing Marginals -------'])
@@ -12,7 +12,7 @@ function marginals_mls( P )
         Integral = sum(P.c.*sqrt(pi./P.eps.^2).^P.pdim);
     end
     
-    NV = 200;
+    NV = 256;
     
     SIGMA=P.M*P.M;
     
@@ -26,7 +26,8 @@ function marginals_mls( P )
 %         nummargin(1,:) = 1/(xx(2)-xx(1))*trapz(FF,1)/Integral;
 %         nummargin(2,:) = 1/(yy(2)-yy(1))*trapz(FF,2)/Integral;
 %     end
-    
+    P.marg_mls = zeros(P.pdim,NV);
+    P.mean_mls = zeros(P.pdim);
     
     for j=1:P.pdim
         for k=1:P.pdim
@@ -66,6 +67,8 @@ function marginals_mls( P )
                 
                 xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
                 xlabel(['log(' P.paramspec{j}{1} ')'])
+                P.marg_mls(j,:) = yy;
+                P.mean_mls(j) = mean_rbf;
             else
                 % 2D 
                 
