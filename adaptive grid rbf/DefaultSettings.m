@@ -39,6 +39,8 @@ switch(P.model)
         [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
         figure(2)
         plot(P.tdata,yy([1 2],:),'.-')
+        hold on
+        errorbar(P.tdata,yy(1,:),P.tdata*0+P.sigma)
         P.ydata = yy(P.species,:)';
         ylabel('Concentration')
         xlabel('Time')
@@ -121,8 +123,8 @@ switch(P.model)
         P.y0 = model.p0;
         P.ydata = histogram.data.values';
         P.k = theta';
-        P.loglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:4)),theta(5:6)'],system,histogram,options);
-        P.estim_param = [1 2 3 4];
+        P.loglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:3)),theta(4),exp(xi(4)),theta(6)],system,histogram,options);
+        P.estim_param = [1 2 3 5];
         P.logscale = [1 1 1 1];
         P.pdim = 4;
         
@@ -130,8 +132,8 @@ switch(P.model)
             {'\tau_{on}', log(P.k(1)), log(P.k(1))-0.5,log(P.k(1))+0.5}
             {'\tau_{off}', log(P.k(2)), log(P.k(2))-0.5,log(P.k(2))+0.5}
             {'k_m', log(P.k(3)), log(P.k(3))-0.5,log(P.k(3))+0.5}
-            {'\gamma_m', log(P.k(4)), log(P.k(4))-0.5,log(P.k(4))+0.5}
-            %{'k_m', log(P.k(5)), log(P.k(5))-0.5,log(P.k(5))+0.5}
+            %{'\gamma_m', log(P.k(4)), log(P.k(4))-0.5,log(P.k(4))+0.5}
+            {'k_p', log(P.k(5)), log(P.k(5))-0.5,log(P.k(5))+0.5}
             %{'\gamma_p', log(P.k(6)), log(P.k(6))-0.5,log(P.k(6))+0.5}
         };
 end

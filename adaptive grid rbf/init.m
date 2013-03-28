@@ -2,6 +2,8 @@ function [ P ] = init( P )
     %INIT Initialises the algorithm with an initial particle distribution
     % and an approximation to the anisotropy transformation
     
+    P.feval_latt = 0;
+    P.feval_adap = 0;
     
     disp(['------- Initialising Problem -------'])
     

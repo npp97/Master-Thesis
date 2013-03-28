@@ -17,6 +17,7 @@ function [f] = eval_llh(p,P)
         if(P.model == 4)
             % pre specified likelihood
             f = exp(P.loglikelihood(p)+9.0498e5);%with added normalization
+            %f = exp(P.loglikelihood(p)+1.0715941e6);
         else
             
             try

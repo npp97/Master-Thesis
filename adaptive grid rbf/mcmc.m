@@ -9,11 +9,11 @@ function [ P ] = mcmc( P )
     model.N = 1;
     
     % number of simulations
-    options.nsimu = 100*(10^P.pdim);
+    options.nsimu = 1/100*(10^P.pdim);
     % flag whether to update simulations
     options.updatesigma = 0;
     % flag for waitbar
-    options.waitbar = 0;
+    options.waitbar = 1;
     % flag for verbosity
     options.verbosity = 0;
     
@@ -40,7 +40,8 @@ function [ P ] = mcmc( P )
         end
         T = chainstats(P.mcchain,P.mcresults);
         % correlation length
-        P.tau = max(iact(P.mcchain));
+        %P.tau = max(iact(P.mcchain));
+        P.tau = 1; % no thinning
 
         nmcmc=nmcmc+1;
     end

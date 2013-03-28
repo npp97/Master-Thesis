@@ -1,4 +1,4 @@
-function [ P ] = init( P )
+function [ P ] = regenerate_lattice( P )
 % initialise initial point
     P.Xp = P.logscale.*log(P.k(P.estim_param))+(1-P.logscale).*P.k(P.estim_param);
     if(P.model == 4)

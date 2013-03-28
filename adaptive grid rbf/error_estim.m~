@@ -34,9 +34,11 @@ function [ P ] = error_estim( P )
     clf
     
     subplot(2,4,1)
-    smoothhist2D([log(P.Ftrue)/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)],10,[100,100])
     %plot(log(P.Ftrue)/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
-    %hold on
+    xx = linspace(min(log(P.Ftrue)/log(10)),max(log(P.Ftrue)/log(10)),200);
+    yy = linspace(min(log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)),max(log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)),200);
+    kdedens = 
+    surf(
     %error_ellipse(cov([log(P.Ftrue)/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)])+eye(2)*1e-8,mean([log(P.Ftrue)/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)]))
     xlabel('log function value')
     xlim([min(log(P.Ftrue)/log(10)),max(log(P.Ftrue)/log(10))])
@@ -44,10 +46,9 @@ function [ P ] = error_estim( P )
     ylim([min(log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)),max(log(abs(P.Ftrue-Finterp)/P.fmax)/log(10))])
     
     subplot(2,4,5)
-    smoothhist2D([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)],10,[100,100])
-    %plot(log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10),'r*')
-    %hold on
-    %error_ellipse(cov([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-8,mean([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)]))
+    plot(log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10),'r*')
+    hold on
+    error_ellipse(cov([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-8,mean([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)]))
     xlabel('log function value')
     ylabel('log rel error on particles')
     
@@ -112,7 +113,7 @@ function [ P ] = error_estim( P )
            subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
            if(j==k)
                % 1D
-               scatter(P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,ones(size(Finterp)),log(abs(P.Ftrue-Finterp)+1))
+               scatter(P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,log(abs(P.Ftrue-Finterp)+1),log(abs(P.Ftrue-Finterp)+1))
                set(gca,'YScale','log')
                xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
                xlabel(['log(' P.paramspec{j}{1} ')'])
@@ -120,7 +121,7 @@ function [ P ] = error_estim( P )
                title('Error on MCMC samples')
            else
                % 2D
-               scatter3(P.XX(:,k),P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,ones(size(Finterp)),log(abs(P.Ftrue-Finterp)+1))
+               scatter3(P.XX(:,k),P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,log(abs(P.Ftrue-Finterp)+1),log(abs(P.Ftrue-Finterp)+1))
                view(0,90)
                set(gca,'ZScale','log')
                xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);
@@ -142,16 +143,14 @@ function [ P ] = error_estim( P )
            subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
            if(j==k)
                % 1D
-               scatter(P.Xp(:,j),abs(EF/P.fmax),ones(size(EF))*5,log(abs(EF/P.fmax)+1))
-               %semilogy(P.Xp(:,j),EF/P.fmax,'k*')
-               set(gca,'YScale','log')
+               semilogy(P.Xp(:,j),EF/P.fmax,'k*')
                xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
                xlabel(['log(' P.paramspec{j}{1} ')'])
                ylabel('relative error to f_{max}')
                title('Error on particles')
            else
                % 2D
-               scatter3(P.Xp(:,k),P.Xp(:,j),abs(EF/P.fmax),ones(size(EF))*5,log(abs(EF/P.fmax)+1))
+               scatter3(P.Xp(:,k),P.Xp(:,j),EF/P.fmax,log(EF+1),log(EF+1))
                view(0,90)
                set(gca,'ZScale','log')
                xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);

@@ -2,11 +2,6 @@ function [ P ] = refine_particles( P )
     %REFINE_PARTICLES Summary of this function goes here
     %   Detailed explanation goes here
     
-    % initialise evaluation count
-    if (P.feval_adap == 0)
-        P.feval_adap = P.feval_latt;
-    end
-    
     disp(['------- Refining Particles -------'])
     
     % we might start from a previous run

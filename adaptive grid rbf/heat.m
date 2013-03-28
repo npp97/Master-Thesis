@@ -3,11 +3,11 @@ clf
 
 DefaultSettings
 
-P.adap_d0 = 1;
-P.adap_D0 = 4;
+P.adap_d0 = 0.5;
+P.adap_D0 = 2;
 
-P.init_d0 = 1;
-P.init_D0 = 4;
+P.init_d0 = 0.5;
+P.init_D0 = 2;
 
 %P.vsT = 15;
 
@@ -15,7 +15,7 @@ P.kernel_aniso = 2;
 
 P.init_method = 2;
 P.init_lattice = 2;
-P.init_latt_d = 0.005;
+P.init_latt_d = 0.01;
 
 P.switch_fusion_off = true;
 P.kernel_aniso_method = 2;
@@ -28,7 +28,7 @@ P.grad_iter = 1;
 P.max_iter = 0;
 % P.adap_dc = 1.5;
 
-P.plotflag=true;
+P.plotflag=false;
 P.plotinter = 1;
 %% 2 Implementation
 

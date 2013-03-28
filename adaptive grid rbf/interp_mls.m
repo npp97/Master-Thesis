@@ -17,7 +17,7 @@ function [ P ] = interp_mls( P )
 
     % estimate optimal eps
     disp(['# Optimizing Shape Parameter '])
-    P.eps = fminbnd(@(ep) CostEps_mls(ep,P),1e-3/mean(P.rcp),1e2/mean(P.rcp),optimset('Display','iter'));
+    P.eps = fminbnd(@(ep) CostEps_mls(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp),optimset('Display','iter'));
     P.c = P.F;
     
     % normalize eps

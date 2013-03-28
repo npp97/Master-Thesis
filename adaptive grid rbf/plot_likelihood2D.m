@@ -19,7 +19,7 @@ for j = 1 : size(X,1)
 end
 textprogressbar('done');
 
-surf(XX,YY,reshape(log(F)/log(10),size(XX)))
+surf(XX,YY,reshape(F,size(XX)))
 xlim([P.paramspec{1}{3},P.paramspec{1}{4}]);
 ylim([P.paramspec{2}{3},P.paramspec{2}{4}]);
 view(0,90)

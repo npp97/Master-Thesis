@@ -9,7 +9,7 @@ function [ P ] = generate_lattice( P )
     tspawn = 1;
     
     % integer coordinats
-    L = zeros(1,P.pdim);
+    P.L = zeros(1,P.pdim);
     
     % Function value
     LF = P.fmax;
@@ -31,7 +31,7 @@ function [ P ] = generate_lattice( P )
                         nb = zeros(1,2*P.pdim);
                         add(k) = 1;
                         nb(k) = 1;
-                        L(end+1,:) = L(j,:)+add;
+                        P.L(end+1,:) = P.L(j,:)+add;
                         nbor(end+1,:) = nb;
                     end
                     if(nbor(j,k) == 0)
@@ -39,25 +39,26 @@ function [ P ] = generate_lattice( P )
                         nb = zeros(1,2*P.pdim);
                         add(k) = -1;
                         nb(P.pdim+k) = 1;
-                        L(end+1,:) = L(j,:)+add;            
+                        P.L(end+1,:) = P.L(j,:)+add;            
                         nbor(end+1,:) = nb;
                     end
                 end
             end
         end
         lspawn = tspawn;
-        [~,ind] = unique(L,'rows','first');
+        [~,ind] = unique(P.L,'rows','first');
         ii = sort(ind);
-        L=L(ii,:);
+        P.L=P.L(ii,:);
         nbor=nbor(ii,:);
-        tspawn = size(L,1);
+        tspawn = size(P.L,1);
         for j = lspawn + 1 : tspawn
-            LF(j,1) = eval_llh(XX+L(j,:)*P.Gram,P);
+            LF(j,1) = eval_llh(XX+P.L(j,:)*P.Gram,P);
+            P.feval_latt = P.feval_latt + 1;
         end
 
         figure(5)
         
-        XL = L*P.Gram;
+        XL = P.L*P.Gram;
         switch(P.pdim)
             case 1
                 semilogy(XL(:,1),LF,'bo')
@@ -67,7 +68,7 @@ function [ P ] = generate_lattice( P )
                 scatter3(XL(:,1),XL(:,2),XL(:,3),max(log(LF)/log(10),1e-16)+10,max(log(LF)/log(10),1e-16)+20);
     end
 
-    P.Xp = bsxfun(@plus,P.Xp(1,:),L*P.Gram);
+    P.Xp = bsxfun(@plus,P.Xp(1,:),P.L*P.Gram);
     P.F = LF;
     
 end

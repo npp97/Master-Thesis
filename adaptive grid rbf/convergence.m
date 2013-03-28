@@ -1,5 +1,5 @@
-clear all
-DefaultSettings
+ clear all
+ DefaultSettings
 
 P.adap_d0 = 1;
 P.adap_D0 = 4;
@@ -34,23 +34,27 @@ P.plotinter = 1;
 
 P = init(P);
 
-ND = 50;
+ND = 40;
+NI = 100;
 
-densvec = logspace(-0.5,0.5,ND);
+densvec = logspace(-0.5,1,ND);
 
-textprogressbar('Progress: ');
-for j = 1 : P.NX
-    textprogressbar(j/P.NX*100)
-    [P.Ftrue(j,1)] = eval_llh(P.XX(j,:),P);
-end
-textprogressbar('done');
+
+% 
+% textprogressbar('Progress: ');
+% for j = 1 : P.NX
+%     textprogressbar(j/P.NX*100)
+%     [P.Ftrue(j,1)] = eval_llh(P.XX(j,:),P);
+% end
+% textprogressbar('done');
 
 NV = 2^8;
 
 kdedens = zeros(NV,P.pdim);
 
 for n = 1 : P.pdim
-    [~,kdedens(:,n),kdexx]=kde(P.XX(:,n),NV,P.paramspec{n}{3},P.paramspec{n}{4});
+    xx = linspace(P.paramspec{n}{3},P.paramspec{n}{4},NV);
+    kdedens(:,n) = kde_simple(P.XX(:,n)',xx);
 end
 
 clear vP
@@ -72,27 +76,23 @@ for k = 1:ND
     
     %% 2.5 Interpolation
     
-    Ps = interp(Ps);
-    
-    %% 2.6 Error Estimation
-    
-    Ps = error_estim(Ps);
-    
-    %% 2.7 Stochastic Analysis
-    
-    Ps = marginals(Ps);
-    
-    %% 2.5 Interpolation
-    
     Ps = interp_mls(Ps);
     
-    %% 2.6 Error Estimation
+    %% 2.7 Marginal
     
-    Ps = error_estim_mls(Ps);
+    NV = 256;
+    Ps.marg_mls = zeros(Ps.pdim,NV);
+    SIGMA=Ps.M*Ps.M;
     
-    %% 2.7 Stochastic Analysis
-    
-    Ps = marginals_mls(Ps);
+    for j = 1 : P.pdim
+        xx = linspace(Ps.paramspec{j}{3},Ps.paramspec{j}{4},NV)';
+        % distances
+        rr = sqrt(sqdistance(xx',Ps.Xp(:,j)'));
+        % sigma
+        sigma = sqrt(SIGMA(j,j));
+        Ps.marg_mls(j,:) = 1/(sigma/Ps.eps.*sqrt(pi)).*rbf(rr,Ps.eps/sigma)*Ps.c/abs(sum(Ps.c));
+    end
+        
     
     vP{k} = Ps;
 end
@@ -100,84 +100,83 @@ end
 
 
 clear vP_adap
-for k = 1:ND
-    
+for k = 21
     Ps = vP{k};
-    Ps.max_iter = 100;
-    
-    Ps.adap_d0 = 2*Ps.init_latt_d;
+        
+    Ps.adap_d0 = Ps.init_latt_d;
     Ps.adap_D0 = 4*Ps.init_latt_d;
     
-    Ps.init_d0 = 2*Ps.init_latt_d;
+    Ps.init_d0 = Ps.init_latt_d;
     Ps.init_D0 = 4*Ps.init_latt_d;
     
     Ps.d0 = Ps.init_d0;
     Ps.D0 = Ps.init_D0;
     
-    %% 2.2 Particle Refinement
-    
-    Ps = refine_particles( Ps );
-    
-    %% 2.3 Post Process
-    
-    %Ps = postprocess(Ps);
-    
-    %% 2.5 Interpolation
-    
-    Ps = interp(Ps);
-    
-    %% 2.6 Error Estimation
-    
-    Ps = error_estim(Ps);
-    
-    %% 2.7 Stochastic Analysis
-    
-    Ps = marginals(Ps);
-    
-    %% 2.5 Interpolation
-    
-    Ps = interp_mls(Ps);
-    
-    %% 2.6 Error Estimation
-    
-    Ps = error_estim_mls(Ps);
-    
-    %% 2.7 Stochastic Analysis
-    
-    Ps = marginals_mls(Ps);
-    
-    vP_adap{k} = Ps;
-end
+    for l = 1:NI
 
-NN = cellfun(@(x) x.N, vP);
-NN_adap = cellfun(@(x) x.N, vP_adap);
-
-for k = 1 : ND
-    kded = zeros(NV,P.pdim);
-    
-    for n = 1 : P.pdim
-        [~,kded(:,n),kdexx]=kde(P.XX(1:NN(k),n),NV,P.paramspec{n}{3},P.paramspec{n}{4});
+        %% 2.2 Particle Refinement
+        
+        Ps.max_iter = (l-1);
+        
+        Ps = refine_particles( Ps );
+        
+        %% 2.5 Interpolation
+        
+        Ps = interp(Ps);
+        
+        %% 2.7 Stochastic Analysis
+        
+        NV = 256;
+        Ps.marg_mls = zeros(Ps.pdim,NV);
+        SIGMA=Ps.M*Ps.M;
+        
+        for j = 1 : Ps.pdim
+            xx = linspace(Ps.paramspec{j}{3},Ps.paramspec{j}{4},NV)';
+            % distances
+            rr = sqrt(sqdistance(xx',Ps.Xp(:,j)'));
+            % sigma
+            sigma = sqrt(SIGMA(j,j));
+            Ps.marg_rbf(j,:) = 1/(sigma/Ps.eps.*sqrt(pi)).*rbf(rr,Ps.eps/sigma)*Ps.c/abs(sum(Ps.c));
+        end
+        
+        %% 2.5 Interpolation
+        
+        vP_adap{l} = Ps;
+        
     end
-    vKDE{k} = kded;
 end
 
-ref = vP{1}.marg_rbf';
-Ndens = numel(vP{1}.marg_rbf);
+NN = cellfun(@(x) x.feval_latt, vP);
+NN_adap = cellfun(@(x) x.feval_adap, vP_adap);
+
+
+NK = 50;
+
+NN_kde = logspace(log(min(min(NN)))/log(10),log(max(max(NN_adap)))/log(10),NK);
+
+for k = 21
+    for l = 1:NK
+        kded = zeros(NV,P.pdim);
+        
+        for n = 1 : P.pdim
+            xx = linspace(P.paramspec{n}{3},P.paramspec{n}{4},NV);
+            kded(:,n) = kde_simple(P.XX(1:ceil(NN_kde(l)),n)',xx);
+        end
+        vKDE{l} = kded;
+    end
+end
+
+ref = kdedens;
+Ndens = numel(ref);
 
 
 clear l1rbf linfrbf l1rbf_adap linfrbf_adap l1mls linfmls l1mls_adap linfmls_adap l1kde linfkde
-
-l1rbf = cellfun(@(x) 1/Ndens*norm(x.marg_rbf' - ref,1),vP);
-linfrbf = cellfun(@(x) 1*norm(x.marg_rbf' - ref,inf),vP);
 
 l1rbf_adap = cellfun(@(x) 1/Ndens*norm(x.marg_rbf' - ref,1),vP_adap);
 linfrbf_adap = cellfun(@(x) 1*norm(x.marg_rbf' - ref,inf),vP_adap);
 
 l1mls = cellfun(@(x) 1/Ndens*norm(x.marg_mls' - ref,1),vP);
 linfmls = cellfun(@(x) 1*norm(x.marg_mls' - ref,inf),vP);
-
-l1mls_adap = cellfun(@(x) 1/Ndens*norm(x.marg_mls' - ref,1),vP_adap);
-linfmls_adap = cellfun(@(x) 1*norm(x.marg_mls' - ref,inf),vP_adap);
 
 l1kde = cellfun(@(x) 1/Ndens*norm(x - ref,1),vKDE);
 linfkde = cellfun(@(x) 1*norm(x - ref,inf),vKDE);
@@ -186,20 +185,24 @@ linfkde = cellfun(@(x) 1*norm(x - ref,inf),vKDE);
 figure(6)
 clf
 
-loglog(NN,l1rbf,'r--')
+loglog(NN,l1mls,'b.-','LineWidth',5)
+
 hold on
-loglog(NN,linfrbf,'r.-')
 
-loglog(NN,l1mls,'b--')
-loglog(NN,linfmls,'b.-')
+loglog(NN_adap,l1rbf_adap(1,:),'r.-','LineWidth',5)
 
-loglog(NN,l1kde,'k--')
-loglog(NN,linfkde,'k.-')
+loglog(NN_kde*1/(1-P.mcresults.rejected),l1kde(1,:),'k.-','LineWidth',5)
 
-loglog(NN_adap,l1rbf_adap,'m--')
-loglog(NN_adap,linfrbf_adap,'m.-')
+% for l = [10 20]
+%     loglog(NN_adap(l,:),l1rbf_adap(l,:),'r--')
+% end
+% 
+% for l = [10 20]
+%     loglog(NN_adap(l,:),l1kde(l,:),'k--')
+% end
 
-loglog(NN_adap,l1mls_adap,'c--')
-loglog(NN_adap,linfrbf_adap,'c.-')
-
-legend('avg. l_1 error RBF','l_{inf} error RBF','avg. l_1 error MLS','l_{inf} error MLS','avg. l_1 error KDE','l_{inf} error KDE','avg. l_1 error RBF adaptive','avg. l_{inf} error RBF adaptive','avg. l_1 error MLS adaptive','avg. l_{inf} error MLS adaptive')
+legend('avg. l_1 error MLS','avg. l_1 error RBF','avg. l_1 error KDE')
+xlabel('Function Evaluations')
+ylabel('Error')
+xlim([min([NN,NN_adap,NN_kde]),max([NN,NN_adap,NN_kde])])
+ylim([min([l1mls,l1rbf_adap,l1kde]),max([l1mls,l1rbf_adap,l1kde])])

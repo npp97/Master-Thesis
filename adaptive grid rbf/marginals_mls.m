@@ -51,14 +51,14 @@ function P = marginals_mls( P )
                 plot(xx,yy,'r-')
                 hold on
                 % kde 
-                [~,kdedens,kdexx]=kde(P.mcchain(:,j),NV,P.paramspec{j}{3},P.paramspec{j}{4});
-                plot(kdexx,kdedens,'k-')
+                kdedens = kde_simple(P.XX(:,j)',xx');
+                plot(xx,kdedens,'k-')
                 % numerical integration
-                scatter(P.Xp(:,j),0.1*P.c/max(abs(P.c))-1)
+%                 scatter(P.Xp(:,j),0.1*P.c/max(abs(P.c))-1)
                 
-                vline(mean_mcmc,'k')
-                vline(mean_rbf,'r')
-                vline(mean_true,'m','True Parameter')
+%                 vline(mean_mcmc,'k')
+%                 vline(mean_rbf,'r')
+%                 vline(mean_true,'c','True Parameter')
                 
 %                 if(P.pdim==2)
 %                     plot(xx,nummargin(j,:),'b-')

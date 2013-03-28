@@ -21,6 +21,7 @@ function [f,Df,F] = eval_gradllh(p,P)
         if(P.model == 4)
             [f,Df] = P.loglikelihood(p);
             f = exp(f+9.0498e5);%add normalization
+            %f = exp(f+1.0715941e6);
             Df = f*Df(P.estim_param);
             F = eye(P.pdim);
         else
