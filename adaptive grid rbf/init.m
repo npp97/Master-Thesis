@@ -20,7 +20,7 @@ function [ P ] = init( P )
             P.adap_Nstar = 24;
     end
     
-    disp(['Neighborhood Size: ' num2str(P.adap_Nstar)])
+    %disp(['Neighborhood Size: ' num2str(P.adap_Nstar)])
     
     % compute soft spawning stop
     P.thresh = exp(-chi2inv(P.alpha,P.pdim)/2);

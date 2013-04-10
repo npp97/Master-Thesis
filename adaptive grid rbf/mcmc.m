@@ -8,8 +8,8 @@ function [ P ] = mcmc( P )
     model.sigma2 = 1;
     model.N = 1;
     
-    % number of simulations
-    options.nsimu = 1/100*(10^P.pdim);
+    % number of simulations (burn in)
+    options.nsimu = 1e3;
     % flag whether to update simulations
     options.updatesigma = 0;
     % flag for waitbar
@@ -30,9 +30,13 @@ function [ P ] = mcmc( P )
     T = chainstats(P.mcchain,P.mcresults);
     % thin samples
 
+    % number of simulations
+    options.nsimu = (10^P.pdim);
+    
     nmcmc=1;
     while(any([min(T(:,5))<0.9, nmcmc==1]))
         [P.mcresults,mcchain,P.mcs2chain] = mcmcrun(model,data,params,options,P.mcresults);
+
         if(nmcmc>1)
             P.mcchain=[P.mcchain;mcchain];
         else
@@ -50,5 +54,21 @@ function [ P ] = mcmc( P )
     P.XX = P.mcchain(1:P.tau:end,:);
     % count number of samples
     P.NX = size(P.XX,1);
+    
+    NV = 2^8;
+
+    
+    disp(['# Computing KDE Marginals']);
+    P.marg_kde = zeros(NV,P.pdim);
+    
+    textprogressbar('Progress: ');
+    for n = 1 : P.pdim
+        textprogressbar(n/P.pdim*100)
+        xx = linspace(P.paramspec{n}{3},P.paramspec{n}{4},NV);
+        P.marg_kde(:,n) = kde_simple(P.XX(:,n)',xx);
+    end
+    textprogressbar('done');
+    
+    
 end
 

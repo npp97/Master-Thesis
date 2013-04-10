@@ -48,15 +48,6 @@ densvec = logspace(-0.5,1,ND);
 % end
 % textprogressbar('done');
 
-NV = 2^8;
-
-kdedens = zeros(NV,P.pdim);
-
-for n = 1 : P.pdim
-    xx = linspace(P.paramspec{n}{3},P.paramspec{n}{4},NV);
-    kdedens(:,n) = kde_simple(P.XX(:,n)',xx);
-end
-
 clear vP
 for k = 1:ND
     
@@ -152,7 +143,7 @@ NN_adap = cellfun(@(x) x.feval_adap, vP_adap);
 
 NK = 50;
 
-NN_kde = logspace(log(min(min(NN)))/log(10),log(max(max(NN_adap)))/log(10),NK);
+NN_kde = logspace(0,log(size(P.XX,1))/log(10),NK);
 
 for k = 21
     for l = 1:NK
@@ -166,9 +157,8 @@ for k = 21
     end
 end
 
-ref = kdedens;
+ref = P.marg_kde;
 Ndens = numel(ref);
-
 
 clear l1rbf linfrbf l1rbf_adap linfrbf_adap l1mls linfmls l1mls_adap linfmls_adap l1kde linfkde
 
@@ -180,7 +170,6 @@ linfmls = cellfun(@(x) 1*norm(x.marg_mls' - ref,inf),vP);
 
 l1kde = cellfun(@(x) 1/Ndens*norm(x - ref,1),vKDE);
 linfkde = cellfun(@(x) 1*norm(x - ref,inf),vKDE);
-
 
 figure(6)
 clf
@@ -198,7 +187,7 @@ loglog(NN_kde*1/(1-P.mcresults.rejected),l1kde(1,:),'k.-','LineWidth',5)
 % end
 % 
 % for l = [10 20]
-%     loglog(NN_adap(l,:),l1kde(l,:),'k--')
+%     loglog(NN_adap(l,:),l1kde(l,:),'k--')m
 % end
 
 legend('avg. l_1 error MLS','avg. l_1 error RBF','avg. l_1 error KDE')

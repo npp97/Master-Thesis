@@ -47,20 +47,21 @@ function [ P ] = error_estim_mls( P )
 %     error_ellipse(cov([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(P.F)/log(10),log(abs(EF)/P.fmax)/log(10)]))
     xlabel('log function value')
     ylabel('log rel particle error')
-%     
-%     subplot(2,4,2)
-%     plot(log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
-%     hold on
-%     error_ellipse(cov([log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)]))
-%     xlabel('log norm of gradient')
-%     ylabel('log rel MCMC error')
-%     
-%     subplot(2,4,6)
-%     plot(log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10),'r*')
-%     hold on
-%     error_ellipse(cov([log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10)]))
-%     xlabel('log norm of gradient')
-%     ylabel('log rel particle error')
+    
+    try
+    subplot(2,4,2)
+    plot(log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
+    hold on
+    error_ellipse(cov([log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(sqrt(sum(P.Fgradtrue.^2,2)))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10)]))
+    xlabel('log norm of gradient')
+    ylabel('log rel MCMC error')
+    
+    subplot(2,4,6)
+    plot(log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10),'r*')
+    hold on
+    error_ellipse(cov([log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(sqrt(sum(P.DF.^2,2)))/log(10),log(abs(EF)/P.fmax)/log(10)]))
+    xlabel('log norm of gradient')
+    ylabel('log rel particle error')
    
     subplot(2,4,3)
     plot(log(min(RR,[],2))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
@@ -94,7 +95,9 @@ function [ P ] = error_estim_mls( P )
     hold on
     error_ellipse(cov([sum(P.Nlist,2),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-16,mean([sum(P.Nlist,2),log(abs(EF)/P.fmax)/log(10)]))
     xlabel('Neighborhood size')
-    ylabel('rel particle error')  
+    ylabel('rel particle error') 
+    catch 
+    end
     
     %% error on mcmc samples
     figure(44)

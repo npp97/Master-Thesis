@@ -1,9 +1,0 @@
-<pre class="code">
-<span class="srcline"><span class="lineno"><a href="48,1" id="srcline1">1</a></span><span class="line"><span class="keyword">function</span> [ <span class="var type1" id="S2T1U3">gU</span> ] = gradllh( <span class="mxinfo" id="T2:U2">~</span>, <span class="var type1" id="S3T1U7">x</span>)</span></span>
-<span class="srcline"><span class="lineno"><a href="48,2" id="srcline2">2</a></span><span class="line">    <span class="comment">%GRADLLH gradient of the log-likelihood function to be approximated</span></span></span>
-<span class="srcline"><span class="lineno"><a href="48,3" id="srcline3">3</a></span><span class="line"></span></span>
-<span class="srcline"><span class="lineno"><a href="48,4" id="srcline4">4</a></span><span class="line">    <span class="mxinfo" id="T1:U4"><span class="var type1" id="S2T1U10">gU</span> = <span class="mxinfo" id="T1:U6"><span class="mxinfo" id="T2:U7">10</span>*<span class="mxinfo" id="T1:U8">bsxfun(@times,<span class="mxinfo" id="T3:U9">- <span class="mxinfo" id="T3:U10">exp(<span class="mxinfo" id="T3:U11"><span class="mxinfo" id="T2:U12">-1/2</span>*(<span class="mxinfo" id="T3:U13">sum(<span class="mxinfo" id="T1:U14"><span class="var type1" id="S3T1U29">x</span>.^2</span>,2)</span>)</span>)</span></span>,<span class="var type1" id="S3T1U32">x</span>)</span></span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="48,5" id="srcline5">5</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="48,6" id="srcline6">6</a></span><span class="line"><span class="keyword">end</span></span></span>
-<span class="srcline"><span class="lineno"><a href="48,7" id="srcline7">7</a></span><span class="line"></span></span>
-</pre>

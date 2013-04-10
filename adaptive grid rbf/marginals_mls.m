@@ -51,8 +51,7 @@ function P = marginals_mls( P )
                 plot(xx,yy,'r-')
                 hold on
                 % kde 
-                kdedens = kde_simple(P.XX(:,j)',xx');
-                plot(xx,kdedens,'k-')
+                plot(xx,P.marg_kde(:,j),'k-')
                 % numerical integration
 %                 scatter(P.Xp(:,j),0.1*P.c/max(abs(P.c))-1)
                 

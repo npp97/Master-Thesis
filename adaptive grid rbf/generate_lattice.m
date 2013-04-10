@@ -56,20 +56,11 @@ function [ P ] = generate_lattice( P )
             P.feval_latt = P.feval_latt + 1;
         end
 
-        figure(5)
-        
-        XL = P.L*P.Gram;
-        switch(P.pdim)
-            case 1
-                semilogy(XL(:,1),LF,'bo')
-            case 2
-                scatter(XL(:,1),XL(:,2),max(log(LF)/log(10),1e-16)+10,max(log(LF)/log(10),1e-16)+20);
-            case 3
-                scatter3(XL(:,1),XL(:,2),XL(:,3),max(log(LF)/log(10),1e-16)+10,max(log(LF)/log(10),1e-16)+20);
-    end
+        P.Xp = bsxfun(@plus,P.Xp(1,:),P.L*P.Gram);
+        P.F = LF;
+        P.N = length(P.F);
+        plot_points(P,1);
 
-    P.Xp = bsxfun(@plus,P.Xp(1,:),P.L*P.Gram);
-    P.F = LF;
-    
+    end
 end
 

@@ -66,7 +66,9 @@ function [ P ] = error_estim( P )
     xlabel('log norm of gradient')
     ylabel('log rel error on particles')
     catch
+    end
    
+    try
     subplot(2,4,3)
     plot(log(min(RR,[],2))/log(10),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
     hold on
@@ -80,6 +82,8 @@ function [ P ] = error_estim( P )
     error_ellipse(cov([log(min(P.R+max(max(P.R))*eye(P.N),[],2))/log(10),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-16,mean([log(min(P.R+max(max(P.R))*eye(P.N),[],2))/log(10),log(abs(EF)/P.fmax)/log(10)]))
     xlabel('log min distance to grid')
     ylabel('log rel particle error') 
+    catch
+    end
     
 
     
@@ -88,7 +92,7 @@ function [ P ] = error_estim( P )
     catch
         P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
     end
-
+    try 
     subplot(2,4,4)
     plot(sum(RR<P.D0*P.adap_rstar,2),log(abs(P.Ftrue-Finterp)/P.fmax)/log(10),'r*')
     hold on
@@ -102,7 +106,8 @@ function [ P ] = error_estim( P )
     error_ellipse(cov([sum(P.Nlist,2),log(abs(EF)/P.fmax)/log(10)])+eye(2)*1e-16,mean([sum(P.Nlist,2),log(abs(EF)/P.fmax)/log(10)]))
     xlabel('Neighborhood size')
     ylabel('rel particle error')  
-    
+    catch
+    end
     % error on mcmc samples
     figure(14)
     clf
@@ -189,49 +194,49 @@ function [ P ] = error_estim( P )
     
     warning('off','MATLAB:nearlySingularMatrix')
     
-%     disp(['# Testing different shape parameters'])
-%     textprogressbar('Progress: ');
-%     for j=1:Ne;
-%         textprogressbar(j/Ne*100)
-%         
-%         % set shape parameter
-%         if(Ps.kernel_shape == 2)
-%             Ps.eps = ee(j)./(Ps.rcp);
-%         else
-%             Ps.eps = ee(j)/mean(Ps.rcp);
-%         end
-%         
-%         % compute interpolation matrix and evaluation matrix
-%         Ps.RBF = rbf(Ps.R,Ps.eps);
-%         R_eval = rbf(RR,Ps.eps);
-%         
-%         % interpolate
-%         Ps.c = Ps.RBF\Ps.F;
-%         Finterp = R_eval*Ps.c;
-%         
-%         % compute errors
-%         erf(j)=max(abs(P.Ftrue-Finterp)/Ps.fmax);
-%         Ps.error_estim = 1;
-%         erl(j)=CostEps(ee(j),Ps)/Ps.fmax;
-%         erf1(j)=norm(abs(P.Ftrue-Finterp),1)/Ps.fmax;
-%         ercond(j)=rcond(Ps.RBF);
-%         
-%         
-%         % visualisation
-%         loglog(ee/mean(Ps.rcp),erf,'.-k')
-%         hold on
-%         loglog(ee/mean(Ps.rcp),erf1,'--k')
-%         loglog(ee/mean(Ps.rcp),erl,'.-r')
-%         loglog(ee/mean(Ps.rcp),ercond,'.-b')
-%         ylim([1e-5,1e2])
-%         title(['Shape Parameter Analysis'])
-%         legend('rel. max error on MCMC samples','rel. l1 error on MCMC samples','rel. max error with Cross Validation','RCOND of Interpolation Matrix','Location','SouthOutside')
-%         xlabel(' Shape Parameter ')
-%         ylabel(' Error ' )
-%     end
-%     vline(P.eps)
-%     plot(P.eps,CostEps(P.eps*mean(P.rcp),P)/P.fmax,'r*')
-%     textprogressbar('done')
+    disp(['# Testing different shape parameters'])
+    textprogressbar('Progress: ');
+    for j=1:Ne;
+        textprogressbar(j/Ne*100)
+        
+        % set shape parameter
+        if(Ps.kernel_shape == 2)
+            Ps.eps = ee(j)./(Ps.rcp);
+        else
+            Ps.eps = ee(j)/mean(Ps.rcp);
+        end
+        
+        % compute interpolation matrix and evaluation matrix
+        Ps.RBF = rbf(Ps.R,Ps.eps);
+        R_eval = rbf(RR,Ps.eps);
+        
+        % interpolate
+        Ps.c = Ps.RBF\Ps.F;
+        Finterp = R_eval*Ps.c;
+        
+        % compute errors
+        erf(j)=max(abs(P.Ftrue-Finterp)/Ps.fmax);
+        Ps.error_estim = 1;
+        erl(j)=CostEps(ee(j),Ps)/Ps.fmax;
+        erf1(j)=norm(abs(P.Ftrue-Finterp),1)/Ps.fmax;
+        ercond(j)=rcond(Ps.RBF);
+        
+        
+        % visualisation
+        loglog(ee/mean(Ps.rcp),erf,'.-k')
+        hold on
+        loglog(ee/mean(Ps.rcp),erf1,'--k')
+        loglog(ee/mean(Ps.rcp),erl,'.-r')
+        loglog(ee/mean(Ps.rcp),ercond,'.-b')
+        ylim([1e-5,1e2])
+        title(['Shape Parameter Analysis'])
+        legend('rel. max error on MCMC samples','rel. l1 error on MCMC samples','rel. max error with Cross Validation','RCOND of Interpolation Matrix','Location','SouthOutside')
+        xlabel(' Shape Parameter ')
+        ylabel(' Error ' )
+    end
+    vline(P.eps)
+    plot(P.eps,CostEps(P.eps*mean(P.rcp),P)/P.fmax,'r*')
+    textprogressbar('done')
     
     warning('on','MATLAB:nearlySingularMatrix')
 end

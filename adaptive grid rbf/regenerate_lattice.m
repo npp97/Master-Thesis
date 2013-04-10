@@ -30,6 +30,8 @@ function [ P ] = regenerate_lattice( P )
         switch(P.init_trans)
             case 1
                 % initialise transform with initial point
+                %P.M = gallery('orthog',P.pdim,2);
+                %P.M = sqrtm(pinv(P.Hess))*sqrt(norm(P.Hess))
                 P.M = eye(P.pdim);
             case 2
                 % initialise transform with fisher matrix of initial point
@@ -42,10 +44,10 @@ function [ P ] = regenerate_lattice( P )
             case 3
                 % initialise with hessian
                 try
-                    P.M = chol(-squeeze(P.D2F(1,:,:)));
+                    P.M = sqrtm(-squeeze(P.D2F(1,:,:)));
                 catch
                     % this might fail if we are not positive definite so add regularization term
-                    P.M = chol(-squeeze(P.D2F(1,:,:))/P.fmax + 1e-10*diag(P.pdim));
+                    P.M = sqrtm(-squeeze(P.D2F(1,:,:))/P.fmax + 1e-10*diag(P.pdim));
                 end
         end
         
@@ -103,7 +105,7 @@ function [ P ] = regenerate_lattice( P )
                 P = exactDp(P);
                 P = calc_transform( P );
                 P.Gram = P.init_latt_d*((M*M')*P.M);
-                P = generate_lattice(P);
+                %P = generate_lattice(P);
             end
             P = XptoTp(P);
     end

@@ -6,7 +6,8 @@ function [ P ] = calc_transform( P )
         case 2
             % 2: global anisotropic
             % select particles in \Omega
-            ind = P.F>P.fmax*P.thresh;
+            %ind = P.F>P.fmax*P.thresh;
+            ind = P.F>0;
             X = P.Xp(ind,:);
             
             % tranform only if we have more than pdim points, otherwise the covariance will alway be degenerated
@@ -44,7 +45,18 @@ function [ P ] = calc_transform( P )
                     
                 end
                 
-                P.Mnew = P.Mnew/((abs(det(P.Mnew/P.M)))^(1/P.pdim));
+                %P.Mnew = P.Mnew/((abs(det(P.Mnew/P.M)))^(1/P.pdim));
+                
+                %s = fminsearch(@(t) norm(diag(P.M)-diag(t*P.Mnew),2),1);
+                %s = min(diag(P.M))/min(diag(P.Mnew));
+                %s = fminsearch(@(t) norm(P.M-t*P.Mnew,2),1);
+                %s = fminsearch(@(t) norm(P.M*P.M-t^2*P.Mnew*P.Mnew),1);
+                %s = norm(P.M,2)/norm(P.Mnew,2);
+                s = 1/norm(P.M\P.Mnew,2);
+                
+                P.Mnew = s*P.Mnew;
+                
+                
                 try
                 P.Mdiffinf(P.Riter) = norm(P.M-P.Mnew,inf);
                 P.Mdifffish(P.Riter) = norm(P.Minit-P.Mnew,inf);

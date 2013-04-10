@@ -5,7 +5,7 @@ function P = gradllh(P)
     P.F = zeros(P.N,1);
     
     % compute pointwise for every particle
-    disp(['# Computing Gradient on Partcles']);
+    disp(['# Computing Gradient on Particles']);
     
     textprogressbar('Progress: ');
     for j=1:P.N

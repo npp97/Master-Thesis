@@ -19,7 +19,7 @@ P.init_latt_d = 0.01;
 
 P.switch_fusion_off = true;
 P.kernel_aniso_method = 2;
-P.init_trans = 2;
+P.init_trans = 1;
 % P.adap_fusion_method = 2;
 % P.pot = @(r,rstar) V3(r,rstar);
 % P.dpot = @(r,rstar) dV3(r,rstar);
@@ -43,6 +43,13 @@ P = refine_particles( P );
 %% 2.3 Post Process
 
 P = postprocess(P);
+
+textprogressbar('Progress: ');
+for j = 1 : P.NX
+    textprogressbar(j/P.NX*100)
+    [P.Ftrue(j,1)] = eval_llh(P.XX(j,:),P);
+end
+textprogressbar('done');
 
 %% 2.5 Interpolation
 
