@@ -18,7 +18,10 @@ function [f] = eval_llh(p,P)
             % pre specified likelihood
             f = exp(P.loglikelihood(p)+9.0498e5);%with added normalization
             %f = exp(P.loglikelihood(p)+1.0715941e6);
+        elseif(P.model == 5)
+            f = exp(P.loglikelihood(p));
         else
+            
             
             try
                 pt = P.logscale.*exp(p) + (1-P.logscale).*p;

@@ -2,16 +2,17 @@ function [ P ] = refine_particles( P )
     %REFINE_PARTICLES Summary of this function goes here
     %   Detailed explanation goes here
     
-    % initialise evaluation count
-    if (P.feval_adap == 0)
-        P.feval_adap = P.feval_latt;
-    end
+    
+
     
     disp(['------- Refining Particles -------'])
     
     % we might start from a previous run
     try
         P.Riter = P.Riter;
+        if(P.Riter == 0)
+           error('restart') 
+        end
     catch
         
         
@@ -24,6 +25,43 @@ function [ P ] = refine_particles( P )
         P.XI = [];
         P.Lh = [];
         P.W = [];
+        P.kthresh = [];
+        P.kspawn = [];
+        P.kfuse = [];
+%         %Initialise interpolation for Dp
+%         %first order interpolation
+%         if(P.kernel_aniso > 1)
+%             P.cDp = TriScatteredInterp(P.Tp,P.Dp);
+%             P.cDpNN = TriScatteredInterp(P.Tp,P.Dp,'nearest');
+%         else
+%             P.cDp = TriScatteredInterp(P.Xp,P.Dp);
+%             P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
+%         end
+        
+        % MLS interpolation for Dp
+        
+        if(P.kernel_aniso > 1)
+            P.X_mls = P.Tp;
+        else
+            P.X_mls = P.Xp;
+        end
+        
+        %P = gradllh(P);
+        
+        P.gradDF_mls = sqrt(sum(P.DF.^2,2));
+        param = fminsearch(@(par) norm(abs(P.gradDF_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.gradDF_mls),inf),[1,1]);
+        
+        %P.F_mls = P.F;
+        %param = fminsearch(@(par) norm(abs(P.F_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.F_mls),inf),[1,1]);
+        
+        P.eps_mls = param(1);
+        P.alpha_mls = param(2);
+        
+        
+        % initialise evaluation count
+        if (P.feval_adap == 0)
+            P.feval_adap = P.feval_latt;
+        end
     end
     P.fuse_hits = 0;
     P.break_hits = 0;
@@ -31,7 +69,7 @@ function [ P ] = refine_particles( P )
     while(P.Riter < P.max_iter)
         
         % find particles that are below removal threshold
-        ind = P.F > P.fmax*P.rem_thresh;
+        ind = P.F >= P.fmax*P.rem_thresh;
         
         % count the number of particles to be removed
         P.kthresh(P.Riter)=P.N-sum(ind);
@@ -54,13 +92,13 @@ function [ P ] = refine_particles( P )
         P = fuse_particles( P );
         
         % recalculate Neighborhood sizes
-        P = exactDp( P );
+        P = approxDp( P );
         
         % spawn new particles
         P = spawn_particles( P );
         
         % recalculate Neighborhood sizes 
-        P = exactDp( P );
+        P = approxDp( P );
         
         % check whether we should do gradient steps
         if(P.Riter>P.adap_gradient_start)
@@ -73,13 +111,6 @@ function [ P ] = refine_particles( P )
             P.W(P.Riter) = sum(sum(P.Dpq.^2*P.pot(P.R./P.Dpq,P.adap_gradr)));
         else
             % calculate energy
-            if(P.kernel_aniso > 1)
-                P.cDp = TriScatteredInterp(P.Tp,P.Dp);
-                P.cDpNN = TriScatteredInterp(P.Tp,P.Dp,'nearest');
-            else
-                P.cDp = TriScatteredInterp(P.Xp,P.Dp);
-                P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
-            end
             P.wp = zeros(P.N,P.pdim);
             P.W(P.Riter) = OrgEnergy(P,0);
         end
@@ -104,13 +135,9 @@ function [ P ] = refine_particles( P )
         else 
 
         end
-        
-        % update function values
-        P = llh(P);
-        
-        
+
         % update neighborhood sizes
-        P = exactDp(P);
+        P = approxDp( P );
         
         % update distances
         if(P.kernel_aniso > 1)
@@ -125,6 +152,7 @@ function [ P ] = refine_particles( P )
         P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
         
         P.NI(P.Riter) = sum(and(sum(P.Nlist,2)<P.adap_Nstar,P.F>P.fmax*P.thresh));
+        P.dc(P.Riter) = max([max(1./P.crit(logical(P.Nlist)),0)]);
         P.RI(P.Riter) = max([max(P.crit(logical(P.Nlist))),0]);
         P.rI(P.Riter) = max([min(P.crit(logical(P.Nlist))),0]);
         P.PI(P.Riter) = sum(P.F>P.fmax*P.thresh);
@@ -144,7 +172,7 @@ function [ P ] = refine_particles( P )
         end
         
         % check break condition
-        if( abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<1e-2 && P.Riter > 5 && abs(P.XI(P.Riter) - P.XI(max(P.Riter-1,1))) == 0 )
+        if( abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<1e-1 && P.Riter > 5 && abs(P.XI(P.Riter) - P.XI(max(P.Riter-1,1))) == 0 )
             P.break_hits = P.break_hits + 1;
             if(P.break_hits > 5)       
                 break;
@@ -166,6 +194,7 @@ function [ P ] = refine_particles( P )
         end
 
         P.Riter = P.Riter+1;
+        disp(['Iteration ' num2str(P.Riter) ' : ' num2str(P.N) ' particles ']);  
     end
     
 end

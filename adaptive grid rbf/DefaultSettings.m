@@ -8,7 +8,7 @@ P.ode_abstol = 1e-8;
 
 %% 1.1 Data
 
-P.model = 4;
+P.model = 5;
 
 switch(P.model)
     
@@ -136,13 +136,33 @@ switch(P.model)
             {'k_p', log(P.k(5)), log(P.k(5))-0.5,log(P.k(5))+0.5}
             %{'\gamma_p', log(P.k(6)), log(P.k(6))-0.5,log(P.k(6))+0.5}
         };
-    case 5 
-        P.loglikelihood = @(xi) 2/4*normpdf(xi,[0 0],[1 0;0 1]) + 1/4*normpdf(xi,[-1 -1],[1 1;1 1]) + 1/4*normpdf(xi,[1 1],[1 -1;-1 1])
+    case 5
+        SIGMA1=[0.1 0.25;0.25 1];
+        SIGMA2=[0.01 -0.01;-0.01 0.5];
+        MU1 = [1 1];
+        MU2 = [0.5 -1.5];
+        w1 = 4/5;
+        w2 = 1/5;
+        P.loglikelihood = @(xi) log(w1*mvnpdf(xi,MU1,SIGMA1) + w2*mvnpdf(xi,MU2,SIGMA2));
         P.pdim = 2;
+        P.xdim = 6;
         P.logscale = [0 0];
         P.estim_param = [1 2];
-        P.k = [0 0];
-        
+        P.k = [1 1];
+        P.y0 = rand(2,1);
+        P.tdata = rand(1,6);
+        P.ydata = rand(6,6);
+        P.paramspec = {
+            {'k_{1}', P.k(1), P.k(1)-2.5,P.k(1)+2.5}
+            {'k_{2}', P.k(2), P.k(2)-6,P.k(2)+5}
+        };
+        NV = 2^8;
+        P.marg_ref = zeros(P.pdim,NV);
+        xx1 = linspace(P.paramspec{1}{3},P.paramspec{1}{4},NV)';
+        P.marg_ref(1,:) = 4/5*normpdf(xx1,1,sqrt(SIGMA1(1,1))) + 1/5*normpdf(xx1,0.5,sqrt(SIGMA2(1,1)));
+        xx2 = linspace(P.paramspec{2}{3},P.paramspec{2}{4},NV)';
+        P.marg_ref(2,:) = 4/5*normpdf(xx2,1,sqrt(SIGMA1(2,2))) + 1/5*normpdf(xx2,-1.5,sqrt(SIGMA2(2,2)));
+            
 end
 
 

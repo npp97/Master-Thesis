@@ -48,10 +48,18 @@ function P = marginals_mls( P )
                 
                 % evaluate rbf
                 yy = 1/(sigma/P.eps.*sqrt(pi)).*rbf(rr,P.eps/sigma)*P.c/abs(sum(P.c));
-                plot(xx,yy,'r-')
-                hold on
-                % kde 
-                plot(xx,P.marg_kde(:,j),'k-')
+                if( P.model == 5)
+                    plot(xx,P.marg_ref(j,:),'k-','LineWidth',5)
+                    hold on
+                    plot(xx,yy,'r--','LineWidth',5)
+                    legend('True Marginal','GHI Marginal')
+                else
+                    plot(xx,P.marg_kde(j,:),'b--','LineWidth',5)
+                    hold on
+                    plot(xx,yy,'r--','LineWidth',5)
+                    legend('KDE Marginal','GHI Marginal')
+                end
+
                 % numerical integration
 %                 scatter(P.Xp(:,j),0.1*P.c/max(abs(P.c))-1)
                 
@@ -62,7 +70,7 @@ function P = marginals_mls( P )
 %                 if(P.pdim==2)
 %                     plot(xx,nummargin(j,:),'b-')
 %                 end
-                legend('rbf on particles','kde on mcmc samples','particle with weights','trapezoidal integration on equidistant grid')
+                legend('RBF on particles','KDE on mcmc samples','true marginals')
                 
                 xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
                 xlabel(['log(' P.paramspec{j}{1} ')'])

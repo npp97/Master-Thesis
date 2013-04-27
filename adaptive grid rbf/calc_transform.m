@@ -20,7 +20,8 @@ function [ P ] = calc_transform( P )
                     % weighted locations
                     Xf = X.*repmat(P.Dp(ind).*P.F(ind)/P.fmax,1,P.pdim);
                     % weighted mean
-                    P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)/P.fmax));     
+                    %P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)/P.fmax));     
+                    P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)./P.fmax));     
                     % substract mean
                     Xm = bsxfun(@minus,X,P.Xmean);
                     % weighted zero mean points
@@ -52,6 +53,9 @@ function [ P ] = calc_transform( P )
                 %s = fminsearch(@(t) norm(P.M-t*P.Mnew,2),1);
                 %s = fminsearch(@(t) norm(P.M*P.M-t^2*P.Mnew*P.Mnew),1);
                 %s = norm(P.M,2)/norm(P.Mnew,2);
+                %old_eig = eig(P.M);
+                %new_eig = eig(P.Mnew); 
+                %s = (max(old_eig)+min(old_eig)) / (max(new_eig) + min(new_eig));
                 s = 1/norm(P.M\P.Mnew,2);
                 
                 P.Mnew = s*P.Mnew;

@@ -19,8 +19,8 @@ function [ P ] = interp( P )
         case 1
             % estimate optimal eps
             disp(['# Optimizing Shape Parameter '])
-            %P.eps = fminbnd(@(ep) CostEps(ep,P),1e-3/mean(P.rcp),1e1/mean(P.rcp),optimset('Display','iter'));
-            P.eps = 1/(min(min(P.R+eye(P.N)*1e6)));
+            P.eps = fminbnd(@(ep) CostEps(ep,P),1e-3*P.init_latt_d,1e1*P.init_latt_d,optimset('Display','iter'));
+            %P.eps = 1/(min(min(P.R+eye(P.N)*1e6)));
              
             % normalize eps
             if(P.kernel_shape == 2)

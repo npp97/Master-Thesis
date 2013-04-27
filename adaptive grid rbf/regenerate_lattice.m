@@ -1,6 +1,5 @@
 function [ P ] = regenerate_lattice( P )
-% initialise initial point
-    P.Xp = P.logscale.*log(P.k(P.estim_param))+(1-P.logscale).*P.k(P.estim_param);
+ P.Xp = P.logscale.*log(P.k(P.estim_param))+(1-P.logscale).*P.k(P.estim_param);
     if(P.model == 4)
         P.Xp = P.Xp(1,1:P.pdim);
     end
@@ -25,20 +24,44 @@ function [ P ] = regenerate_lattice( P )
         % generate first transformed point
         P.Tp = zeros(1,P.pdim);
         % set mean as initial pint
-        P.Xmean = P.Xp;
+        if(P.model == 5)
+            SIGMA1=[0.1 0.25;0.25 1];
+            SIGMA2=[0.01 -0.01;-0.01 0.5];
+            MU1 = [1 1];
+            MU2 = [0.5 -1.5];
+            w1 = 4/5;
+            w2 = 1/5;
+            P.Xmean = w1 * MU1 + w2 * MU2;
+        else
+            P.Xmean = P.Xp;
+        end
         % initialise transformation
         switch(P.init_trans)
             case 1
                 % initialise transform with initial point
-                %P.M = gallery('orthog',P.pdim,2);
-                %P.M = sqrtm(pinv(P.Hess))*sqrt(norm(P.Hess))
                 P.M = eye(P.pdim);
             case 2
                 % initialise transform with fisher matrix of initial point
+                if(P.model < 4 )
                 try
-                    P.M = sqrtm(pinv(squeeze(P.S(1,:,:))));
+                    P.M = sqrtm((squeeze(P.S(1,:,:))));
                 catch
-                    P.M = sqrtm(pinv(squeeze(P.S(1,:,:)) + 1e-10*diag(P.pdim)));
+                    P.M = sqrtm((squeeze(P.S(1,:,:)) + 1e-10*diag(P.pdim)));
+                end
+                elseif(P.model == 4)
+                    % unknown!
+                    P.M = eye(P.pdim);
+                elseif(P.model == 5)
+                    % we can compute the exact covariance
+                    SIGMA1=[0.1 0.25;0.25 1];
+                    SIGMA2=[0.01 -0.01;-0.01 0.5];
+                    MU1 = [1 1];
+                    MU2 = [0.5 -1.5];
+                    w1 = 4/5;
+                    w2 = 1/5;
+                    C = w1*SIGMA1 + w2*SIGMA2 + w1*MU1'*MU1 + w2*MU2'*MU2 - (w1^2*MU1'*MU1 + w1*w2*(MU1'*MU2 + MU2'*MU1) + w2^2*MU2'*MU2);
+                    P.M =  sqrtm(C);
+                    P.M = P.M/norm(P.M);
                 end
                 
             case 3
@@ -71,7 +94,7 @@ function [ P ] = regenerate_lattice( P )
     P.Init_rad = P.D0;
     
     
-    switch(P.init_method)
+        switch(P.init_method)
         case 1
             disp(['Initialising with single point at mode'])
             % nothing to do, we already have the modes!
@@ -81,32 +104,56 @@ function [ P ] = regenerate_lattice( P )
                 case 1
                     disp(['Initialising with Z lattice'])
                     M = eye(P.pdim);
+                    % reduce basis
+                    M = LLL_reduction(M);
+                    %normalise
+                    M = M/mean(sqrt(sum(M.^2,2)));
                 case 2
                     disp(['Initialising with A lattice'])
-                    M = [diag(-ones(P.pdim,1),0)+diag(ones(P.pdim-1,1),1),[zeros(P.pdim-1,1);1]];
+                    M = ones(P.pdim,P.pdim)+diag(ones(P.pdim,1))*(sqrt(P.pdim+1)+1);
+                    % reduce basis
+                    M = LLL_reduction(M);
+                    %normalise
+                    M = M/mean(sqrt(sum(M.^2,2)));
                 case 3
                     disp(['Initialising with D lattice'])
-                    M = [diag(-ones(P.pdim,1),0)+diag(ones(P.pdim-1,1),1)'];
-                    M(1,2) = -1;
+                    M = [2 zeros(1,P.pdim-1);ones(P.pdim-1,1),diag(ones(P.pdim-1,1))];
+                    % reduce basis
+                    M = LLL_reduction(M);
+                    %normalise
+                    M = M/mean(sqrt(sum(M.^2,2)));
+                case 4
+                    disp(['Initialising with A* lattice'])
+                    M = ones(P.pdim,P.pdim)+diag(ones(P.pdim,1))*(sqrt(P.pdim+1)-1+P.pdim);
+                    % reduce basis
+                    M = LLL_reduction(M);
+                    %normalise
+                    M = M/mean(sqrt(sum(M.^2,2)));
+                case 5
+                    disp(['Initialising with D* lattice'])
+                    % reduce basis
+                    M = LLL_reduction(M);
+                    %normalise
+                    M = M/mean(sqrt(sum(M.^2,2)));
             end
             % Gram Matrix
-            P.Gram = P.init_latt_d*((M*M')*P.M);
+            P.Generator = P.init_latt_d*(P.M*M);
             % generate the lattice
             P = generate_lattice(P);
-            if(P.kernel_aniso > 1);
-                disp(['Regenerating Lattice with updated Covariance Matrix'])
-                P = XptoTp(P);
-                P.N = size(P.Xp,1);
-                if(P.kernel_aniso > 1) 
-                    P.R = sqrt(sqdistance(P.Tp'));
-                else
-                    P.R = sqrt(sqdistance(P.Xp'));
-                end
-                P = exactDp(P);
-                P = calc_transform( P );
-                P.Gram = P.init_latt_d*((M*M')*P.M);
-                %P = generate_lattice(P);
-            end
+%             if(P.kernel_aniso > 1);
+%                 disp(['Regenerating Lattice with updated Covariance Matrix'])
+%                 P = XptoTp(P);
+%                 P.N = size(P.Xp,1);
+%                 if(P.kernel_aniso > 1) 
+%                     P.R = sqrt(sqdistance(P.Tp'));
+%                 else
+%                     P.R = sqrt(sqdistance(P.Xp'));
+%                 end
+%                 P = exactDp(P);
+%                 P = calc_transform( P );
+%                 P.Generator = P.init_latt_d*(P.M*M);
+%                 P = generate_lattice(P);
+%             end
             P = XptoTp(P);
     end
     

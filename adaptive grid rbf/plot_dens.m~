@@ -1,0 +1,11 @@
+function plot_dens( xx )
+    %PLOT_DENS Summary of this function goes here
+    %   Detailed explanation goes here
+    
+    xdim = size(xx,2)
+    N = size(xx,1
+    
+    
+    
+end
+

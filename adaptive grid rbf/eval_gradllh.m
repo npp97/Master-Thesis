@@ -24,6 +24,13 @@ function [f,Df,F] = eval_gradllh(p,P)
             %f = exp(f+1.0715941e6);
             Df = f*Df(P.estim_param);
             F = eye(P.pdim);
+        elseif(P.model == 5)
+            f = exp(P.loglikelihood(p));
+            SIGMA1=[0.1 0.25;0.25 1];
+            SIGMA2=[0.01 -0.01;-0.01 0.5];
+            MU1 = [1 1];
+            MU2 = [0.5 -1.5];
+            Df = -4/5*mvnpdf(p,MU1,SIGMA1)*(-(p - MU1)*pinv(SIGMA1)) + 1/5*mvnpdf(p,MU2,SIGMA2)*(-(p - MU2)*pinv(SIGMA2));
         else
             
             

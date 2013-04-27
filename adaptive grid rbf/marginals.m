@@ -42,31 +42,27 @@ function P = marginals( P )
                 % sigma
                 sigma = sqrt(SIGMA(j,j));
                 % mean
-                mean_mcmc = mean(P.XX(:,j));
-                mean_rbf = sum(P.Xp(:,j).*P.c/sum(P.c));
-                mean_true = log(P.k(j));
+                P.mean_mcmc = mean(P.XX(:,j));
+                P.mean_rbf = sum(P.Xp(:,j).*P.c/sum(P.c));
                 
                 % evaluate rbf
                 yy = 1/(sigma/P.eps.*sqrt(pi)).*rbf(rr,P.eps/sigma)*P.c/abs(sum(P.c));
-                plot(xx,yy,'r-')
-                hold on
-                % kde 
-                plot(xx,P.marg_kde(:,j),'k-')
-                % numerical integration
-%                 scatter(P.Xp(:,j),0.1*P.c/max(abs(P.c))-1)
-%                 vline(mean_mcmc,'k')
-%                 vline(mean_rbf,'r')
-%                 vline(mean_true,'c','True Parameter')
-                
-%                 if(P.pdim==2)
-%                     plot(xx,nummargin(j,:),'b-')
-%                 end
-                legend('rbf on particles','kde on mcmc samples','particle with weights','trapezoidal integration on equidistant grid')
+                if( P.model == 5)
+                    plot(xx,P.marg_ref(j,:),'k-','LineWidth',5)
+                    hold on
+                    plot(xx,yy,'r--','LineWidth',5)
+                    legend('True Marginal','GHI Marginal')
+                else
+                    plot(xx,P.marg_kde(j,:),'b--','LineWidth',5)
+                    hold on
+                    plot(xx,yy,'r--','LineWidth',5)
+                    legend('KDE Marginal','GHI Marginal')
+                end
                 
                 xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
-                xlabel(['log(' P.paramspec{j}{1} ')'])
+                %xlabel(['log(' P.paramspec{j}{1} ')'])
+                xlabel([ P.paramspec{j}{1} ])
                 P.marg_rbf(j,:) = yy;
-                P.mean_rbf(j) = mean_rbf;
             else
                 % 2D 
                 
@@ -80,7 +76,9 @@ function P = marginals( P )
 
                 SIS = pinv(sqrtm(SIGMA([k j],[k j])));
                 if(P.kernel_aniso > 1)
-                    rr = sqrt(sqdistance((bsxfun(@minus,X,P.Xmean([k j]))*SIS)',(bsxfun(@minus,P.Xp(:,[k j]),P.Xmean([k j]))*SIS)'));
+                    TX = bsxfun(@minus,X,P.Xmean([k j]))*SIS;
+                    Tp = bsxfun(@minus,P.Xp(:,[k j]),P.Xmean([k j]))*SIS;
+                    rr = sqrt(sqdistance(TX',Tp'));
                 else
                     rr = sqrt(sqdistance((X)',(P.Xp(:,[k j]))'));
                 end

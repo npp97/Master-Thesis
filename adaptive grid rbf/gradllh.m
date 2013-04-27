@@ -11,7 +11,11 @@ function P = gradllh(P)
     for j=1:P.N
         textprogressbar(j/P.N*100)
         p=P.Xp(j,:);
-        [P.F(j),P.DF(j,:),P.S(j,:,:)] = eval_gradllh(p,P);
+        try
+            [P.F(j),P.DF(j,:),P.S(j,:,:)] = eval_gradllh(p,P);
+        catch
+            [P.F(j),P.DF(j,:)] = eval_gradllh(p,P);
+        end
     end
     textprogressbar('done');
     

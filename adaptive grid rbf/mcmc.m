@@ -31,15 +31,17 @@ function [ P ] = mcmc( P )
     % thin samples
 
     % number of simulations
-    options.nsimu = (10^P.pdim);
+    options.nsimu = 1e5;
     
     nmcmc=1;
     while(any([min(T(:,5))<0.9, nmcmc==1]))
-        [P.mcresults,mcchain,P.mcs2chain] = mcmcrun(model,data,params,options,P.mcresults);
+        [P.mcresults,mcchain,P.mcs2chain,sschain] = mcmcrun(model,data,params,options,P.mcresults);
 
         if(nmcmc>1)
+            P.sschain=[P.sschain;sschain];
             P.mcchain=[P.mcchain;mcchain];
         else
+            P.sschain=sschain;
             P.mcchain=mcchain;
         end
         T = chainstats(P.mcchain,P.mcresults);
@@ -52,6 +54,7 @@ function [ P ] = mcmc( P )
 
     % save thinned chain
     P.XX = P.mcchain(1:P.tau:end,:);
+    P.Ftrue = exp(-1/2*P.sschain);
     % count number of samples
     P.NX = size(P.XX,1);
     
@@ -59,13 +62,13 @@ function [ P ] = mcmc( P )
 
     
     disp(['# Computing KDE Marginals']);
-    P.marg_kde = zeros(NV,P.pdim);
+    P.marg_kde = zeros(P.pdim,NV);
     
     textprogressbar('Progress: ');
     for n = 1 : P.pdim
         textprogressbar(n/P.pdim*100)
         xx = linspace(P.paramspec{n}{3},P.paramspec{n}{4},NV);
-        P.marg_kde(:,n) = kde_simple(P.XX(:,n)',xx);
+        P.marg_kde(n,:) = kde_simple(P.XX(:,n)',xx)';
     end
     textprogressbar('done');
     

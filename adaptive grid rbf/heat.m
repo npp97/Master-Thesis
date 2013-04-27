@@ -3,21 +3,21 @@ clf
 
 DefaultSettings
 
-P.adap_d0 = 0.5;
-P.adap_D0 = 2;
+P.adap_d0 = 0.4;
+P.adap_D0 = 0.5;
 
-P.init_d0 = 0.5;
-P.init_D0 = 2;
+P.init_d0 = 0.4;
+P.init_D0 = 0.5;
 
-%P.vsT = 15;
+P.vsT = 5;
 
 P.kernel_aniso = 2;
 
 P.init_method = 2;
 P.init_lattice = 2;
-P.init_latt_d = 0.01;
+P.init_latt_d = 0.05;
 
-P.switch_fusion_off = true;
+P.switch_fusion_off = false;
 P.kernel_aniso_method = 2;
 P.init_trans = 1;
 % P.adap_fusion_method = 2;
@@ -25,10 +25,10 @@ P.init_trans = 1;
 % P.dpot = @(r,rstar) dV3(r,rstar);
 P.cov_iter = 151;
 P.grad_iter = 1;
-P.max_iter = 0;
+P.max_iter = 150;
 % P.adap_dc = 1.5;
 
-P.plotflag=false;
+P.plotflag=true;
 P.plotinter = 1;
 %% 2 Implementation
 
@@ -42,14 +42,7 @@ P = refine_particles( P );
 
 %% 2.3 Post Process
 
-P = postprocess(P);
-
-textprogressbar('Progress: ');
-for j = 1 : P.NX
-    textprogressbar(j/P.NX*100)
-    [P.Ftrue(j,1)] = eval_llh(P.XX(j,:),P);
-end
-textprogressbar('done');
+%P = postprocess(P);
 
 %% 2.5 Interpolation
 
@@ -63,12 +56,12 @@ P = error_estim(P);
 
 P = marginals(P);
 
-P = interp_mls(P);
-
-P = error_estim_mls(P);
-
-P = marginals_mls(P);
-
+ P = interp_mls(P);
+% 
+ P = error_estim_mls(P);
+% 
+ P = marginals_mls(P);
+% 
 
 
 

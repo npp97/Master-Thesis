@@ -13,11 +13,11 @@ P.kernel_aniso = 2;
 
 P.init_method = 2;
 P.init_lattice = 2;
-P.init_latt_d = 0.5;
+P.init_latt_d = 0.1;
 
 P.switch_fusion_off = true;
 P.kernel_aniso_method = 2;
-P.init_trans = 2;
+P.init_trans = 1;
 % P.adap_fusion_method = 2;
 % P.pot = @(r,rstar) V3(r,rstar);
 % P.dpot = @(r,rstar) dV3(r,rstar);
@@ -37,7 +37,7 @@ P = init(P);
 ND = 40;
 NI = 100;
 
-densvec = logspace(-0.5,1,ND);
+densvec = logspace(-1,1,ND);
 
 
 % 
@@ -47,6 +47,16 @@ densvec = logspace(-0.5,1,ND);
 %     [P.Ftrue(j,1)] = eval_llh(P.XX(j,:),P);
 % end
 % textprogressbar('done');
+
+
+nMCMC = 10;
+clear vM
+for k = 1:nMCMC
+    Ps = P;
+    Ps = mcmc(Ps);
+    vM = Ps;
+end
+
 
 clear vP
 for k = 1:ND
@@ -157,16 +167,16 @@ for k = 21
     end
 end
 
-ref = P.marg_kde;
+ref = P.marg_ref;
 Ndens = numel(ref);
 
 clear l1rbf linfrbf l1rbf_adap linfrbf_adap l1mls linfmls l1mls_adap linfmls_adap l1kde linfkde
 
-l1rbf_adap = cellfun(@(x) 1/Ndens*norm(x.marg_rbf' - ref,1),vP_adap);
-linfrbf_adap = cellfun(@(x) 1*norm(x.marg_rbf' - ref,inf),vP_adap);
+l1rbf_adap = cellfun(@(x) 1/Ndens*norm(x.marg_rbf - ref,1),vP_adap);
+linfrbf_adap = cellfun(@(x) 1*norm(x.marg_rbf - ref,inf),vP_adap);
 
-l1mls = cellfun(@(x) 1/Ndens*norm(x.marg_mls' - ref,1),vP);
-linfmls = cellfun(@(x) 1*norm(x.marg_mls' - ref,inf),vP);
+l1mls = cellfun(@(x) 1/Ndens*norm(x.marg_mls - ref,1),vP);
+linfmls = cellfun(@(x) 1*norm(x.marg_mls - ref,inf),vP);
 
 l1kde = cellfun(@(x) 1/Ndens*norm(x - ref,1),vKDE);
 linfkde = cellfun(@(x) 1*norm(x - ref,inf),vKDE);

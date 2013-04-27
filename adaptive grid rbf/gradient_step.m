@@ -3,16 +3,8 @@ function [ P ] = gradient_step( P )
     %   Detailed explanation goes here
     P = gradient_descent( P );
     
-    if(P.kernel_aniso > 1)
-        P.cDp = TriScatteredInterp(P.Tp,P.Dp);
-        P.cDpNN = TriScatteredInterp(P.Tp,P.Dp,'nearest');
-    else
-        P.cDp = TriScatteredInterp(P.Xp,P.Dp);
-        P.cDpNN = TriScatteredInterp(P.Xp,P.Dp,'nearest');
-    end
     
     [gamma,P.W(P.Riter)] = fminbnd(@(g) OrgEnergy(P,g),0,1,P.opts);
-    gamma
     
     if(P.kernel_aniso > 1)
         P.Tp = P.Tp + gamma*P.wp;
@@ -24,7 +16,7 @@ function [ P ] = gradient_step( P )
     
     
     
-    P = exactDp(P);
+    P = approxDp(P);
     
 end
 

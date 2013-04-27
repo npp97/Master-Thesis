@@ -185,47 +185,47 @@ function [ P ] = error_estim_mls( P )
     
     warning('off','MATLAB:nearlySingularMatrix')
     
-    disp(['# Testing different shape parameters'])
-    textprogressbar('Progress: ');
-    for j=1:Ne;
-        textprogressbar(j/Ne*100)
-        
-        % set shape parameter
-        if(Ps.kernel_shape == 2)
-            Ps.eps = ee(j)./(Ps.rcp);
-        else
-            Ps.eps = ee(j)/mean(Ps.rcp);
-        end
-        
-        % compute interpolation matrix and evaluation matrix
-        Ps.RBF = rbf(Ps.R,Ps.eps);
-        R_eval = rbf(RR,Ps.eps);
-        
-        Finterp = R_eval*Ps.F;
-        
-        % compute errors
-        erf(j)=max(abs(P.Ftrue-Finterp)/Ps.fmax);
-        Ps.error_estim = 1;
-        erl(j)=CostEps_mls(ee(j),Ps)/Ps.fmax;
-        erf1(j)=norm(abs(P.Ftrue-Finterp),1)/Ps.fmax;
-        ercond(j)=rcond(Ps.RBF);
-        
-        
-        % visualisation
-        loglog(ee/mean(Ps.rcp),erf,'.-k')
-        hold on
-        loglog(ee/mean(Ps.rcp),erf1,'--k')
-        loglog(ee/mean(Ps.rcp),erl,'.-r')
-        loglog(ee/mean(Ps.rcp),ercond,'.-b')
-        ylim([1e-5,1e2])
-        title(['Shape Parameter Analysis'])
-        legend('rel. max error on MCMC','rel. l1 error on MCMC','rel. max error with Cross Validation','RCOND of Interpolation Matrix','Location','SouthOutside')
-        xlabel(' Shape Parameter ')
-        ylabel(' Error ' )
-    end
-    vline(P.eps)
-    plot(P.eps,CostEps_mls(P.eps*mean(P.rcp),P)/P.fmax,'r*')
-    textprogressbar('done')
+%     disp(['# Testing different shape parameters'])
+%     textprogressbar('Progress: ');
+%     for j=1:Ne;
+%         textprogressbar(j/Ne*100)
+%         
+%         % set shape parameter
+%         if(Ps.kernel_shape == 2)
+%             Ps.eps = ee(j)./(Ps.rcp);
+%         else
+%             Ps.eps = ee(j)/mean(Ps.rcp);
+%         end
+%         
+%         % compute interpolation matrix and evaluation matrix
+%         Ps.RBF = rbf(Ps.R,Ps.eps);
+%         R_eval = rbf(RR,Ps.eps);
+%         
+%         Finterp = R_eval*Ps.F;
+%         
+%         % compute errors
+%         erf(j)=max(abs(P.Ftrue-Finterp)/Ps.fmax);
+%         Ps.error_estim = 1;
+%         erl(j)=CostEps_mls(ee(j),Ps)/Ps.fmax;
+%         erf1(j)=norm(abs(P.Ftrue-Finterp),1)/Ps.fmax;
+%         ercond(j)=rcond(Ps.RBF);
+%         
+%         
+%         % visualisation
+%         loglog(ee/mean(Ps.rcp),erf,'.-k')
+%         hold on
+%         loglog(ee/mean(Ps.rcp),erf1,'--k')
+%         loglog(ee/mean(Ps.rcp),erl,'.-r')
+%         loglog(ee/mean(Ps.rcp),ercond,'.-b')
+%         ylim([1e-5,1e2])
+%         title(['Shape Parameter Analysis'])
+%         legend('rel. max error on MCMC','rel. l1 error on MCMC','rel. max error with Cross Validation','RCOND of Interpolation Matrix','Location','SouthOutside')
+%         xlabel(' Shape Parameter ')
+%         ylabel(' Error ' )
+%     end
+%     vline(P.eps)
+%     plot(P.eps,CostEps_mls(P.eps*mean(P.rcp),P)/P.fmax,'r*')
+%     textprogressbar('done')
     
     warning('on','MATLAB:nearlySingularMatrix')
 end
