@@ -47,10 +47,12 @@ function [ P ] = spawn_particles( P )
                         if(P.kernel_aniso_method > 2)
                             P.F(end+1) = eval_llh(xnew*P.M(:,:,l)+P.Xmean,P);
                         else
-                            P.F(end+1) = eval_llh(xnew*P.M+P.Xmean,P);
+                            %P.F(end+1) = eval_llh(xnew*P.M+P.Xmean,P);
+                            P.F(end+1) = P.alpha_mls_f*rbf(sqrt(sqdistance((xnew*P.M+P.Xmean)',P.X_mls')),P.eps_mls_f)*P.F_mls;
                         end
                     else
-                        P.F(end+1) = eval_llh(xnew,P);
+                        %P.F(end+1) = eval_llh(xnew,P);
+                        P.F(end+1) = P.alpha_mls_f*rbf(sqrt(sqdistance((xnew)',P.X_mls')),P.eps_mls_f)*P.F_mls;
                     end
                 end
                 

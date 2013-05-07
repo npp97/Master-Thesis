@@ -34,10 +34,10 @@ function Dp = calcDp( P )
      
      if(P.adap_method == 1)
         % fval version
-        %F = P.alpha_mls*rbf(R,P.eps_mls)*P.F_mls;
+        %F = P.alpha_mls_f*rbf(R,P.eps_mls_f)*P.F_mls;
         %MF=monitor_function(sqrt(((P.D0/P.d0)^2-1))*F/P.fmax,P.D0);
         % norm grad version
-        DF = P.alpha_mls*rbf(R,P.eps_mls)*P.gradDF_mls;
+        DF = P.alpha_mls_df*rbf(R,P.eps_mls_df)*P.gradDF_mls;
         MF=monitor_function(sqrt(((P.D0/P.d0)^2-1))*DF/P.fmax,P.D0);
         
         if(size(MF,1)>size(MF,2))

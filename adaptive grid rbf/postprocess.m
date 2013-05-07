@@ -6,13 +6,13 @@ function [ P ] = postprocess( P )
     
     P = gradllh(P);
     
-    disp(['# Computing Gradients on MCMC Samples'])
-    textprogressbar('Progress: ');
-    for j = 1 : P.NX
-        textprogressbar(j/P.NX*100)
-        [P.Ftrue(j,1),P.Fgradtrue(j,:)] = eval_gradllh(P.XX(j,:),P);
-    end
-    textprogressbar('done');
+%     disp(['# Computing Gradients on MCMC Samples'])
+%     textprogressbar('Progress: ');
+%     for j = 1 : P.NX
+%         textprogressbar(j/P.NX*100)
+%         [P.Ftrue(j,1),P.Fgradtrue(j,:)] = eval_gradllh(P.XX(j,:),P);
+%     end
+%     textprogressbar('done');
 %     textprogressbar('Progress: ');
 %     for j = 1 : P.NX
 %         textprogressbar(j/P.NX*100)
@@ -34,6 +34,17 @@ function [ P ] = postprocess( P )
     end
     
     P.N = sum(ind);
+    
+    P.gradDF_mls = sqrt(sum(P.DF.^2,2));
+    param = fminsearch(@(par) norm(abs(P.gradDF_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.gradDF_mls),inf),[1,1]);
+    
+    P.eps_mls_df = param(1);
+    P.alpha_mls_df = param(2);
+    
+    P.F_mls = P.F;
+    param = fminsearch(@(par) norm(abs(P.F_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.F_mls),inf),[1,1]);
+    P.eps_mls_f = param(1);
+    P.alpha_mls_f = param(2);
     
     
 end

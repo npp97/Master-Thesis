@@ -8,7 +8,7 @@ P.ode_abstol = 1e-8;
 
 %% 1.1 Data
 
-P.model = 5;
+P.model = 4;
 
 switch(P.model)
     
@@ -20,7 +20,7 @@ switch(P.model)
         P.mStructdxdt = mStructdxdt;
         P.k=[0.6 0.4];
         P.y0=[1;0]; 
-        P.tN=5;
+        P.tN=6;
         P.species=1;
         P.sigma=0.1;
         P.logscale = [1 1];
@@ -38,13 +38,15 @@ switch(P.model)
         
         [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
         figure(2)
-        plot(P.tdata,yy([1 2],:),'.-')
+        plot(P.tdata,yy([1 2],:),'.-','LineWidth',5,'MarkerSize',25)
         hold on
         errorbar(P.tdata,yy(1,:),P.tdata*0+P.sigma)
-        P.ydata = yy(P.species,:)';
+        xlim([0,5])
         ylabel('Concentration')
         xlabel('Time')
-        legend('A','B')
+        legend('c_A','c_B')
+        
+        P.ydata = yy(P.species,:)';
                
     case 2
         P.ode=@dxdt_M2_mex;
@@ -62,19 +64,37 @@ switch(P.model)
         P.pdim = 3;
         P.xdim = 4;
         
+        
+        
         P.estim_param = 1:P.pdim;
         
         P.paramspec = {
-            {'k_{+1}', log(P.k(1)), log(P.k(1))-5,log(P.k(1))+5}
-            {'k_{-1}', log(P.k(2)), log(P.k(2))-5,log(P.k(2))+5}
-            {'k_{2}', log(P.k(3)), log(P.k(3))-5,log(P.k(3))+5}
+            {'k_{+1}', log(P.k(1)), log(P.k(1))-2,log(P.k(1))+2}
+            {'k_{-1}', log(P.k(2)), log(P.k(2))-3,log(P.k(2))+3}
+            {'k_{2}', log(P.k(3)), log(P.k(3))-1,log(P.k(3))+1}
             };
         
         P.tdata=linspace(0,5,P.tN);
         
         [~,yy] = P.ode(P.tdata,[P.y0],P.k,[],[P.ode_reltol,P.ode_abstol,P.tdata(end)]);
         figure(2)
-        plot(P.tdata,yy([1 2],:),'.-')
+        clf
+        plot(P.tdata,yy([1 2 3 4],:),'.-','LineWidth',5,'MarkerSize',25)
+        hold on
+        errorbar(P.tdata,yy(1,:),P.tdata*0+P.sigma)
+        errorbar(P.tdata,yy(4,:),P.tdata*0+P.sigma)
+        xlim([0,5])
+        ylim([0,4])
+        axis square
+        ylabel('Concentration')
+        xlabel('Time')
+        legend('c_A','c_C','c_E','c_P')
+        
+        
+        
+        
+        
+        
         P.ydata = yy(P.species,:)';
         
     case 3
@@ -123,16 +143,16 @@ switch(P.model)
         P.y0 = model.p0;
         P.ydata = histogram.data.values';
         P.k = theta';
-        P.loglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:5)),theta(6)],system,histogram,options);
-        P.estim_param = [1 2 3 4 5];
-        P.logscale = [1 1 1 1 1];
-        P.pdim = 5;
+        P.loglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:3)),theta(4),exp(xi(4)),theta(6)],system,histogram,options);
+        P.estim_param = [1 2 3 5];
+        P.logscale = [1 1 1 1 1 1];
+        P.pdim = 4;
         
         P.paramspec = {
             {'\tau_{on}', log(P.k(1)), log(P.k(1))-0.5,log(P.k(1))+0.5}
             {'\tau_{off}', log(P.k(2)), log(P.k(2))-0.5,log(P.k(2))+0.5}
             {'k_m', log(P.k(3)), log(P.k(3))-0.5,log(P.k(3))+0.5}
-            {'\gamma_m', log(P.k(4)), log(P.k(4))-0.5,log(P.k(4))+0.5}
+            %{'\gamma_m', log(P.k(4)), log(P.k(4))-0.5,log(P.k(4))+0.5}
             {'k_p', log(P.k(5)), log(P.k(5))-0.5,log(P.k(5))+0.5}
             %{'\gamma_p', log(P.k(6)), log(P.k(6))-0.5,log(P.k(6))+0.5}
         };
@@ -159,9 +179,11 @@ switch(P.model)
         NV = 2^8;
         P.marg_ref = zeros(P.pdim,NV);
         xx1 = linspace(P.paramspec{1}{3},P.paramspec{1}{4},NV)';
-        P.marg_ref(1,:) = 4/5*normpdf(xx1,1,sqrt(SIGMA1(1,1))) + 1/5*normpdf(xx1,0.5,sqrt(SIGMA2(1,1)));
+        P.marg_ref(1,:) = w1*normpdf(xx1,1,sqrt(SIGMA1(1,1))) + w2*normpdf(xx1,0.5,sqrt(SIGMA2(1,1)));
         xx2 = linspace(P.paramspec{2}{3},P.paramspec{2}{4},NV)';
-        P.marg_ref(2,:) = 4/5*normpdf(xx2,1,sqrt(SIGMA1(2,2))) + 1/5*normpdf(xx2,-1.5,sqrt(SIGMA2(2,2)));
+        P.marg_ref(2,:) = w1*normpdf(xx2,1,sqrt(SIGMA1(2,2))) + w2*normpdf(xx2,-1.5,sqrt(SIGMA2(2,2)));
+        P.mean_ref(1) = w1*MU1(1) + w2*MU2(1);
+        P.mean_ref(2) = w1*MU1(2) + w2*MU2(2);
             
 end
 

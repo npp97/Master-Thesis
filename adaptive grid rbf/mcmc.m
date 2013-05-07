@@ -9,7 +9,7 @@ function [ P ] = mcmc( P )
     model.N = 1;
     
     % number of simulations (burn in)
-    options.nsimu = 1e3;
+    options.nsimu = 10^(P.pdim);
     % flag whether to update simulations
     options.updatesigma = 0;
     % flag for waitbar
@@ -31,10 +31,10 @@ function [ P ] = mcmc( P )
     % thin samples
 
     % number of simulations
-    options.nsimu = 1e5;
+    options.nsimu = 50*10^(P.pdim);
     
     nmcmc=1;
-    while(any([min(T(:,5))<0.9, nmcmc==1]))
+    while(any([min(T(:,5))<0.95, nmcmc==1]))
         [P.mcresults,mcchain,P.mcs2chain,sschain] = mcmcrun(model,data,params,options,P.mcresults);
 
         if(nmcmc>1)

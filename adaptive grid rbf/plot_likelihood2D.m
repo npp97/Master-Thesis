@@ -5,8 +5,8 @@ function plot_likelihood2D( P )
 figure(4)
 clf
 
-xx = linspace(P.paramspec{1}{3},P.paramspec{1}{4},256);
-yy = linspace(P.paramspec{2}{3},P.paramspec{2}{4},256);
+xx = linspace(P.paramspec{1}{3},P.paramspec{1}{4},100);
+yy = linspace(P.paramspec{2}{3},P.paramspec{2}{4},100);
 
 [XX,YY] = meshgrid(xx,yy);
 
@@ -15,7 +15,7 @@ textprogressbar('Progress: ');
 F=zeros(size(X,1),1);
 for j = 1 : size(X,1)
     if(mod(j,100)==0)
-        textprogressbar(j/256^2/10000)
+        textprogressbar(j/100^2/10000)
     end
     [F(j)] = eval_llh(X(j,:),P);
 end

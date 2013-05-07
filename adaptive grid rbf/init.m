@@ -31,7 +31,7 @@ function [ P ] = init( P )
     P.d0 = P.init_d0;
     
     % initialise initial point
-    P.Xp = P.logscale.*log(P.k(P.estim_param))+(1-P.logscale).*P.k(P.estim_param);
+    P.Xp = P.logscale(P.estim_param).*log(P.k(P.estim_param))+(1-P.logscale(P.estim_param)).*P.k(P.estim_param);
     if(P.model == 4)
         P.Xp = P.Xp(1,1:P.pdim);
     end
@@ -87,16 +87,16 @@ function [ P ] = init( P )
                     % we can compute the exact covariance
 
                     C = w1*SIGMA1 + w2*SIGMA2 + w1*MU1'*MU1 + w2*MU2'*MU2 - (w1^2*MU1'*MU1 + w1*w2*(MU1'*MU2 + MU2'*MU1) + w2^2*MU2'*MU2);
-                    P.M =  sqrtm(pinv(C));
+                    P.M =  sqrtm(C);
                 end
                 
             case 3
                 % initialise with hessian
                 try
-                    P.M = chol(-squeeze(P.D2F(1,:,:)));
+                    P.M = sqrtm(-squeeze(P.D2F(1,:,:)));
                 catch
                     % this might fail if we are not positive definite so add regularization term
-                    P.M = chol(-squeeze(P.D2F(1,:,:))/P.fmax + 1e-10*diag(P.pdim));
+                    P.M = sqrtm(-squeeze(P.D2F(1,:,:))/P.fmax + 1e-10*diag(P.pdim));
                 end
         end
         
@@ -109,7 +109,6 @@ function [ P ] = init( P )
     end
     
     
-    
     % initialise particle ages
     
 
@@ -120,7 +119,7 @@ function [ P ] = init( P )
     P.Init_rad = P.D0;
     
     
-    switch(P.init_method)
+        switch(P.init_method)
         case 1
             disp(['Initialising with single point at mode'])
             % nothing to do, we already have the modes!
@@ -133,34 +132,34 @@ function [ P ] = init( P )
                     % reduce basis
                     M = LLL_reduction(M);
                     %normalise
-                    M = mean(sqrt(sum(M.^2,2)));
+                    M = M/mean(sqrt(sum(M.^2,2)));
                 case 2
                     disp(['Initialising with A lattice'])
                     M = ones(P.pdim,P.pdim)+diag(ones(P.pdim,1))*(sqrt(P.pdim+1)+1);
                     % reduce basis
                     M = LLL_reduction(M);
                     %normalise
-                    M = mean(sqrt(sum(M.^2,2)));
+                    M = M/mean(sqrt(sum(M.^2,2)));
                 case 3
                     disp(['Initialising with D lattice'])
                     M = [2 zeros(1,P.pdim-1);ones(P.pdim-1,1),diag(ones(P.pdim-1,1))];
                     % reduce basis
                     M = LLL_reduction(M);
                     %normalise
-                    M = mean(sqrt(sum(M.^2,2)));
+                    M = M/mean(sqrt(sum(M.^2,2)));
                 case 4
                     disp(['Initialising with A* lattice'])
                     M = ones(P.pdim,P.pdim)+diag(ones(P.pdim,1))*(sqrt(P.pdim+1)-1+P.pdim);
                     % reduce basis
                     M = LLL_reduction(M);
                     %normalise
-                    M = mean(sqrt(sum(M.^2,2)));
+                    M = M/mean(sqrt(sum(M.^2,2)));
                 case 5
                     disp(['Initialising with D* lattice'])
                     % reduce basis
                     M = LLL_reduction(M);
                     %normalise
-                    M = mean(sqrt(sum(M.^2,2)));
+                    M = M/mean(sqrt(sum(M.^2,2)));
             end
             % Gram Matrix
             P.Generator = P.init_latt_d*(P.M*M);

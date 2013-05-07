@@ -9,7 +9,7 @@ function [f] = eval_llh(p,P)
         end
     end
     
-    if((1-P.logscale).*p<0)
+    if((1-P.logscale(P.estim_param)).*p<0)
         f = 0;
     elseif(not(inbound))
         f = 0;

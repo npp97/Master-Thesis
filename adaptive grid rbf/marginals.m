@@ -31,7 +31,9 @@ function P = marginals( P )
     
     for j=1:P.pdim
         for k=1:P.pdim
-            subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
+            %subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
+            figure(12+((j-1)*P.pdim)+k-1)
+            clf
             if(j==k)
                 % 1D
                 
@@ -51,19 +53,19 @@ function P = marginals( P )
                     plot(xx,P.marg_ref(j,:),'k-','LineWidth',5)
                     hold on
                     plot(xx,yy,'r--','LineWidth',5)
-                    legend('True Marginal','GHI Marginal')
+                    legend('True Marginal','RBF Marginal')
                 else
                     plot(xx,P.marg_kde(j,:),'b--','LineWidth',5)
                     hold on
                     plot(xx,yy,'r--','LineWidth',5)
-                    legend('KDE Marginal','GHI Marginal')
+                    legend('KDE Marginal','RBF Marginal')
                 end
                 
                 xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
-                %xlabel(['log(' P.paramspec{j}{1} ')'])
-                xlabel([ P.paramspec{j}{1} ])
+                xlabel(['log(' P.paramspec{j}{1} ')'])
+                %xlabel([ P.paramspec{j}{1} ])
                 P.marg_rbf(j,:) = yy;
-            else
+            elseif(j>k)
                 % 2D 
                 
                 % evaluation points
@@ -92,6 +94,9 @@ function P = marginals( P )
                 xlabel(['log(' P.paramspec{k}{1} ')'])
                 ylabel(['log(' P.paramspec{j}{1} ')'])
             end
+            axis square
+            box on
+            set(gcf, 'Color', 'w')
         end
     end
     

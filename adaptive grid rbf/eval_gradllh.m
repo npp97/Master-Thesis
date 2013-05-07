@@ -9,7 +9,7 @@ function [f,Df,F] = eval_gradllh(p,P)
         end
     end
     
-    if((1-P.logscale).*p<0)
+    if((1-P.logscale(P.estim_param)).*p<0)
         f = 0;
         Df = zeros(1,P.pdim);
         F = zeros(P.pdim,P.pdim);
@@ -22,7 +22,11 @@ function [f,Df,F] = eval_gradllh(p,P)
             [f,Df] = P.loglikelihood(p);
             f = exp(f+9.0498e5);%add normalization
             %f = exp(f+1.0715941e6);
-            Df = f*Df(P.estim_param);
+            if(P.kernel_aniso > 1)
+                Df = f*Df(P.estim_param);
+            else
+                Df = f*Df(P.estim_param);
+            end
             F = eye(P.pdim);
         elseif(P.model == 5)
             f = exp(P.loglikelihood(p));

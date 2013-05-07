@@ -12,11 +12,14 @@ for j = 1:NN
         disp(['j: ' num2str(j) ' / ' num2str(NN)])
         disp(['k: ' num2str(k) ' / ' num2str(Nrepeat)])
         load adap_dens_latt
-        P.adap_d0 = 1;
-        P.adap_D0 = 1.2;
+        P.Riter = 0;
         
-        P.init_d0 = 1;
-        P.init_D0 = 1.2;
+        P.adap_D0 = 1;
+        P.adap_d0 = P.adap_D0/1.2;
+        
+        P.init_D0 = 1;
+        P.init_d0 = P.adap_D0/1.2;
+        
         P.d0 = P.init_d0;
         P.D0 = P.init_D0;
         P.plotflag=false;
@@ -53,7 +56,7 @@ str = cellfun(@(x) num2str(x,2),num2cell(vN),'UniformOutput',false);
 figure(50)
 clf
 boxplot(mlinferr',str)
-xlabel('Nstar')
+xlabel('N^*')
 ylabel('l_{\infty} error')
 axis square
 set(gcf, 'Color', 'w')
@@ -61,7 +64,7 @@ set(gcf, 'Color', 'w')
 figure(51)
 clf
 boxplot(mN',str)
-xlabel('Nstar')
+xlabel('N^*')
 ylabel('# Points')
 axis square
 set(gcf, 'Color', 'w')
@@ -69,7 +72,7 @@ set(gcf, 'Color', 'w')
 figure(52)
 clf
 boxplot(mIter',str)
-xlabel('Nstar')
+xlabel('N^*')
 ylabel('# Iterations')
 axis square
 set(gcf, 'Color', 'w')
@@ -78,8 +81,8 @@ set(gcf, 'Color', 'w')
 figure(53)
 clf
 boxplot(ml2err',str)
-xlabel('Nstar')
-ylabel('l_{2} error')
+xlabel('N^*')
+ylabel('L_{2} error')
 axis square
 set(gcf, 'Color', 'w')
 

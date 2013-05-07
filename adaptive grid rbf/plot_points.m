@@ -16,7 +16,7 @@ function plot_points( P, fig )
                         
                         scatter(X(:,j),P.F,ones(P.N,1)*16,log(P.F)/log(10))
                         set(gca,'YScale','log')
-                        xlim([min(P.Tp(:,k))-1e-6,max(P.Xp(:,k))+1e-6]);
+                        xlim([min(P.Xp(:,k))-1e-6,max(P.Xp(:,k))+1e-6]);
                         xlabel(['log(' P.paramspec{j}{1} ')'])
                         
                     elseif(k > j)

@@ -46,16 +46,7 @@ function [ P ] = refine_particles( P )
             P.X_mls = P.Xp;
         end
         
-        %P = gradllh(P);
-        
-        P.gradDF_mls = sqrt(sum(P.DF.^2,2));
-        param = fminsearch(@(par) norm(abs(P.gradDF_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.gradDF_mls),inf),[1,1]);
-        
-        %P.F_mls = P.F;
-        %param = fminsearch(@(par) norm(abs(P.F_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.F_mls),inf),[1,1]);
-        
-        P.eps_mls = param(1);
-        P.alpha_mls = param(2);
+        %P = gradllh(P);  
         
         
         % initialise evaluation count
@@ -139,6 +130,13 @@ function [ P ] = refine_particles( P )
         % update neighborhood sizes
         P = approxDp( P );
         
+        % update function values
+        if(P.kernel_aniso > 1)
+            P.F = P.alpha_mls_f*rbf(sqrt(sqdistance(P.Tp',P.X_mls')),P.eps_mls_f)*P.F_mls;
+        else
+            P.F = P.alpha_mls_f*rbf(sqrt(sqdistance(P.Tp',P.X_mls')),P.eps_mls_f)*P.F_mls;
+        end
+        
         % update distances
         if(P.kernel_aniso > 1)
             P.R = distm(P.Tp,P.Tp);
@@ -148,13 +146,13 @@ function [ P ] = refine_particles( P )
         P.Dpq = bsxfun(@min,P.Dp,P.Dp');
         
         % analyse distribtion 
-        P.crit = P.R./P.Dpq;
+        P.crit = P.Dpq./P.R;
         P.Nlist = (P.R<min(repmat(P.rcp,1,P.N),repmat(P.rcp',P.N,1)))-logical(eye(P.N));
         
         P.NI(P.Riter) = sum(and(sum(P.Nlist,2)<P.adap_Nstar,P.F>P.fmax*P.thresh));
-        P.dc(P.Riter) = max([max(1./P.crit(logical(P.Nlist)),0)]);
-        P.RI(P.Riter) = max([max(P.crit(logical(P.Nlist))),0]);
-        P.rI(P.Riter) = max([min(P.crit(logical(P.Nlist))),0]);
+        D=zeros(P.N,P.N);
+        D(logical(P.Nlist)) = P.crit(logical(P.Nlist));
+        P.dc(P.Riter) = max(max(D));
         P.PI(P.Riter) = sum(P.F>P.fmax*P.thresh);
         P.XI(P.Riter) = P.N;
         P.Lp = P.Lp+ones(size(P.Lp));
@@ -172,26 +170,27 @@ function [ P ] = refine_particles( P )
         end
         
         % check break condition
-        if( abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<1e-1 && P.Riter > 5 && abs(P.XI(P.Riter) - P.XI(max(P.Riter-1,1))) == 0 )
-            P.break_hits = P.break_hits + 1;
-            if(P.break_hits > 5)       
+        if( abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<10^(-1.5) && P.Riter > 5 )
+%        if( P.Riter >= P.max_iter && P.Riter > 5 )
+%             P.break_hits = P.break_hits + 1;
+%             if(P.break_hits > 5)       
                 break;
-            end
-        else
-            P.break_hits = 0;
+%             end
+%         else
+%             P.break_hits = 0;
         end
         
 
-        if(P.switch_fusion_off && P.NI(P.Riter)==0)
-            P.fuse_hits = P.fuse_hits + 1;        
-            if( P.fuse_hits >= P.switch_hits );
-                P.adap_fusion_method = 2;
-                P.pot = @(r,rstar) V3(r,rstar);
-                P.dpot = @(r,rstar) dV3(r,rstar);
-            end
-        else
-            P.fuse_hits = 0;
-        end
+%         if(P.switch_fusion_off && P.NI(P.Riter)==0)
+%             P.fuse_hits = P.fuse_hits + 1;        
+%             if( P.fuse_hits >= P.switch_hits );
+%                 P.adap_fusion_method = 2;
+%                 P.pot = @(r,rstar) V3(r,rstar);
+%                 P.dpot = @(r,rstar) dV3(r,rstar);
+%             end
+%         else
+%             P.fuse_hits = 0;
+%         end
 
         P.Riter = P.Riter+1;
         disp(['Iteration ' num2str(P.Riter) ' : ' num2str(P.N) ' particles ']);  

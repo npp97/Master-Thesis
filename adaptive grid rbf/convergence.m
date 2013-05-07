@@ -1,207 +1,215 @@
  clear all
- DefaultSettings
 
-P.adap_d0 = 1;
-P.adap_D0 = 4;
-
-P.init_d0 = 1;
-P.init_D0 = 4;
-
-%P.vsT = 15;
-
-P.kernel_aniso = 2;
-
-P.init_method = 2;
-P.init_lattice = 2;
-P.init_latt_d = 0.1;
-
-P.switch_fusion_off = true;
-P.kernel_aniso_method = 2;
-P.init_trans = 1;
-% P.adap_fusion_method = 2;
-% P.pot = @(r,rstar) V3(r,rstar);
-% P.dpot = @(r,rstar) dV3(r,rstar);
-P.cov_iter = 151;
-P.grad_iter = 1;
-P.max_iter = 50;
-% P.adap_dc = 1.5;
-
-P.plotflag=false;
-P.plotinter = 1;
-%% 2 Implementation
-
-%% 2.1 Initialization
-
-P = init(P);
-
-ND = 40;
-NI = 100;
-
-densvec = logspace(-1,1,ND);
+load adap_dens_latt
 
 
-% 
-% textprogressbar('Progress: ');
-% for j = 1 : P.NX
-%     textprogressbar(j/P.NX*100)
-%     [P.Ftrue(j,1)] = eval_llh(P.XX(j,:),P);
-% end
-% textprogressbar('done');
+NV = 2^8;
+xx1 = linspace(P.paramspec{1}{3},P.paramspec{1}{4},NV)';
+xx2 = linspace(P.paramspec{2}{3},P.paramspec{2}{4},NV)';
+
+ 
+%% RBF refined particles
+ND = 20;
+densvec_rbf_ref = linspace(0.6,2,ND);
+Nrepeat = 10;
+
+vD = logspace(-0.6,0,ND);
 
 
-nMCMC = 10;
-clear vM
-for k = 1:nMCMC
-    Ps = P;
-    Ps = mcmc(Ps);
-    vM = Ps;
+for l = 1:3
+    load adap_dens_latt
+    switch(l)
+        case 1
+            P.init_latt_d = vD(1);
+            P = regenerate_lattice(P);
+            SIGMA=P.M*P.M;
+            P = postprocess(P);
+        case 2
+            P = regenerate_lattice(P);
+            SIGMA=P.M*P.M;
+            P = postprocess(P);
+        case 3
+            P.init_latt_d = vD(end);
+            P = regenerate_lattice(P);
+            SIGMA=P.M*P.M;
+            P = postprocess(P);
+    end
+    Ninit = P.N;
+    for j = 1:ND
+        Pj = P;
+        Pj.Riter = 0;
+        Pj.adap_D0 = densvec_rbf_ref(j);
+        Pj.adap_d0 = Pj.adap_D0/1.1;
+        
+        Pj.init_D0 = densvec_rbf_ref(j);
+        Pj.init_d0 = Pj.adap_D0/1.1;
+        
+        Pj.d0 = Pj.init_d0;
+        Pj.D0 = Pj.init_D0;
+        Pj.plotflag=false;
+        
+        for k = 1:Nrepeat
+            Ps = Pj;
+            Ps = refine_particles(Ps);
+            Ps = interp(Ps);
+            marg_rbf = zeros(Ps.pdim,NV);
+            for d = 1 : Ps.pdim
+                xx = linspace(Ps.paramspec{d}{3},Ps.paramspec{d}{4},NV)';
+                % distances
+                rr = sqrt(sqdistance(xx',Ps.Xp(:,d)'));
+                % sigma
+                sigma = sqrt(SIGMA(d,d));
+                marg_rbf(d,:) = 1/(sigma/Ps.eps.*sqrt(pi)).*rbf(rr,Ps.eps/sigma)*Ps.c/abs(sum(Ps.c));
+                mean_rbf(d) = sum(Ps.Xp(:,d).*Ps.c)/sum(Ps.c);
+            end
+            switch(l)
+                case 1
+                    rbf_adap_linf_low(j,k) = max(max(abs(marg_rbf(1,:)-P.marg_ref(1,:))),max(abs(marg_rbf(2,:)-P.marg_ref(2,:))));
+                    rbf_adap_l2_low(j,k) = norm(marg_rbf(1,:)-P.marg_ref(1,:),2) + norm(marg_rbf(2,:)-P.marg_ref(2,:),2);
+                    rbf_adap_dmean_low(j,k) = sum(abs((mean_rbf-P.mean_ref)./P.mean_ref));
+                    N_adap_low(j,k) = Ninit + Ps.N;
+                case 2
+                    rbf_adap_linf_mid(j,k) = max(max(abs(marg_rbf(1,:)-P.marg_ref(1,:))),max(abs(marg_rbf(2,:)-P.marg_ref(2,:))));
+                    rbf_adap_l2_mid(j,k) = norm(marg_rbf(1,:)-P.marg_ref(1,:),2) + norm(marg_rbf(2,:)-P.marg_ref(2,:),2);
+                    rbf_adap_dmean_mid(j,k) = sum(abs((mean_rbf-P.mean_ref)./P.mean_ref));
+                    N_adap_mid(j,k) = Ninit + Ps.N;
+                case 3
+                    rbf_adap_linf_high(j,k) = max(max(abs(marg_rbf(1,:)-P.marg_ref(1,:))),max(abs(marg_rbf(2,:)-P.marg_ref(2,:))));
+                    rbf_adap_l2_high(j,k) = norm(marg_rbf(1,:)-P.marg_ref(1,:),2) + norm(marg_rbf(2,:)-P.marg_ref(2,:),2);
+                    rbf_adap_dmean_high(j,k) = sum(abs((mean_rbf-P.mean_ref)./P.mean_ref));
+                    N_adap_high(j,k) = Ninit + Ps.N;
+            end
+
+        end
+    end
 end
 
+%% lattice rbf & mls
 
-clear vP
-for k = 1:ND
-    
+vD = logspace(-0.9,0,ND);
+
+for j= 1:ND
+    load adap_dens_latt
     Ps = P;
-    
-    Ps.init_latt_d = densvec(k);
-    
-    Ps = regenerate_lattice( Ps ); 
-    
-    %% 2.2 Particle Refinement
-    
-    %P = refine_particles( P );
-    
-    %% 2.3 Post Process
-    
-    %Ps = postprocess(Ps);
-    
-    %% 2.5 Interpolation
+    Ps.init_latt_d = 2*vD(j);
+    Ps = regenerate_lattice(Ps);
+    SIGMA=Ps.M*Ps.M;
+    Ps.N
+    Ps = interp(Ps);
+    marg_rbf = zeros(Ps.pdim,NV);
+    for l = 1 : Ps.pdim
+        xx = linspace(Ps.paramspec{l}{3},Ps.paramspec{l}{4},NV)';
+        % distances
+        rr = sqrt(sqdistance(xx',Ps.Xp(:,l)'));
+        % sigma
+        sigma = sqrt(SIGMA(l,l));
+        marg_rbf(l,:) = 1/(sigma/Ps.eps.*sqrt(pi)).*rbf(rr,Ps.eps/sigma)*Ps.c/abs(sum(Ps.c));
+        mean_rbf(l) = sum(Ps.Xp(:,l).*Ps.c)/sum(Ps.c);
+    end
+    rbf_latt_linf(j) = max(max(abs(marg_rbf(1,:)-P.marg_ref(1,:))),max(abs(marg_rbf(2,:)-P.marg_ref(2,:))));
+    rbf_latt_l2(j) = norm(marg_rbf(1,:)-P.marg_ref(1,:),2) + norm(marg_rbf(2,:)-P.marg_ref(2,:),2);
+    rbf_latt_dmean(j) = sum(abs((mean_rbf-P.mean_ref)./P.mean_ref));
     
     Ps = interp_mls(Ps);
-    
-    %% 2.7 Marginal
-    
-    NV = 256;
-    Ps.marg_mls = zeros(Ps.pdim,NV);
-    SIGMA=Ps.M*Ps.M;
-    
-    for j = 1 : P.pdim
-        xx = linspace(Ps.paramspec{j}{3},Ps.paramspec{j}{4},NV)';
+    marg_mls = zeros(Ps.pdim,NV);
+    for l = 1 : P.pdim
+        xx = linspace(Ps.paramspec{l}{3},Ps.paramspec{l}{4},NV)';
         % distances
-        rr = sqrt(sqdistance(xx',Ps.Xp(:,j)'));
+        rr = sqrt(sqdistance(xx',Ps.Xp(:,l)'));
         % sigma
-        sigma = sqrt(SIGMA(j,j));
-        Ps.marg_mls(j,:) = 1/(sigma/Ps.eps.*sqrt(pi)).*rbf(rr,Ps.eps/sigma)*Ps.c/abs(sum(Ps.c));
+        sigma = sqrt(SIGMA(l,l));
+        marg_mls(l,:) = 1/(sigma/Ps.eps.*sqrt(pi)).*rbf(rr,Ps.eps/sigma)*Ps.c/abs(sum(Ps.c));
+        mean_mls(l) = sum(Ps.Xp(:,l).*Ps.c)/sum(Ps.c);
     end
-        
-    
-    vP{k} = Ps;
+    mls_latt_linf(j) = max(max(abs(marg_mls(1,:)-P.marg_ref(1,:))),max(abs(marg_mls(2,:)-P.marg_ref(2,:))));
+    mls_latt_l2(j) = norm(marg_mls(1,:)-P.marg_ref(1,:),2) + norm(marg_mls(2,:)-P.marg_ref(2,:),2);
+    mls_latt_dmean(j) = sum(abs((mean_mls-P.mean_ref)./P.mean_ref));
+    N_latt(j) = Ps.N;
 end
-
-
-
-clear vP_adap
-for k = 21
-    Ps = vP{k};
-        
-    Ps.adap_d0 = Ps.init_latt_d;
-    Ps.adap_D0 = 4*Ps.init_latt_d;
-    
-    Ps.init_d0 = Ps.init_latt_d;
-    Ps.init_D0 = 4*Ps.init_latt_d;
-    
-    Ps.d0 = Ps.init_d0;
-    Ps.D0 = Ps.init_D0;
-    
-    for l = 1:NI
-
-        %% 2.2 Particle Refinement
-        
-        Ps.max_iter = (l-1);
-        
-        Ps = refine_particles( Ps );
-        
-        %% 2.5 Interpolation
-        
-        Ps = interp(Ps);
-        
-        %% 2.7 Stochastic Analysis
-        
-        NV = 256;
-        Ps.marg_mls = zeros(Ps.pdim,NV);
-        SIGMA=Ps.M*Ps.M;
-        
-        for j = 1 : Ps.pdim
-            xx = linspace(Ps.paramspec{j}{3},Ps.paramspec{j}{4},NV)';
-            % distances
-            rr = sqrt(sqdistance(xx',Ps.Xp(:,j)'));
-            % sigma
-            sigma = sqrt(SIGMA(j,j));
-            Ps.marg_rbf(j,:) = 1/(sigma/Ps.eps.*sqrt(pi)).*rbf(rr,Ps.eps/sigma)*Ps.c/abs(sum(Ps.c));
-        end
-        
-        %% 2.5 Interpolation
-        
-        vP_adap{l} = Ps;
-        
-    end
-end
-
-NN = cellfun(@(x) x.feval_latt, vP);
-NN_adap = cellfun(@(x) x.feval_adap, vP_adap);
-
 
 NK = 50;
 
 NN_kde = logspace(0,log(size(P.XX,1))/log(10),NK);
 
-for k = 21
-    for l = 1:NK
-        kded = zeros(NV,P.pdim);
-        
-        for n = 1 : P.pdim
-            xx = linspace(P.paramspec{n}{3},P.paramspec{n}{4},NV);
-            kded(:,n) = kde_simple(P.XX(1:ceil(NN_kde(l)),n)',xx);
-        end
-        vKDE{l} = kded;
+for j = 1:NK
+    kded = zeros(NV,P.pdim);
+    
+    for n = 1 : P.pdim
+        xx = linspace(P.paramspec{n}{3},P.paramspec{n}{4},NV);
+        kded(:,n) = kde_simple(P.XX(1:ceil(NN_kde(j)),n)',xx);
+        mean_kde(n) = mean(P.XX(1:ceil(NN_kde(j)),n));
     end
+    kde_linf(j) = max(max(abs(kded(:,1)'-P.marg_ref(1,:))),max(abs(kded(:,2)'-P.marg_ref(2,:))));
+    kde_l2(j) = norm(kded(:,1)'-P.marg_ref(1,:),2) + norm(kded(:,2)'-P.marg_ref(2,:),2);
+    kde_dmean(j) = sum(abs((mean_kde-P.mean_ref)./P.mean_ref));
 end
 
-ref = P.marg_ref;
-Ndens = numel(ref);
+save([datestr(clock) '_convergence_analysis'])
 
-clear l1rbf linfrbf l1rbf_adap linfrbf_adap l1mls linfmls l1mls_adap linfmls_adap l1kde linfkde
 
-l1rbf_adap = cellfun(@(x) 1/Ndens*norm(x.marg_rbf - ref,1),vP_adap);
-linfrbf_adap = cellfun(@(x) 1*norm(x.marg_rbf - ref,inf),vP_adap);
-
-l1mls = cellfun(@(x) 1/Ndens*norm(x.marg_mls - ref,1),vP);
-linfmls = cellfun(@(x) 1*norm(x.marg_mls - ref,inf),vP);
-
-l1kde = cellfun(@(x) 1/Ndens*norm(x - ref,1),vKDE);
-linfkde = cellfun(@(x) 1*norm(x - ref,inf),vKDE);
-
-figure(6)
+figure(120)
 clf
-
-loglog(NN,l1mls,'b.-','LineWidth',5)
-
 hold on
-
-loglog(NN_adap,l1rbf_adap(1,:),'r.-','LineWidth',5)
-
-loglog(NN_kde*1/(1-P.mcresults.rejected),l1kde(1,:),'k.-','LineWidth',5)
-
-% for l = [10 20]
-%     loglog(NN_adap(l,:),l1rbf_adap(l,:),'r--')
-% end
-% 
-% for l = [10 20]
-%     loglog(NN_adap(l,:),l1kde(l,:),'k--')m
-% end
-
-legend('avg. l_1 error MLS','avg. l_1 error RBF','avg. l_1 error KDE')
+set(gcf, 'Color', 'w')
+loglog(NN_kde,kde_linf,'k.-','LineWidth',5,'MarkerSize',25)
+loglog(N_latt,mls_latt_linf,'b.-','LineWidth',5,'MarkerSize',25)
+loglog(N_latt,rbf_latt_linf,'r.-','LineWidth',5,'MarkerSize',25)
+% scatter(N_adap(:),rbf_adap_linf(:),25*ones(1,size(N_adap(:))),[.5 0 0],'fill')
+legend('KDE','MLS on Lattice','RBF on lattice')
+axis square
+box on
 xlabel('Function Evaluations')
-ylabel('Error')
-xlim([min([NN,NN_adap,NN_kde]),max([NN,NN_adap,NN_kde])])
-ylim([min([l1mls,l1rbf_adap,l1kde]),max([l1mls,l1rbf_adap,l1kde])])
+ylabel('$$\log(L_{\infty}\mbox{-error})$$ in marginals','Interpreter','LaTex')
+xlim([10^1,10^5])
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+
+figure(121)
+clf
+hold on
+set(gcf, 'Color', 'w')
+loglog(NN_kde,kde_l2,'k.-','LineWidth',5,'MarkerSize',25)
+loglog(N_latt,mls_latt_l2,'b.-','LineWidth',5,'MarkerSize',25)
+loglog(N_latt,rbf_latt_l2,'r.-','LineWidth',5,'MarkerSize',25)
+% scatter(N_adap(:),rbf_adap_l2(:),25*ones(1,size(N_adap(:))),[.5 0 0],'fill')
+legend('KDE','MLS on Lattice','RBF on lattice')
+axis square
+box on
+xlabel('Function Evaluations')
+ylabel('$$\log(l_1-L_2\mbox{-error})$$ in marginals','Interpreter','LaTex')
+xlim([10^1,10^5])
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+
+figure(122)
+clf
+hold on
+set(gcf, 'Color', 'w')
+loglog(NN_kde,kde_dmean,'k.-','LineWidth',5,'MarkerSize',25)
+loglog(N_latt,mls_latt_dmean,'b.-','LineWidth',5,'MarkerSize',25)
+loglog(N_latt,rbf_latt_dmean,'r.-','LineWidth',5,'MarkerSize',25)
+% scatter(N_adap(:),rbf_adap_l2(:),25*ones(1,size(N_adap(:))),[.5 0 0],'fill')
+legend('KDE','MLS on Lattice','RBF on lattice')
+axis square
+box on
+xlabel('Function Evaluations')
+ylabel('Sum of relative error in first order moments')
+xlim([10^1,10^5])
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+
+figure(123)
+clf
+hold on
+set(gcf, 'Color', 'w')
+scatter(N_adap_low(:),rbf_adap_l2_low(:),25*ones(1,size(N_adap_low(:))),[.5 0 0],'fill')
+scatter(N_adap_mid(:),rbf_adap_l2_mid(:),25*ones(1,size(N_adap_mid(:))),[.5 .5 .5],'fill')
+scatter(N_adap_high(:),rbf_adap_l2_high(:),25*ones(1,size(N_adap_low(:))),[0 0 .5],'fill')
+loglog(N_latt,rbf_latt_l2,'r.-','LineWidth',5,'MarkerSize',25)
+legend('RBF on particles with high-res. init.','RBF on particles with mid-res. init.','RBF on particles with low-res. init.','RBF on lattice')
+axis square
+box on
+ylabel('$$\log(l_1-L_2\mbox{-error})$$ in marginals','Interpreter','LaTex')
+xlim([10^1,10^5])
+set(gca,'XScale','log')
+set(gca,'YScale','log')

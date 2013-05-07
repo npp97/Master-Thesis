@@ -17,10 +17,12 @@ function [ P ] = interp_mls( P )
 
     % estimate optimal eps
     disp(['# Optimizing Shape Parameter '])
-    param = fminsearch(@(param) CostEps_mls(param,P),[1,1],optimset('Display','iter'));
+    param = fminsearch(@(param) CostEps_mls(param,P),[1,1],optimset('Display','iter','MaxIter',500,'MaxFunEvals',10^3));
     P.eps = param(1);
     P.c = param(2)*P.F;
-    
+%     param = fminbnd(@(param) CostEps_mls(exp([param,0]),P),-3,3,optimset('Display','iter','MaxIter',500,'MaxFunEvals',10^3));
+%     P.esp = param;
+%     P.c = P.F;
     % normalize eps
     if(P.kernel_shape == 2)
         P.eps = P.eps./P.rcp;

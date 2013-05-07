@@ -44,24 +44,18 @@ function [ P ] = regenerate_lattice( P )
                 % initialise transform with fisher matrix of initial point
                 if(P.model < 4 )
                 try
-                    P.M = sqrtm((squeeze(P.S(1,:,:))));
+                    P.M = sqrtm(pinv(squeeze(P.S(1,:,:))));
                 catch
-                    P.M = sqrtm((squeeze(P.S(1,:,:)) + 1e-10*diag(P.pdim)));
+                    P.M = sqrtm(pinv(squeeze(P.S(1,:,:)) + 1e-10*diag(P.pdim)));
                 end
                 elseif(P.model == 4)
                     % unknown!
                     P.M = eye(P.pdim);
                 elseif(P.model == 5)
                     % we can compute the exact covariance
-                    SIGMA1=[0.1 0.25;0.25 1];
-                    SIGMA2=[0.01 -0.01;-0.01 0.5];
-                    MU1 = [1 1];
-                    MU2 = [0.5 -1.5];
-                    w1 = 4/5;
-                    w2 = 1/5;
+
                     C = w1*SIGMA1 + w2*SIGMA2 + w1*MU1'*MU1 + w2*MU2'*MU2 - (w1^2*MU1'*MU1 + w1*w2*(MU1'*MU2 + MU2'*MU1) + w2^2*MU2'*MU2);
                     P.M =  sqrtm(C);
-                    P.M = P.M/norm(P.M);
                 end
                 
             case 3
@@ -83,15 +77,10 @@ function [ P ] = regenerate_lattice( P )
     end
     
     
-    
     % initialise particle ages
     
 
     %% 2.3 Initial particle distribution
-    
-    % number of iterations for initialisation
-    P.Iiter = 1;
-    P.Init_rad = P.D0;
     
     
         switch(P.init_method)

@@ -90,10 +90,31 @@ kerf=@(z)exp(-z.*z/2)/sqrt(2*pi);
 
 r.x=linspace(min(x),max(x),N);
 r.f=zeros(1,N);
+g=zeros(length(x));
+
+for l=1:length(x)
+    z=kerf((x(l)-x)/h);
+    g(l)=sum(z.*y)/sum(z);
+    s(l)=(y(l)-g(l))^2;
+end
+
+s = s';
+
 for k=1:N
     z=kerf((r.x(k)-x)/h);
     r.f(k)=sum(z.*y)/sum(z);
+    r.s(k)=sum(z.*s)/sum(z);
+%     % bootstrap
+%     for l=1:20
+%         ii = randi(length(x),[length(x)/1000,1]);
+%         zz=kerf((r.x(k)-x(ii))/h);
+%         n(k,l) = sum(zz.*y(ii))/sum(zz);
+%     end
+    
+
 end
+% r.m=mean(n');
+% r.s=var(n');
 
 % Plot
 if ~nargout

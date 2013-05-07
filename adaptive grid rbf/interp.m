@@ -12,21 +12,21 @@ function [ P ] = interp( P )
     
     % get function values
     disp(['# Evaluating Function '])
-%     P = llh(P);
+    P = llh(P);
 
     % choose inversion method
     switch(P.kernel_inverse)
         case 1
             % estimate optimal eps
             disp(['# Optimizing Shape Parameter '])
-            P.eps = fminbnd(@(ep) CostEps(ep,P),1e-3*P.init_latt_d,1e1*P.init_latt_d,optimset('Display','iter'));
+            P.eps = fminbnd(@(ep) CostEps(exp(ep),P),-3,2,optimset('Display','iter'));
             %P.eps = 1/(min(min(P.R+eye(P.N)*1e6)));
              
             % normalize eps
             if(P.kernel_shape == 2)
-                P.eps = P.eps./P.rcp;
+                P.eps = exp(P.eps).*(P.rcp).^P.gamma;
             else
-                P.eps = P.eps/mean(P.rcp);
+                P.eps = exp(P.eps)/mean(P.rcp);
             end
             
             % compute interpolation matrix 

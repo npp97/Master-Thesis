@@ -3,7 +3,7 @@ function [ ceps ] = CostEps( ep,P )
     %   Detailed explanation goes here
     
     if(P.kernel_shape == 2)
-        ep = ep./P.rcp;
+        ep = ep.*(P.rcp).^P.gamma;
     else
         ep = ep/mean(P.rcp);
     end
