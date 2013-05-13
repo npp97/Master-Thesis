@@ -23,9 +23,9 @@ function [f,Df,F] = eval_gradllh(p,P)
             f = exp(f+9.0498e5);%add normalization
             %f = exp(f+1.0715941e6);
             if(P.kernel_aniso > 1)
-                Df = f*Df(P.estim_param);
+                Df = f*Df;
             else
-                Df = f*Df(P.estim_param);
+                Df = f*Df;
             end
             F = eye(P.pdim);
         elseif(P.model == 5)

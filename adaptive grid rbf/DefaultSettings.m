@@ -143,8 +143,13 @@ switch(P.model)
         P.y0 = model.p0;
         P.ydata = histogram.data.values';
         P.k = theta';
-        P.loglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:3)),theta(4),exp(xi(4)),theta(6)],system,histogram,options);
         P.estim_param = [1 2 3 5];
+        options.grad_ind = P.estim_param;
+        options.scale = 'log';
+        P.loglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:3)),theta(4),exp(xi(4)),theta(6)],system,histogram,options);
+        noptions = options;
+        noptions.sign = 'negative';
+        P.nloglikelihood = @(xi) logLikelihood_FACS_FSP([exp(xi(1:3)),theta(4),exp(xi(4)),theta(6)],system,histogram,options);
         P.logscale = [1 1 1 1 1 1];
         P.pdim = 4;
         

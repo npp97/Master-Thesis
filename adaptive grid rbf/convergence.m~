@@ -213,3 +213,36 @@ ylabel('$$\log(l_1-L_2\mbox{-error})$$ in marginals','Interpreter','LaTex')
 xlim([10^1,10^4])
 set(gca,'XScale','log')
 set(gca,'YScale','log')
+
+figure(124)
+clf
+hold on
+set(gcf, 'Color', 'w')
+scatter(N_adap_low(:),rbf_adap_linf_low(:),25*ones(1,size(N_adap_low(:))),[.5 0 0],'fill')
+scatter(N_adap_mid(:),rbf_adap_linf_mid(:),25*ones(1,size(N_adap_mid(:))),[.5 .5 .5],'fill')
+scatter(N_adap_high(:),rbf_adap_linf_high(:),25*ones(1,size(N_adap_low(:))),[0 0 .5],'fill')
+loglog(N_latt,rbf_latt_linf,'r.-','LineWidth',5,'MarkerSize',25)
+legend('RBF on particles with high-res. init.','RBF on particles with mid-res. init.','RBF on particles with low-res. init.','RBF on lattice')
+axis square
+box on
+ylabel('$$\log(L_{\infty}\mbox{-error})$$ in marginals','Interpreter','LaTex')
+xlim([10^1,10^4])
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+
+figure(125)
+clf
+hold on
+set(gcf, 'Color', 'w')
+scatter(N_adap_low(:),rbf_adap_dmean_low(:),25*ones(1,size(N_adap_low(:))),[.5 0 0],'fill')
+scatter(N_adap_mid(:),rbf_adap_dmean_mid(:),25*ones(1,size(N_adap_mid(:))),[.5 .5 .5],'fill')
+scatter(N_adap_high(:),rbf_adap_dmean_high(:),25*ones(1,size(N_adap_low(:))),[0 0 .5],'fill')
+loglog(N_latt,rbf_latt_dmean,'r.-','LineWidth',5,'MarkerSize',25)
+legend('RBF on particles with high-res. init.','RBF on particles with mid-res. init.','RBF on particles with low-res. init.','RBF on lattice')
+axis square
+box on
+ylabel('Sum of relative error in first order moments')
+xlim([10^1,10^4])
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+

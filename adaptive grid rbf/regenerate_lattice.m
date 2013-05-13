@@ -1,5 +1,5 @@
 function [ P ] = regenerate_lattice( P )
- P.Xp = P.logscale.*log(P.k(P.estim_param))+(1-P.logscale).*P.k(P.estim_param);
+    P.Xp = P.logscale(P.estim_param).*log(P.k(P.estim_param))+(1-P.logscale(P.estim_param)).*P.k(P.estim_param);
     if(P.model == 4)
         P.Xp = P.Xp(1,1:P.pdim);
     end
@@ -48,9 +48,6 @@ function [ P ] = regenerate_lattice( P )
                 catch
                     P.M = sqrtm(pinv(squeeze(P.S(1,:,:)) + 1e-10*diag(P.pdim)));
                 end
-                elseif(P.model == 4)
-                    % unknown!
-                    P.M = eye(P.pdim);
                 elseif(P.model == 5)
                     % we can compute the exact covariance
 
@@ -65,6 +62,15 @@ function [ P ] = regenerate_lattice( P )
                 catch
                     % this might fail if we are not positive definite so add regularization term
                     P.M = sqrtm(-squeeze(P.D2F(1,:,:))/P.fmax + 1e-10*diag(P.pdim));
+                end
+            case 4
+                % initialise with quasi Newton
+                if(P.model == 4)
+                    opt = optimset('Algorithm','interior-point','Hessian','bfgs','GradObj','on');
+                    lb = [P.paramspec{1}{3},P.paramspec{2}{3},P.paramspec{3}{3},P.paramspec{4}{3}];
+                    ub = [P.paramspec{1}{4},P.paramspec{2}{4},P.paramspec{3}{4},P.paramspec{4}{4}];
+                    [~,~,~,~,~,~,H] = fmincon(@(k) P.nloglikelihood(k),P.Xp(1,:),[],[],[],[],lb,ub,[],opt);
+                    P.M = sqrtm(H);
                 end
         end
         

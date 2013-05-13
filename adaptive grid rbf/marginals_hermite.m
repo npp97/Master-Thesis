@@ -24,7 +24,8 @@ function marginals_hermite( P )
     
     for j=1:P.pdim
         for k=1:P.pdim
-            subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
+            figure(22+(j-1)*P.pdim+k)
+%             subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
             if(j==k)
                 % 1D
                 
@@ -77,7 +78,8 @@ function marginals_hermite( P )
                     dmj = diffm(xx(:,j),P.Xp(:,j));
                 end
                 E_eval = rbf_hermite_marginal2D(rr,P.eps,dmk,dmj);
-                Z = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi^2))*E_eval*P.c_herm([1:P.N,P.N*min(j,k)+1:P.N*(min(j,k)+1),P.N*max(j,k)+1:P.N*(max(j,k)+1)])/abs(sum(P.c_herm([1:P.N,P.N*k+1:P.N*(k+1),P.N*j+1:P.N*(j+1)])));
+                %Z = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi^2))*E_eval*P.c_herm([1:P.N,P.N*min(j,k)+1:P.N*(min(j,k)+1),P.N*max(j,k)+1:P.N*(max(j,k)+1)])/abs(sum(P.c_herm([1:P.N,P.N*k+1:P.N*(k+1),P.N*j+1:P.N*(j+1)])));
+                Z = E_eval*P.c_herm([1:P.N,P.N*min(j,k)+1:P.N*(min(j,k)+1),P.N*max(j,k)+1:P.N*(max(j,k)+1)]);
                 
                 surf(XX,YY,reshape(Z,size(XX)));
                 xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);

@@ -9,56 +9,60 @@ function [ P ] = calc_transform( P )
             %ind = P.F>P.fmax*P.thresh;
             ind = P.F>0;
             X = P.Xp(ind,:);
+            FF = P.F(ind);
             
             % tranform only if we have more than pdim points, otherwise the covariance will alway be degenerated
             if(size(X,1)>P.pdim)
                 if(P.kernel_aniso_method == 2)
-                    % 2: covariance with function value
-                    if(size(P.F(ind),2)>size(P.F(ind),1))
-                        P.F = P.F';
-                    end
-                    % weighted locations
-                    Xf = X.*repmat(P.Dp(ind).*P.F(ind)/P.fmax,1,P.pdim);
-                    % weighted mean
-                    %P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)/P.fmax));     
-                    P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)./P.fmax));     
-                    % substract mean
-                    Xm = bsxfun(@minus,X,P.Xmean);
-                    % weighted zero mean points
-                    Xmf = Xm.*repmat(sqrt(P.Dp(ind).*P.F(ind)/P.fmax),1,P.pdim);
-                    try
-                        % take chol decomposition of weighted covariance as transformation
-                        P.Mnew = sqrtm((Xmf'*Xmf)/(sum(P.Dp(ind))));
-                    catch
-                        % regularise if chol is not possible
-                        P.Mnew = sqrtm((Xmf'*Xmf)/(sum(P.Dp(ind))+diag(P.pdim)*1e-10));
-                    end
-                else
-                    % 1: covariance
-                    
-%                     P.Xmean = mean(X);
+%                     % 2: covariance with function value
+%                     if(size(P.F(ind),2)>size(P.F(ind),1))
+%                         P.F = P.F';
+%                     end
+%                     % weighted locations
+%                     Xf = X.*repmat(P.Dp(ind).*P.F(ind)/P.fmax,1,P.pdim);
+%                     % weighted mean
+%                     %P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)/P.fmax));     
+%                     P.Xmean = sum(Xf,1)/(sum(P.Dp(ind).*P.F(ind)./P.fmax));     
+%                     % substract mean
 %                     Xm = bsxfun(@minus,X,P.Xmean);
-                    try
-                        P.Mnew = sqrtm(cov(Xm));
-                    catch
-                        P.Mnew = sqrtm(cov(Xm)+diag(P.pdim)*1e-10);
+%                     % weighted zero mean points
+%                     Xmf = Xm.*repmat(sqrt(P.Dp(ind).*P.F(ind)/P.fmax),1,P.pdim);
+%                     try
+%                         % take chol decomposition of weighted covariance as transformation
+%                         P.Mnew = sqrtm((Xmf'*Xmf)/(sum(P.Dp(ind))));
+%                     catch
+%                         % regularise if chol is not possible
+%                         P.Mnew = sqrtm((Xmf'*Xmf)/(sum(P.Dp(ind))+diag(P.pdim)*1e-10));
+%                     end
+%                 else
+%                     % 1: covariance
+%                     
+% %                     P.Xmean = mean(X);
+% %                     Xm = bsxfun(@minus,X,P.Xmean);
+%                     try
+%                         P.Mnew = sqrtm(cov(Xm));
+%                     catch
+%                         P.Mnew = sqrtm(cov(Xm)+diag(P.pdim)*1e-10);
+%                     end
+%                     
+%                 end
+%                 
+%                 %P.Mnew = P.Mnew/((abs(det(P.Mnew/P.M)))^(1/P.pdim));
+%                 
+
+
+                %covariance of MLS approximation
+                
+                
+                C = zeros(P.pdim,P.pdim);
+                for i = 1:P.pdim
+                    for j = 1:P.pdim
+                        C(i,j) = sum(FF.*(P.eps*(i==j) + X(:,i).*X(:,j))) - (sum(FF.*X(:,i)))*(sum(FF.*X(:,j)));
                     end
-                    
                 end
                 
-                %P.Mnew = P.Mnew/((abs(det(P.Mnew/P.M)))^(1/P.pdim));
-                
-                %s = fminsearch(@(t) norm(diag(P.M)-diag(t*P.Mnew),2),1);
-                %s = min(diag(P.M))/min(diag(P.Mnew));
-                %s = fminsearch(@(t) norm(P.M-t*P.Mnew,2),1);
-                %s = fminsearch(@(t) norm(P.M*P.M-t^2*P.Mnew*P.Mnew),1);
-                %s = norm(P.M,2)/norm(P.Mnew,2);
-                %old_eig = eig(P.M);
-                %new_eig = eig(P.Mnew); 
-                %s = (max(old_eig)+min(old_eig)) / (max(new_eig) + min(new_eig));
-                s = 1/norm(P.M\P.Mnew,2);
-                
-                P.Mnew = s*P.Mnew;
+                P.Mnew = sqrtm(C);                
+                P.Mnew = P.Mnew/mean(sqrt(sum(P.Mnew.^2,2)));
                 
                 
                 try
@@ -69,6 +73,7 @@ function [ P ] = calc_transform( P )
                 
                 P.M = P.Mnew;
                 
+                end
             end
 
         case 3

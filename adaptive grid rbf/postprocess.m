@@ -36,15 +36,17 @@ function [ P ] = postprocess( P )
     P.N = sum(ind);
     
     P.gradDF_mls = sqrt(sum(P.DF.^2,2));
-    param = fminsearch(@(par) norm(abs(P.gradDF_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.gradDF_mls),inf),[1,1]);
+    eps = fminbnd(@(par) norm(abs(P.gradDF_mls - (rbf(P.R,exp(par))-rbf(0,par(1))*eye(P.N))*P.gradDF_mls),inf),-1,1);
+    alpha = fminbnd(@(par) norm(abs(P.gradDF_mls - par * rbf(P.R,exp(eps))*P.gradDF_mls),inf),0,1);
     
-    P.eps_mls_df = param(1);
-    P.alpha_mls_df = param(2);
+    P.eps_mls_df = exp(eps);
+    P.alpha_mls_df = alpha;
     
     P.F_mls = P.F;
-    param = fminsearch(@(par) norm(abs(P.F_mls - par(2)*(rbf(P.R,par(1))-rbf(0,par(1))*eye(P.N))*P.F_mls),inf),[1,1]);
-    P.eps_mls_f = param(1);
-    P.alpha_mls_f = param(2);
+    eps = fminbnd(@(par) norm(abs(P.gradDF_mls - (rbf(P.R,exp(par))-rbf(0,par(1))*eye(P.N))*P.F_mls),inf),-1,1);
+    alpha = fminbnd(@(par) norm(abs(P.gradDF_mls - par * rbf(P.R,exp(eps))*P.F_mls),inf),0,1);
+    P.eps_mls_f = exp(eps);
+    P.alpha_mls_f = alpha;
     
     
 end

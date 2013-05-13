@@ -1,6 +1,6 @@
  clear all
 
-load adap_dens_latt
+load init_latt
 
 
 NV = 2^8;
@@ -11,13 +11,13 @@ xx2 = linspace(P.paramspec{2}{3},P.paramspec{2}{4},NV)';
 %% RBF refined particles
 ND = 20;
 densvec_rbf_ref = linspace(0.6,2,ND);
-Nrepeat = 10;
+Nrepeat = 20;
 
 vD = logspace(-0.6,0,ND);
 
 
 for l = 1:3
-    load adap_dens_latt
+    load init_latt
     switch(l)
         case 1
             P.init_latt_d = vD(1);
@@ -39,10 +39,10 @@ for l = 1:3
         Pj = P;
         Pj.Riter = 0;
         Pj.adap_D0 = densvec_rbf_ref(j);
-        Pj.adap_d0 = Pj.adap_D0/1.1;
+        Pj.adap_d0 = Pj.adap_D0/1.2;
         
         Pj.init_D0 = densvec_rbf_ref(j);
-        Pj.init_d0 = Pj.adap_D0/1.1;
+        Pj.init_d0 = Pj.adap_D0/1.2;
         
         Pj.d0 = Pj.init_d0;
         Pj.D0 = Pj.init_D0;
@@ -155,11 +155,11 @@ loglog(NN_kde,kde_linf,'k.-','LineWidth',5,'MarkerSize',25)
 loglog(N_latt,mls_latt_linf,'b.-','LineWidth',5,'MarkerSize',25)
 loglog(N_latt,rbf_latt_linf,'r.-','LineWidth',5,'MarkerSize',25)
 % scatter(N_adap(:),rbf_adap_linf(:),25*ones(1,size(N_adap(:))),[.5 0 0],'fill')
-legend('KDE','MLS on Lattice','RBF on lattice')
+legend('KDE','MLS on lattice','RBF on lattice')
 axis square
 box on
 xlabel('Function Evaluations')
-ylabel('$$\log(L_{\infty}\mbox{-error})$$ in marginals','Interpreter','LaTex')
+ylabel('$$L_{\infty}\mbox{-error}$$ in marginals','Interpreter','LaTex')
 xlim([10^1,10^5])
 set(gca,'XScale','log')
 set(gca,'YScale','log')
@@ -172,11 +172,11 @@ loglog(NN_kde,kde_l2,'k.-','LineWidth',5,'MarkerSize',25)
 loglog(N_latt,mls_latt_l2,'b.-','LineWidth',5,'MarkerSize',25)
 loglog(N_latt,rbf_latt_l2,'r.-','LineWidth',5,'MarkerSize',25)
 % scatter(N_adap(:),rbf_adap_l2(:),25*ones(1,size(N_adap(:))),[.5 0 0],'fill')
-legend('KDE','MLS on Lattice','RBF on lattice')
+legend('KDE','MLS on lattice','RBF on lattice')
 axis square
 box on
 xlabel('Function Evaluations')
-ylabel('$$\log(l_1-L_2\mbox{-error})$$ in marginals','Interpreter','LaTex')
+ylabel('$$l_1-L_2\mbox{-error}$$ in marginals','Interpreter','LaTex')
 xlim([10^1,10^5])
 set(gca,'XScale','log')
 set(gca,'YScale','log')
@@ -189,7 +189,7 @@ loglog(NN_kde,kde_dmean,'k.-','LineWidth',5,'MarkerSize',25)
 loglog(N_latt,mls_latt_dmean,'b.-','LineWidth',5,'MarkerSize',25)
 loglog(N_latt,rbf_latt_dmean,'r.-','LineWidth',5,'MarkerSize',25)
 % scatter(N_adap(:),rbf_adap_l2(:),25*ones(1,size(N_adap(:))),[.5 0 0],'fill')
-legend('KDE','MLS on Lattice','RBF on lattice')
+legend('KDE','MLS on lattice','RBF on lattice')
 axis square
 box on
 xlabel('Function Evaluations')
@@ -209,7 +209,43 @@ loglog(N_latt,rbf_latt_l2,'r.-','LineWidth',5,'MarkerSize',25)
 legend('RBF on particles with high-res. init.','RBF on particles with mid-res. init.','RBF on particles with low-res. init.','RBF on lattice')
 axis square
 box on
-ylabel('$$\log(l_1-L_2\mbox{-error})$$ in marginals','Interpreter','LaTex')
-xlim([10^1,10^5])
+xlabel('Function Evaluations')
+ylabel('$$l_1-L_2\mbox{-error}$$ in marginals','Interpreter','LaTex')
+xlim([10^1,10^4])
 set(gca,'XScale','log')
 set(gca,'YScale','log')
+
+figure(124)
+clf
+hold on
+set(gcf, 'Color', 'w')
+scatter(N_adap_low(:),rbf_adap_linf_low(:),25*ones(1,size(N_adap_low(:))),[.5 0 0],'fill')
+scatter(N_adap_mid(:),rbf_adap_linf_mid(:),25*ones(1,size(N_adap_mid(:))),[.5 .5 .5],'fill')
+scatter(N_adap_high(:),rbf_adap_linf_high(:),25*ones(1,size(N_adap_low(:))),[0 0 .5],'fill')
+loglog(N_latt,rbf_latt_linf,'r.-','LineWidth',5,'MarkerSize',25)
+legend('RBF on particles with high-res. init.','RBF on particles with mid-res. init.','RBF on particles with low-res. init.','RBF on lattice')
+axis square
+box on
+xlabel('Function Evaluations')
+ylabel('$$L_{\infty}\mbox{-error}$$ in marginals','Interpreter','LaTex')
+xlim([10^1,10^4])
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+
+figure(125)
+clf
+hold on
+set(gcf, 'Color', 'w')
+scatter(N_adap_low(:),rbf_adap_dmean_low(:),25*ones(1,size(N_adap_low(:))),[.5 0 0],'fill')
+scatter(N_adap_mid(:),rbf_adap_dmean_mid(:),25*ones(1,size(N_adap_mid(:))),[.5 .5 .5],'fill')
+scatter(N_adap_high(:),rbf_adap_dmean_high(:),25*ones(1,size(N_adap_low(:))),[0 0 .5],'fill')
+loglog(N_latt,rbf_latt_dmean,'r.-','LineWidth',5,'MarkerSize',25)
+legend('RBF on particles with high-res. init.','RBF on particles with mid-res. init.','RBF on particles with low-res. init.','RBF on lattice')
+axis square
+box on
+xlabel('Function Evaluations')
+ylabel('Sum of relative error in first order moments')
+xlim([10^1,10^4])
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+

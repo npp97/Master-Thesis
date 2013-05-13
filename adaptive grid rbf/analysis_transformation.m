@@ -1,13 +1,13 @@
 clear all
 NN = 40;
 
-vD = logspace(-0.7,0,NN);
+vD = logspace(-1,0,NN);
 
 for j = 1:NN
-    load adap_dens_latt
+    load init_latt
     Ps = P;
     Ps.kernel_aniso = 1;
-    Ps.init_latt_d = 0.75*vD(j);
+    Ps.init_latt_d = 1*vD(j);
     Ps = regenerate_lattice(Ps);
     Ps.N
     Ps = interp(Ps);
@@ -25,7 +25,7 @@ for j = 1:NN
 end
 
 for j = 1:NN
-    load adap_dens_latt
+    load init_latt
     Ps = P;
     Ps.kernel_aniso = 2;
     Ps.init_latt_d = 2*vD(j);
@@ -46,7 +46,7 @@ for j = 1:NN
 end
 
 for j = 1:NN
-    load adap_dens_latt
+    load init_latt
     Ps = P;
     Ps.kernel_aniso = 2;
     Ps.init_lattice = 4;
@@ -67,16 +67,6 @@ for j = 1:NN
     mN_aniso_Z(j) = Ps.N;
 end
 
-figure(90)
-clf
-semilogy(mN_iso,ml2err_iso,'.-k','LineWidth',5,'MarkerSize',25)
-hold on
-semilogy(mN_aniso,ml2err_aniso,'.-r','LineWidth',5,'MarkerSize',25)
-legend('untransformed','transformed using covariance')
-xlabel('Number of Points')
-ylabel('L_2 error')
-set(gcf, 'Color', 'w')
-axis square
 
 figure(91)
 clf
@@ -85,7 +75,7 @@ hold on
 semilogy(mN_aniso,ml2err_aniso,'.-r','LineWidth',5,'MarkerSize',25)
 legend('untransformed','transformed using covariance')
 xlabel('Number of Points')
-ylabel('L_2 error')
+ylabel('$L_{2}$-error')
 set(gcf, 'Color', 'w')
 axis square
 
@@ -94,14 +84,32 @@ clf
 semilogy(mN_aniso_Z,ml2err_iso,'.-k','LineWidth',5,'MarkerSize',25)
 hold on
 semilogy(mN_aniso,ml2err_aniso,'.-r','LineWidth',5,'MarkerSize',25)
-legend('Z^2 lattice','A^*_2 lattice')
+legend('$Z^2$ Lattice','$A^*_2$ Lattice')
 xlabel('Number of Points')
-ylabel('L_2 error')
+ylabel('$L_{2}$-error')
+set(gcf, 'Color', 'w')
+axis square
+
+figure(93)
+clf
+[nn,uu] = unique(mN_iso);
+yy = interp1(nn,ml2err_iso(uu),mN_aniso,'linear');
+ii = not(isnan(yy));
+semilogy(mN_aniso(ii),abs((ml2err_aniso(ii)./yy(ii))),'.-k','LineWidth',5,'MarkerSize',25);
+xlabel('Number of Points')
+ylabel('$L_{2}\mbox{-error fraction}$')
+set(gcf, 'Color', 'w')
+axis square
+
+figure(94)
+clf
+[nn,uu] = unique(mN_aniso_Z);
+yy = interp1(nn,ml2err_aniso_Z(uu),mN_aniso,'linear');
+ii = not(isnan(yy));
+semilogy(mN_aniso,abs((ml2err_iso(ii)./yy(ii))),'.-k','LineWidth',5,'MarkerSize',25);
+xlabel('Number of Points')
+ylabel('$L_{2}\mbox{-error fraction}$')
 set(gcf, 'Color', 'w')
 axis square
 
 save analysis_transformation
-
-    
-
-

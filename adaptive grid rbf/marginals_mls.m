@@ -95,7 +95,8 @@ function P = marginals_mls( P )
                     else
                         rr = sqrt(sqdistance((X(l,:))',(P.Xp(:,[k j]))'));
                     end
-                    Z(l) = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi))*rbf(rr,P.eps)*P.c/abs(sum(P.c));
+                    %Z(l) = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi))*rbf(rr,P.eps)*P.c/abs(sum(P.c));
+                    Z(l) = rbf(rr,P.eps)*P.c;
                 end
                 
                 surf(XX,YY,reshape(Z,size(XX)));

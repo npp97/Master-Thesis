@@ -9,7 +9,7 @@ function [ P ] = mcmc( P )
     model.N = 1;
     
     % number of simulations (burn in)
-    options.nsimu = 10^(P.pdim);
+    options.nsimu = 10^3;
     % flag whether to update simulations
     options.updatesigma = 0;
     % flag for waitbar
@@ -31,7 +31,7 @@ function [ P ] = mcmc( P )
     % thin samples
 
     % number of simulations
-    options.nsimu = 50*10^(P.pdim);
+    options.nsimu = 10^6;
     
     nmcmc=1;
     while(any([min(T(:,5))<0.95, nmcmc==1]))

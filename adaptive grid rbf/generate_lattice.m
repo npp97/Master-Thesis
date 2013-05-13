@@ -60,8 +60,9 @@ function [ P ] = generate_lattice( P )
         end
         P.F = LF;
         P.N = length(P.F);
-        %plot_points(P,1);
-
+%         plot_points(P,1);
+%         drawnow
+        disp(['Current Lattice has ' num2str(P.N) ' Points.'])
     end
 end
 

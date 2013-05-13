@@ -1,10 +1,10 @@
 function P = exactDp(P)
     if(P.adap_method == 1)
         % fval version
-        MF=monitor_function(sqrt(((P.D0/P.d0)^2-1))*P.F/P.fmax,P.D0);
+        %MF=monitor_function(sqrt(((P.D0/P.d0)^2-1))*P.F/P.fmax,P.D0);
         % norm grad version
-        %P = gradllh(P);
-        %MF=monitor_function(sqrt(((P.D0/P.d0)^2-1))*(sqrt(sum(P.DF.^2,2)))/P.fmax,P.D0);
+        P = gradllh(P);
+        MF=monitor_function(sqrt(((P.D0/P.d0)^2-1))*(sqrt(sum(P.DF.^2,2)))/P.fmax,P.D0);
         
         if(size(MF,1)>size(MF,2))
             MF = MF';

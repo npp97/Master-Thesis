@@ -84,7 +84,8 @@ function P = marginals( P )
                 else
                     rr = sqrt(sqdistance((X)',(P.Xp(:,[k j]))'));
                 end
-                Z = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi))*rbf(rr,P.eps)*P.c/abs(sum(P.c));
+                %Z = 1/(sqrt(det(SIGMA([k j],[k j]))/P.eps^2*pi))*rbf(rr,P.eps)*P.c/abs(sum(P.c));
+                Z = rbf(rr,P.eps)*P.c;
                 
                 surf(XX,YY,reshape(Z,size(XX)));
                 xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);

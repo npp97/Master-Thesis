@@ -2,19 +2,19 @@ clear all
 
 
 Nspacing = 6;
-vN = linspace(0.7,0.9,Nspacing);
+vN = linspace(0.6,0.8,Nspacing);
 Nrepeat = 20;
 
 
 for j = 1:Nspacing
-    load adap_dens_latt
+    load init_latt
     P.Riter = 0;
     P.max_iter = 20;
-    P.adap_d0 = 0.7;
-    P.adap_D0 = vN(j);
+    P.adap_d0 = vN(j);
+    P.adap_D0 = 0.8;
     
-    P.init_d0 = 0.7;
-    P.init_D0 = vN(j);
+    P.init_d0 = vN(j);
+    P.init_D0 = 0.8;
     P.d0 = P.init_d0;
     P.D0 = P.init_D0;
     P.plotflag=false;
@@ -62,31 +62,31 @@ for j = 1:Nspacing
     end
 end
 
-str = cellfun(@(x) num2str(x/P.adap_d0,3),num2cell(vN),'UniformOutput',false);
+str = cellfun(@(x) num2str(P.adap_D0./x,3),num2cell(fliplr(vN)),'UniformOutput',false);
 
 figure(70)
 clf
-boxplot(mlinferr,str)
-xlabel('$$\frac{D_0}{d_0}$$','Interpreter','LaTex')
-ylabel('$$L_{\infty}\mbox{-error}$$','Interpreter','LaTex')
+boxplot(fliplr(mlinferr),str)
+xlabel('$\frac{D_0}{d_0}$')
+ylabel('$$\log(L_{\infty}\mbox{-error})$$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
 set(gca,'YScale','log')
 
 figure(71)
 clf
-boxplot(ml2err,str)
-xlabel('$$\frac{D_0}{d_0}$$','Interpreter','LaTex')
-ylabel('$$L_{2}\mbox{-error}$$','Interpreter','LaTex')
+boxplot(fliplr(ml2err),str)
+xlabel('$\frac{D_0}{d_0}$')
+ylabel('$$\log(L_2\mbox{-error})$$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
 set(gca,'YScale','log')
 
 figure(72)
 clf
-boxplot(mN,str)
-xlabel('$$\frac{D_0}{d_0}$$','Interpreter','LaTex')
-ylabel('# Points')
+boxplot(fliplr(mN),str)
+xlabel('$\frac{D_0}{d_0}$')
+ylabel('\# Points')
 axis square
 set(gcf, 'Color', 'w')
 

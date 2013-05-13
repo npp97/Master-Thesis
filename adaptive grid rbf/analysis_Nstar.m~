@@ -4,21 +4,21 @@ clear all
 
 vN = [4 5 6 7];
 NN = 4;
-Nrepeat = 10;
+Nrepeat = 20;
 
 
 for j = 1:NN
     for k = 1:Nrepeat
         disp(['j: ' num2str(j) ' / ' num2str(NN)])
         disp(['k: ' num2str(k) ' / ' num2str(Nrepeat)])
-        load adap_dens_latt
+        load init_latt
         P.Riter = 0;
         
-        P.adap_D0 = 1;
+        P.adap_D0 = 0.8;
         P.adap_d0 = P.adap_D0/1.2;
         
-        P.init_D0 = 1;
-        P.init_d0 = P.adap_D0/1.1;
+        P.init_D0 = 0.8;
+        P.init_d0 = P.adap_D0/1.2;
         
         P.d0 = P.init_d0;
         P.D0 = P.init_D0;
@@ -81,7 +81,7 @@ set(gcf, 'Color', 'w')
 figure(53)
 clf
 boxplot(ml2err',str)
-xlabel('N^*')
+xlabel('$N^*')
 ylabel('L_{2} error')
 axis square
 set(gcf, 'Color', 'w')

@@ -170,7 +170,7 @@ function [ P ] = refine_particles( P )
         end
         
         % check break condition
-        if( abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<10^(-1.5) && P.Riter > 5 )
+        if( abs((P.W(P.Riter)-P.W(max(P.Riter-1,1)))/P.W(P.Riter))<10^(-2) && P.Riter > 5 )
 %        if( P.Riter >= P.max_iter && P.Riter > 5 )
 %             P.break_hits = P.break_hits + 1;
 %             if(P.break_hits > 5)       

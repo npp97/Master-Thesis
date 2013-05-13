@@ -9,14 +9,14 @@ for j = 1:NN
     for k = 1:Nrepeat
         disp(['j: ' num2str(j) ' / ' num2str(NN)])
         disp(['k: ' num2str(k) ' / ' num2str(Nrepeat)])
-        load adap_dens_latt
+        load init_latt
         P.Riter = 0;
         
-        P.adap_D0 = 1;
-        P.adap_d0 = P.adap_D0/1.1;
+        P.adap_D0 = 0.8;
+        P.adap_d0 = P.adap_D0/1.2;
         
-        P.init_D0 = 1;
-        P.init_d0 = P.adap_D0/1.1;
+        P.init_D0 = 0.8;
+        P.init_d0 = P.adap_D0/1.2;
         
         P.d0 = P.init_d0;
         P.D0 = P.init_D0;
@@ -25,7 +25,6 @@ for j = 1:NN
         
         Ps = P;
         Ps = refine_particles( Ps );
-        mPs(j,k) = Ps;
         mIter(j,k) = Ps.Riter;
         mN(j,k) = Ps.N;
         Ps = interp(Ps);
@@ -48,7 +47,6 @@ for j = 1:NN
         mfuse(j,k) = sum(Ps.kfuse);
         mspawn(j,k) = sum(Ps.kspawn);
         
-        mPs(j,k) = Ps;
     end
 end
 
@@ -65,14 +63,14 @@ set(gcf, 'Color', 'w')
 figure(81)
 clf
 boxplot(mN',str)
-ylabel('# Points')
+ylabel('\# Points')
 axis square
 set(gcf, 'Color', 'w')
 
 figure(82)
 clf
 boxplot(ml2err',str)
-ylabel('$$\log(L_2\mbox{-error})$$','Interpreter','LaTex')
+ylabel('$$L_2\mbox{-error}$$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
 
@@ -93,7 +91,7 @@ set(gcf, 'Color', 'w')
 figure(85)
 clf
 boxplot(mIter',str)
-ylabel('# Iterations')
+ylabel('\# Iterations')
 axis square
 set(gcf, 'Color', 'w')
 

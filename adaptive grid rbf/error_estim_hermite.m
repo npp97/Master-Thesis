@@ -110,136 +110,136 @@ function [ P ] = error_estim_hermite( P )
     %
     %
     %         %% error on mcmc samples
-    figure(24)
-    clf
-    
-    for j = 1 : P.pdim
-        for k = 1 : P.pdim
-           subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)  
-           if(j==k)
-               %% 1D
-               semilogy(P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,'k*')
-               xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
-               xlabel(['log(' P.paramspec{j}{1} ')'])
-               ylabel('relative error to f_{max}')
-               title('Error on MCMC samples')
-           else
-               %% 2D
-               scatter3(P.XX(:,k),P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,log(abs(P.Ftrue-Finterp)),log(abs(P.Ftrue-Finterp)))
-               view(0,90)
-               set(gca,'ZScale','log')
-               xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);
-               ylim([P.paramspec{j}{3},P.paramspec{j}{4}]);
-               view(0,90)
-               xlabel(['log(' P.paramspec{k}{1} ')'])
-               ylabel(['log(' P.paramspec{j}{1} ')'])
-               title('Error on MCMC samples')
-           end
-        end
-    end
-    
-    %% error on particles
-    figure(25)
-    clf
-    
-    for j = 1 : P.pdim
-        for k = 1 : P.pdim
-           subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
-           
-           if(j==k)
-               %% 1D
-               semilogy(P.Xp(:,j),EF(1:P.N)/P.fmax,'k*')
-               xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
-               xlabel(['log(' P.paramspec{j}{1} ')'])
-               ylabel('relative error to f_{max}')
-               title('Error on particles')
-           else
-               %% 2D
-               scatter3(P.Xp(:,k),P.Xp(:,j),EF(1:P.N)/P.fmax,log(EF(1:P.N)),log(EF(1:P.N)))
-               view(0,90)
-               set(gca,'ZScale','log')
-               xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);
-               ylim([P.paramspec{j}{3},P.paramspec{j}{4}]);
-               view(0,90)
-               xlabel(['log(' P.paramspec{k}{1} ')'])
-               ylabel(['log(' P.paramspec{j}{1} ')'])
-               title('Error on particles')
-           end
-        end
-    end
-    
-    
-    %% shape parameter analysis
-%     figure(26)
+%     figure(24)
 %     clf
-%     % number of scans
-%     Ne = 50;
-%     % scan range
-%     ee=logspace(-3,3,Ne);
 %     
-%     % L-\infty error
-%     erf = zeros(1,Ne);
-%     
-%     % L-1 error
-%     erf1 = zeros(1,Ne);
-% 
-%     % Particle error
-%     erl = zeros(1,Ne);
-%     
-%     % Condition number
-%     ercond = zeros(1,Ne);
-%     
-%     % transfer settings
-%     Ps = P;
-%     
-%     warning('off','MATLAB:nearlySingularMatrix')
-%     
-%     disp(['# Testing different shape parameters'])
-%     textprogressbar('Progress: ');
-%     for j=1:Ne;
-%         textprogressbar(j/Ne*100)
-%         
-%         % set shape parameter
-%         if(Ps.kernel_shape == 2)
-%             Ps.eps = ee(j)./(Ps.rcp);
-%         else
-%             Ps.eps = ee(j)/mean(Ps.rcp);
+%     for j = 1 : P.pdim
+%         for k = 1 : P.pdim
+%            subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)  
+%            if(j==k)
+%                %% 1D
+%                semilogy(P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,'k*')
+%                xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
+%                xlabel(['log(' P.paramspec{j}{1} ')'])
+%                ylabel('relative error to f_{max}')
+%                title('Error on MCMC samples')
+%            else
+%                %% 2D
+%                scatter3(P.XX(:,k),P.XX(:,j),abs(P.Ftrue-Finterp)/P.fmax,log(abs(P.Ftrue-Finterp)),log(abs(P.Ftrue-Finterp)))
+%                view(0,90)
+%                set(gca,'ZScale','log')
+%                xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);
+%                ylim([P.paramspec{j}{3},P.paramspec{j}{4}]);
+%                view(0,90)
+%                xlabel(['log(' P.paramspec{k}{1} ')'])
+%                ylabel(['log(' P.paramspec{j}{1} ')'])
+%                title('Error on MCMC samples')
+%            end
 %         end
-%         
-%         % compute interpolation matrix and evaluation matrix
-%         Ps.RBF_herm = rbf_hermite(Ps.R,Ps.eps,P.DM);
-%         R_eval = rbf_hermite_eval(RR,Ps.eps,dx);
-%         
-%         % interpolate
-%         Ps.c_herm = Ps.RBF_herm\[Ps.F;Ps.DF(:)];
-%         Finterp = R_eval*Ps.c_herm;
-%         
-%         % compute errors
-%         erf(j)=max(abs(P.Ftrue-Finterp)/Ps.fmax);
-%         Ps.error_estim = 1;
-%         erl(j)=CostEps_hermite(ee(j),Ps)/Ps.fmax;
-%         erf1(j)=norm(abs(P.Ftrue-Finterp),1)/Ps.fmax;
-%         ercond(j)=rcond(Ps.RBF_herm);
-%         
-%         % visualisation
-%         loglog(ee/mean(Ps.rcp),erf,'.-k')
-%         hold on
-%         loglog(ee/mean(Ps.rcp),erf1,'--k')
-%         loglog(ee/mean(Ps.rcp),erl,'.-r')
-%         loglog(ee/mean(Ps.rcp),ercond,'.-b')
-%         ylim([1e-5,1e2])
-%         title(['Shape Parameter Analysis'])
-%         legend('rel. max error on MCMC','rel. l1 error on MCMC','rel. max error with Cross Validation','RCOND of Interpolation Matrix','Location','SouthOutside')
-%         xlabel(' Shape Parameter ')
-%         ylabel(' Error ' )
-%         
 %     end
-%     hline([],P.eps)
-%     plot(P.eps,CostEps_hermite(P.eps*mean(P.rcp),P)/P.fmax,'r*')
-%     textprogressbar('done')
 %     
-%     warning('on','MATLAB:nearlySingularMatrix')
+%     %% error on particles
+%     figure(25)
+%     clf
 %     
-%     warning('on','MATLAB:Axes:NegativeDataInLogAxis')
+%     for j = 1 : P.pdim
+%         for k = 1 : P.pdim
+%            subplot(P.pdim,P.pdim,(j-1)*P.pdim+k)
+%            
+%            if(j==k)
+%                %% 1D
+%                semilogy(P.Xp(:,j),EF(1:P.N)/P.fmax,'k*')
+%                xlim([P.paramspec{j}{3},P.paramspec{j}{4}]);
+%                xlabel(['log(' P.paramspec{j}{1} ')'])
+%                ylabel('relative error to f_{max}')
+%                title('Error on particles')
+%            else
+%                %% 2D
+%                scatter3(P.Xp(:,k),P.Xp(:,j),EF(1:P.N)/P.fmax,log(EF(1:P.N)),log(EF(1:P.N)))
+%                view(0,90)
+%                set(gca,'ZScale','log')
+%                xlim([P.paramspec{k}{3},P.paramspec{k}{4}]);
+%                ylim([P.paramspec{j}{3},P.paramspec{j}{4}]);
+%                view(0,90)
+%                xlabel(['log(' P.paramspec{k}{1} ')'])
+%                ylabel(['log(' P.paramspec{j}{1} ')'])
+%                title('Error on particles')
+%            end
+%         end
+%     end
+%     
+    
+    % shape parameter analysis
+    figure(26)
+    clf
+    % number of scans
+    Ne = 50;
+    % scan range
+    ee=logspace(-3,3,Ne);
+    
+    % L-\infty error
+    erf = zeros(1,Ne);
+    
+    % L-1 error
+    erf2 = zeros(1,Ne);
+
+    % Particle error
+    erl = zeros(1,Ne);
+    
+    % Condition number
+    ercond = zeros(1,Ne);
+    
+    % transfer settings
+    Ps = P;
+    
+    warning('off','MATLAB:nearlySingularMatrix')
+    
+    disp(['# Testing different shape parameters'])
+    textprogressbar('Progress: ');
+    for j=1:Ne;
+        textprogressbar(j/Ne*100)
+        
+        % set shape parameter
+        if(Ps.kernel_shape == 2)
+            Ps.eps = ee(j)./(Ps.rcp);
+        else
+            Ps.eps = ee(j)/mean(Ps.rcp);
+        end
+        
+        % compute interpolation matrix and evaluation matrix
+        Ps.RBF_herm = rbf_hermite(Ps.R,Ps.eps,P.DM);
+        R_eval = rbf_hermite_eval(RR,Ps.eps,dx);
+        
+        % interpolate
+        Ps.c_herm = Ps.RBF_herm\[Ps.F;Ps.DF(:)];
+        Finterp = R_eval*Ps.c_herm;
+        
+        % compute errors
+        erf(j)=max(abs(P.Ftrue-Finterp));
+        Ps.error_estim = 1;
+        erl(j)=CostEps_hermite(ee(j),Ps);
+        erf2(j)=sum(abs((P.Ftrue-Finterp).^2./P.Ftrue));
+        ercond(j)=rcond(Ps.RBF_herm);
+        
+        % visualisation
+        
+    end
+    loglog(ee/mean(Ps.rcp),erf,'.-k','LineWidth',5,'MarkerSize',25)
+    hold on
+    loglog(ee/mean(Ps.rcp),erf2,'--k','LineWidth',5,'MarkerSize',25)
+    loglog(ee/mean(Ps.rcp),erl,'.-r','LineWidth',5,'MarkerSize',25)
+    loglog(ee/mean(Ps.rcp),ercond,'.-b','LineWidth',5,'MarkerSize',25)
+    ylim([1e-5,1e2])
+    title(['Shape Parameter Analysis'])
+    legend('$$L_{\infty}\mbox{-error}$$','$$L_{2}\mbox{-error}$$','LOOCV error Approximation','RCOND of Interpolation Matrix','Location','SouthOutside')
+    xlabel(' Shape Parameter ')
+    ylabel(' Error ' )
+    vline(P.eps/mean(P.rcp))
+    plot(P.eps/mean(P.rcp),CostEps_hermite(P.eps,P)/P.fmax,'r*')
+    textprogressbar('done')
+    
+    warning('on','MATLAB:nearlySingularMatrix')
+    
+    warning('on','MATLAB:Axes:NegativeDataInLogAxis')
 
 end

@@ -9,13 +9,13 @@ Nrepeat = 20;
 
 
 for j = 1:Nrepeat
-    load adap_dens_latt
+    load init_latt
     P.Riter = 0;
     
-    P.adap_D0 = 0.7;
+    P.adap_D0 = 0.8;
     P.adap_d0 = P.adap_D0/1.2;
     
-    P.init_D0 = 0.7;
+    P.init_D0 = 0.8;
     P.init_d0 = P.adap_D0/1.2;
     
     P.d0 = P.init_d0;
@@ -77,7 +77,7 @@ str = cellfun(@(x) num2str(x-1,2),num2cell(vN),'UniformOutput',false);
 figure(60)
 clf
 boxplot(mlinferr',str)
-xlabel('# Iterations')
+xlabel('\# Iterations')
 ylabel('$$\log(L_{\infty}\mbox{-error})$$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
@@ -86,7 +86,7 @@ set(gca,'YScale','log')
 figure(61)
 clf
 boxplot(ml2err',str)
-xlabel('# Iterations')
+xlabel('\# Iterations')
 ylabel('$$\log(L_2\mbox{-error})$$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
@@ -95,7 +95,7 @@ set(gca,'YScale','log')
 figure(62)
 clf
 boxplot(mdc',str)
-xlabel('# Iterations')
+xlabel('\# Iterations')
 ylabel('$$\log (d_c) $$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
@@ -112,7 +112,7 @@ set(gcf, 'Color', 'w')
 figure(64)
 clf
 boxplot(mE',str(2:Nspacing))
-xlabel('# Iterations')
+xlabel('\# Iterations')
 ylabel('$$E_{avg}^{(k)}$$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
@@ -128,7 +128,7 @@ legend('Conditional Expectation','Samples')
 
 figure(66)
 clf
-ksr(log(abs(mEdiff))/log(10),log(ml2err(3:Nspacing,:))/log(10))
+ksr(log(abs(mEdiff(2:end,:)))/log(10),log(ml2err(4:Nspacing,:))/log(10))
 xlabel('$$\Delta E_{rel}^{(k)}$$','Interpreter','LaTex')
 ylabel('$$\log(L_2\mbox{-error})$$','Interpreter','LaTex')
 axis square
@@ -138,7 +138,7 @@ legend('Conditional Expectation','Samples')
 figure(67)
 clf
 boxplot(abs(mEdiff'),str(3:Nspacing))
-xlabel('# Iterations')
+xlabel('\# Iterations')
 ylabel('$$\Delta E_{rel}^{(k)}$$','Interpreter','LaTex')
 axis square
 set(gcf, 'Color', 'w')
